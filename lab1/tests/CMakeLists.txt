@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.23)
+project(lab1)
+add_executable(lab1 tests.cpp)
+target_include_directories(lab1 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+target_link_libraries(lab1 PRIVATE CircularBuffer gtest)
