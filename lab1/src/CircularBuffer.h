@@ -1,3 +1,5 @@
+#pragma once
+
 typedef char value_type;
 
 class CircularBuffer {
@@ -5,6 +7,7 @@ class CircularBuffer {
 	int bufferSize;
 	int bufferFreeSize;
 	int frontIndex;
+	int backIndex;
 
 public:
 	CircularBuffer();
@@ -28,19 +31,22 @@ public:
 	bool full() const;
 	int reserve() const;
 	int capacity() const;
-	int startIndex() const;
 	void setCapacity(int newCapacity);
 	void resize(int newSize, const value_type& item = value_type());
 	CircularBuffer& operator=(const CircularBuffer& cb);
 	void swap(CircularBuffer& cb);
 	void pushBack(const value_type& item = value_type());
-	void swapInBuffer(int indexFirst, int indexSecond);
 	void pushFront(const value_type& item = value_type());
 	void popBack();
 	void popFront();
 	void insert(int pos, const value_type& item = value_type());
 	void erase(int first, int last);
 	void clear();
+
+private:
+	int bufferIndex(int i) const;
+	int moduloIncrease(int& increasing, int plus, int module);
 };
+
 bool operator==(const CircularBuffer& a, const CircularBuffer& b);
 bool operator!=(const CircularBuffer& a, const CircularBuffer& b);
