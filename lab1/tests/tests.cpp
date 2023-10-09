@@ -35,7 +35,7 @@ TEST(CircularBufferInitTest, InitCopyTest) {
     EXPECT_EQ(cbCopy.capacity(), cb.capacity());
     EXPECT_EQ(cbCopy.reserve(), cb.reserve());
     EXPECT_EQ(cb.back(), cbCopy.back());
-    EXPECT_TRUE(cb.front(),cbCopy.front() );
+    EXPECT_EQ(cb.front(),cbCopy.front() );
     for (int i = 0; i < cb.capacity(); ++i) {
         EXPECT_EQ(cbCopy[i], cb[i]);
     }
@@ -652,6 +652,7 @@ TEST(CircularBufferChangeOfSizeTest, moreResizeTest) {
     EXPECT_EQ(cb[4], 'e');
     EXPECT_EQ(cb[5], 'e');
     EXPECT_EQ(cb.capacity(), 6);
+    EXPECT_EQ(cb.size(), 6);
     EXPECT_EQ(cb.reserve(), 0);
     EXPECT_EQ(cb.front(), 'a');
     EXPECT_EQ(cb.back(), 'e');
@@ -671,6 +672,7 @@ TEST(CircularBufferChangeOfSizeTest, notItemResizeTest) {
     EXPECT_EQ(cb[4], 0);
     EXPECT_EQ(cb[5], 0);
     EXPECT_EQ(cb.capacity(), 6);
+    EXPECT_EQ(cb.size(), 6);
     EXPECT_EQ(cb.reserve(), 0);
     EXPECT_EQ(cb.front(), 'a');
     EXPECT_EQ(cb.back(), 0);
@@ -685,8 +687,11 @@ TEST(CircularBufferChangeOfSizeTest, lessResizeTest) {
     cb.resize(2,'b');
     EXPECT_EQ(cb[0], 'a');
     EXPECT_EQ(cb[1], 'b');
-    EXPECT_EQ(cb.capacity(), 2);
-    EXPECT_EQ(cb.reserve(), 0);
+    EXPECT_EQ(cb[2], 0);
+    EXPECT_EQ(cb[3], 0);
+    EXPECT_EQ(cb.capacity(), 4);
+    EXPECT_EQ(cb.size(), 2);
+    EXPECT_EQ(cb.reserve(), 2);
     EXPECT_EQ(cb.front(), 'a');
     EXPECT_EQ(cb.back(), 'b');
 }
@@ -703,6 +708,7 @@ TEST(CircularBufferChangeOfSizeTest, eqResizeTest) {
     EXPECT_EQ(cb[2], 'c');
     EXPECT_EQ(cb[3], 'd');
     EXPECT_EQ(cb.capacity(), 4);
+    EXPECT_EQ(cb.size(), 4);
     EXPECT_EQ(cb.front(), 'a');
     EXPECT_EQ(cb.back(), 'd');
     EXPECT_EQ(cb.reserve(), 0);
@@ -723,6 +729,7 @@ TEST(CircularBufferChangeOfSizeTest, notFullResizeTest) {
     EXPECT_EQ(cb.front(), 'a');
     EXPECT_EQ(cb.back(), 'e');
     EXPECT_EQ(cb.capacity(), 6);
+    EXPECT_EQ(cb.size(), 5);
     EXPECT_EQ(cb.reserve(), 1);
 }
 
@@ -734,6 +741,32 @@ TEST(CircularBufferSwapTest, swapTwoCBTest) {
     EXPECT_EQ(cb2[1], 'a');
     EXPECT_EQ(cb1[0], 'b');
     EXPECT_EQ(cb1[1], 'b');
+}
+
+TEST(CircularBufferSwapTest, swapTwoCBSmallerTest) {
+    CircularBuffer cb1{ 2,'a' };
+    CircularBuffer cb2{ 3,'b' };
+    cb1.swap(cb2);
+    EXPECT_EQ(cb2[0], 'a');
+    EXPECT_EQ(cb2[1], 'a');
+    EXPECT_EQ(cb1[0], 'b');
+    EXPECT_EQ(cb1[1], 'b');
+    EXPECT_EQ(cb1[2], 'b');
+    EXPECT_EQ(cb1.capacity(), 3);
+    EXPECT_EQ(cb2.capacity(), 2);
+}
+
+TEST(CircularBufferSwapTest, swapTwoCBBiggerTest) {
+    CircularBuffer cb1{ 3,'a' };
+    CircularBuffer cb2{ 2,'b' };
+    cb1.swap(cb2);
+    EXPECT_EQ(cb2[0], 'a');
+    EXPECT_EQ(cb2[1], 'a');
+    EXPECT_EQ(cb2[2], 'a');
+    EXPECT_EQ(cb1[0], 'b');
+    EXPECT_EQ(cb1[1], 'b');
+    EXPECT_EQ(cb1.capacity(), 2);
+    EXPECT_EQ(cb2.capacity(), 3);
 }
 
 TEST(CircularBufferRequestTest, requestTest) {
@@ -839,6 +872,22 @@ TEST(CircularBufferOperatorTest, eqSizeEqTest) {
     EXPECT_EQ(cb[1], 'b');
     EXPECT_EQ(cb[2], 'c');
     EXPECT_EQ(cb[3], 0);
+    EXPECT_EQ(cb.back(), 'c');
+    EXPECT_EQ(cb.front(), 'a');
+}
+
+TEST(CircularBufferOperatorTest, eqthisTest) {
+    CircularBuffer cb{ 3 };
+    cb.pushBack('a');
+    cb.pushBack('b');
+    cb.pushBack('c');
+    cb = cb;
+    EXPECT_EQ(cb.capacity(), 3);
+    EXPECT_EQ(cb.size(), 3);
+    EXPECT_EQ(cb.reserve(), 0);
+    EXPECT_EQ(cb[0], 'a');
+    EXPECT_EQ(cb[1], 'b');
+    EXPECT_EQ(cb[2], 'c');
     EXPECT_EQ(cb.back(), 'c');
     EXPECT_EQ(cb.front(), 'a');
 }
@@ -978,12 +1027,6 @@ TEST(CircularBufferThrowTest, rotateMoreOutOfRangeTest) {
     EXPECT_ANY_THROW(cb.rotate(3));
 }
 
-TEST(CircularBufferThrowTest, swapNotEqSizeTest) {
-    CircularBuffer cb{ 2,'a'};
-    CircularBuffer cb1{ 3,'b' };
-    EXPECT_ANY_THROW(cb.swap(cb1));
-}
-
 TEST(CircularBufferThrowTest, eraseLessOutOfRangeTest) {
     CircularBuffer cb{ 5,'a' };
     EXPECT_ANY_THROW(cb.erase(-1, 5));
@@ -992,26 +1035,6 @@ TEST(CircularBufferThrowTest, eraseLessOutOfRangeTest) {
 TEST(CircularBufferThrowTest, eraseMoreOutOfRangeTest) {
     CircularBuffer cb{ 5,'a' };
     EXPECT_ANY_THROW(cb.erase(3, 12));
-}
-
-TEST(CircularBufferThrowTest, frontNotHaveElemTest) {
-    CircularBuffer cb{ 5};
-    EXPECT_ANY_THROW(cb.front());
-}
-
-TEST(CircularBufferThrowTest, frontNotHaveElemConstTest) {
-    const CircularBuffer cb{ 5 };
-    EXPECT_ANY_THROW(cb.front());
-}
-
-TEST(CircularBufferThrowTest, backtNotHaveElemTest) {
-    CircularBuffer cb{ 5 };
-    EXPECT_ANY_THROW(cb.back());
-}
-
-TEST(CircularBufferThrowTest, backNotHaveElemConstTest) {
-    const CircularBuffer cb{ 5 };
-    EXPECT_ANY_THROW(cb.back());
 }
 
 TEST(CircularBufferThrowTest, popBackNotHaveElemTest) {

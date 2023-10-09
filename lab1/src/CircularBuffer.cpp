@@ -58,56 +58,32 @@ const value_type& CircularBuffer::operator[](int i) const {
 }
 
 value_type& CircularBuffer::at(int i) {
-	if (i < 0 || i > bufferSize - 1) {
+	if (i < 0 || i > size() - 1) {
 		throw std::out_of_range("out of range");
-	}
-	int realPos = (frontIndex + i) % bufferSize;
-	if (!full()) {
-		if (realPos < frontIndex || realPos  > backIndex) {
-			throw std::out_of_range("out of range");
-		}
 	}
 	return buffer[bufferIndex(i)];
 }
 
 const value_type& CircularBuffer::at(int i) const {
-	if (i < 0 || i > bufferSize - 1) {
+	if (i < 0 || i > size() - 1) {
 		throw std::out_of_range("out of range");
-	}
-	int realPos = (frontIndex + i) % bufferSize;
-	if (!full()) {
-		if (realPos < frontIndex || realPos  > backIndex) {
-			throw std::out_of_range("out of range");
-		}
 	}
 	return buffer[bufferIndex(i)];
 }
 
 value_type& CircularBuffer::front() {
-	if (size() == 0) {
-		throw std::out_of_range("not have elem");
-	}
 	return buffer[frontIndex];
 }
 
 value_type& CircularBuffer::back() {
-	if (size() == 0) {
-		throw std::out_of_range("not have elem");
-	}
 	return buffer[backIndex];
 }
 
 const value_type& CircularBuffer::front() const {
-	if (size() == 0) {
-		throw std::out_of_range("not have elem");
-	}
 	return buffer[frontIndex];
 }
 
 const value_type& CircularBuffer::back() const {
-	if (size() == 0) {
-		throw std::out_of_range("not have elem");
-	}
 	return buffer[backIndex];
 }
 
@@ -128,7 +104,7 @@ void CircularBuffer::rotate(int newBegin) {
 	if (newBegin < 0 || newBegin >= bufferSize) {
 		throw std::invalid_argument("new_begin > 0 and new_begin < bufferSize");
 	}
-	int realNewBegin = (frontIndex + newBegin) % bufferSize;
+	int realNewBegin = bufferIndex(newBegin);
 	if (!full()) {
 		if (realNewBegin < frontIndex || realNewBegin  > backIndex) {
 			throw std::out_of_range("out of range");
@@ -188,27 +164,40 @@ void CircularBuffer::resize(int newSize, const value_type& item) {
 	if (newSize == bufferSize) {
 		return;
 	}
-	value_type* newBuffer = new value_type[newSize];
-	int minCapacity = std::min(size(), newSize);
-	int newBackIndex = minCapacity - 1;
-	for (int i = 0; i < minCapacity; ++i) {
-		newBuffer[i] = buffer[i];
-	}
-	if (newSize > capacity()) {
-		for (int i = 0; i < (newSize - capacity()); ++i) {
-			newBuffer[i + minCapacity] = item;
+	else if (newSize < bufferSize) {
+		linearize();
+		for (int i = size() - 1; i > newSize - 1; --i) {
+			buffer[i] =  0 ;
 		}
-		for (int i = (newSize - capacity() + minCapacity); i < newSize; ++i) {
-			newBuffer[i] = 0;
-		}
+		backIndex = newSize - 1;
+		bufferFreeSize += size() - newSize;
 	}
-	delete[] buffer;
-	buffer = newBuffer;
-	bufferSize = newSize;
-	backIndex = size() - 1;;
+	else {
+		value_type* newBuffer = new value_type[newSize];
+		int minCapacity = std::min(size(), newSize);
+		int newBackIndex = minCapacity - 1;
+		for (int i = 0; i < minCapacity; ++i) {
+			newBuffer[i] = buffer[i];
+		}
+		if (newSize > capacity()) {
+			for (int i = 0; i < (newSize - capacity()); ++i) {
+				newBuffer[i + minCapacity] = item;
+			}
+			for (int i = (newSize - capacity() + minCapacity); i < newSize; ++i) {
+				newBuffer[i] = 0;
+			}
+		}
+		delete[] buffer;
+		buffer = newBuffer;
+		bufferSize = newSize;
+		backIndex = size() - 1;
+	}
 }
 
 CircularBuffer& CircularBuffer::operator=(const CircularBuffer& cb) {
+	if (*(this) == cb) {
+		return *(this);
+	}
 	if (cb.bufferSize != bufferSize){
 		value_type* newBuffer = new value_type[cb.bufferSize];
 		delete[] buffer;
@@ -225,11 +214,30 @@ CircularBuffer& CircularBuffer::operator=(const CircularBuffer& cb) {
 }
 
 void CircularBuffer::swap(CircularBuffer& cb) {
+	int oldCapacity = 0;
+	int smallerBuffer = 0;
 	if (cb.bufferSize != bufferSize) {
-		throw std::out_of_range("size1 != size2");
+		if (cb.bufferSize > bufferSize) {
+			smallerBuffer = 1;
+			oldCapacity = bufferSize;
+			setCapacity(cb.bufferSize);
+		}
+		else {
+			smallerBuffer = 2;
+			oldCapacity = cb.bufferSize;
+			cb.setCapacity(bufferSize);
+		}
 	}
 	for (int i = 0; i < bufferSize; ++i) {
 		std::swap(cb[i], buffer[i]);
+	}
+	if (smallerBuffer == 0) {
+	}
+	else if (smallerBuffer  == 1) {
+		cb.setCapacity(oldCapacity);
+	}
+	else if (smallerBuffer == 2) {
+		setCapacity(oldCapacity);
 	}
 }
 
@@ -263,7 +271,7 @@ void CircularBuffer::pushFront(const value_type& item) {
 			frontIndex = 0;
 		}
 		else{
-			buffer[(frontIndex + bufferSize - 1) % bufferSize] = item;
+			buffer[bufferIndex(bufferSize - 1)] = item;
 			frontIndex = moduloIncrease(frontIndex, bufferSize - 1, bufferSize);
 		}
 		bufferFreeSize -= 1;
@@ -302,16 +310,10 @@ void CircularBuffer::insert(int pos, const value_type& item) {
 	if (size() == 0) {
 		throw std::out_of_range("not have elem");
 	}
-	if (pos < 0 || pos >= bufferSize) {
+	if (pos < 0 || pos > size() - 1) {
 		throw std::out_of_range("wrong index");
 	}
-	int realPos = (frontIndex + pos) % bufferSize;
-	if (!full()) {
-		if (realPos < frontIndex || realPos  > backIndex) {
-			throw std::out_of_range("wrong index");
-		}
-	}
-	buffer[realPos] = item;
+	buffer[bufferIndex(pos)] = item;
 }
 
 void CircularBuffer::erase(int first, int last) {
@@ -347,10 +349,8 @@ void CircularBuffer::clear() {
 
 
 bool operator==(const CircularBuffer& a, const CircularBuffer& b) {
-	if (a.capacity() != b.capacity()) {
-		return false;
-	}
-	if (a.size() != b.size()) {
+	if (a.size() != b.size()||
+		a.capacity() != b.capacity()){
 		return false;
 	}
 	for (int i = 0; i < a.size(); ++i) {
