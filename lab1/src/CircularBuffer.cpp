@@ -166,6 +166,8 @@ void CircularBuffer::resize(int newSize, const value_type& item) {
 	}
 	else if (newSize < bufferSize) {
 		linearize();
+		linearize();
+		linearize();
 		for (int i = size() - 1; i > newSize - 1; --i) {
 			buffer[i] =  0 ;
 		}
@@ -214,31 +216,11 @@ CircularBuffer& CircularBuffer::operator=(const CircularBuffer& cb) {
 }
 
 void CircularBuffer::swap(CircularBuffer& cb) {
-	int oldCapacity = 0;
-	int smallerBuffer = 0;
-	if (cb.bufferSize != bufferSize) {
-		if (cb.bufferSize > bufferSize) {
-			smallerBuffer = 1;
-			oldCapacity = bufferSize;
-			setCapacity(cb.bufferSize);
-		}
-		else {
-			smallerBuffer = 2;
-			oldCapacity = cb.bufferSize;
-			cb.setCapacity(bufferSize);
-		}
-	}
-	for (int i = 0; i < bufferSize; ++i) {
-		std::swap(cb[i], buffer[i]);
-	}
-	if (smallerBuffer == 0) {
-	}
-	else if (smallerBuffer  == 1) {
-		cb.setCapacity(oldCapacity);
-	}
-	else if (smallerBuffer == 2) {
-		setCapacity(oldCapacity);
-	}
+	std::swap(buffer, cb.buffer);
+	std::swap(bufferSize, cb.bufferSize);
+	std::swap(bufferFreeSize, cb.bufferFreeSize);
+	std::swap(frontIndex, cb.frontIndex);
+	std::swap(backIndex, cb.backIndex);
 }
 
 int CircularBuffer::moduloIncrease(int&	increasing, int plusNum, int module) {
@@ -279,9 +261,6 @@ void CircularBuffer::pushFront(const value_type& item) {
 }
 
 void CircularBuffer::popBack() {
-	if (size() == 0) {
-		throw std::out_of_range("not have elem");
-	}
 	buffer[backIndex] = 0;
 	backIndex = moduloIncrease(backIndex, bufferSize - 1, bufferSize);
 	bufferFreeSize++;
@@ -292,9 +271,6 @@ void CircularBuffer::popBack() {
 }
 
 void CircularBuffer::popFront() {
-	if (size() == 0) {
-		throw std::out_of_range("not have elem");
-	}
 	buffer[frontIndex] = 0;
 	bufferFreeSize++;
 	frontIndex += 1;

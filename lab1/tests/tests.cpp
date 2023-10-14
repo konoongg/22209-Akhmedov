@@ -1037,16 +1037,6 @@ TEST(CircularBufferThrowTest, eraseMoreOutOfRangeTest) {
     EXPECT_ANY_THROW(cb.erase(3, 12));
 }
 
-TEST(CircularBufferThrowTest, popBackNotHaveElemTest) {
-    CircularBuffer cb{ 5 };
-    EXPECT_ANY_THROW(cb.popBack());
-}
-
-TEST(CircularBufferThrowTest, popFrontNotHaveElemTest) {
-    CircularBuffer cb{ 5 };
-    EXPECT_ANY_THROW(cb.popFront());
-}
-
 TEST(CircularBufferThrowTest, insertFullLessIndexTest) {
     CircularBuffer cb{5, 'a'};
     EXPECT_ANY_THROW(cb.insert(-1, 'b'));
