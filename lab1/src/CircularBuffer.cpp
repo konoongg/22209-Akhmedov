@@ -177,7 +177,6 @@ void CircularBuffer::resize(int newSize, const value_type& item) {
 	else {
 		value_type* newBuffer = new value_type[newSize];
 		int minCapacity = std::min(size(), newSize);
-		int newBackIndex = minCapacity - 1;
 		for (int i = 0; i < minCapacity; ++i) {
 			newBuffer[i] = buffer[i];
 		}
