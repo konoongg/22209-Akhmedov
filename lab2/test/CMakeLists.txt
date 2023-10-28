@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.23)
+project(lab2Test)
+
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+add_subdirectory(googletest)
+add_subdirectory(../src/cell cell)
+add_subdirectory(../src/gameController gameController)
+add_subdirectory(../src/gameState gameState)
+add_subdirectory(../src/viewer viewer)
+add_executable(lab2Test test.cpp)
+target_include_directories(lab2Test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+target_link_libraries(lab2Test PRIVATE cell gameState gameController viewer gtest)
