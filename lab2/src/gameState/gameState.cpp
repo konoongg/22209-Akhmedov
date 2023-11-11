@@ -33,6 +33,7 @@ Game::Game(std::vector<std::string> argc) {
 	if (inputFile.is_open()) {
 		std::string line;
 		std::vector<std::string> linesForFile;
+		std::string name;
 		while (std::getline(inputFile, line)) {
 			linesForFile.push_back(line);
 		}
@@ -71,16 +72,9 @@ Game::Game(std::vector<std::string> argc) {
 			size.push_back(line);
 		}
 		inputFile.close();
-		sizeX = std::stoi(size[0]);
-		sizeY = std::stoi(size[1]);
-		stateGame.resize(sizeX);
-		for (int i = 0; i < sizeX; ++i) {
-			stateGame[i] = std::vector<Cell>();
-			stateGame[i].resize(sizeY);
-			for (int j = 0; j < sizeY; ++j) {
-				stateGame[i][j] = Cell(i, j);
-			}
-		}
+		int sizeX = std::stoi(size[0]);
+		int sizeY = std::stoi(size[1]);
+		board = GameBoard{ sizeX, sizeY, name };
 		index += 1;
 		for (int i = index; i < linesForFile.size(); ++i) {
 			std::string line;
@@ -91,22 +85,14 @@ Game::Game(std::vector<std::string> argc) {
 			}
 			int x = std::stoi(cord[0]);
 			int y = std::stoi(cord[1]);
-			if (stateGame[x][y].printValue() == 0) {
-				stateGame[x][y].changeStatus();
+			if (board.gameBoard()[board.realIndex(x, y)].printValue() == 0) {
+				board.gameBoard()[board.realIndex(x, y)].changeStatus();
 			}
 		}
 	}
 	else {
 		std::cout << "failed to open file \n";
 	}
-}
-
-std::vector<std::vector<Cell>>& Game::gameBoard() {
-	return stateGame;
-}
-
-const std::vector<std::vector<Cell>>& Game::gameBoard() const  {
-	return stateGame;
 }
 
 const std::vector<int>& Game::needForSafe() const {
@@ -121,22 +107,14 @@ const std::string Game::gameMode() const {
 	return mode;
 }
 
-const std::string Game::gameName() const  {
-	return name;
-}
-
-const int Game::gameSizeX() const {
-	return sizeX;
-}
-
-const int Game::gameSizeY() const {
-	return sizeY;
-}
-
 const int Game::step() const {
 	return countStep;
 }
 
 const std::string Game::gameOutFile() const {
 	return outFile;
+}
+
+GameBoard& Game::returnBoard() {
+	return board;
 }

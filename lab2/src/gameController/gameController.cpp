@@ -9,7 +9,7 @@ GameController::GameController(Game& game, Viewer& viewer) {
 	}
 	else {
 		tick(game.step(), game, viewer);
-		dump(game.gameOutFile(), game.gameBoard());
+		dump(game.gameOutFile(), game.returnBoard());
 	}
 }
 
@@ -41,7 +41,7 @@ void GameController::reader(Game& game, Viewer& viewer) {
 		}
 		else if (input.find("dump <") != std::string::npos) {
 			std::string outFile = input.substr(6, input.size() - 6 - 1);
-			dump(outFile, game.gameBoard());
+			dump(outFile, game.returnBoard());
 			std::cout << "enter some command" << std::endl;
 		}
 		else {
@@ -57,14 +57,16 @@ void GameController::help() {
 	std::cout << "exit - end the game." << std::endl;
 }
 
-void GameController::dump(std::string outFile, const std::vector<std::vector<Cell>> & gameBoard) {
+void GameController::dump(std::string outFile, const GameBoard& board) {
 	std::ofstream file(outFile);
 	if (file.is_open()) {
-		for (auto vec: gameBoard) {
-			for (auto cell : vec) {
-				file << cell.printValue() << ' ';
+		int countCell = 0;
+		for (auto cell: board.gameBoard()) {
+			countCell++;
+			file << cell.printValue() << ' ';
+			if (countCell % board.gameSizeX() == 0) {
+				file << std::endl;
 			}
-			file << std::endl;
 		}
 		file.close();
 		std::cout << "save the universe to " << outFile << std::endl;
@@ -74,8 +76,8 @@ void GameController::dump(std::string outFile, const std::vector<std::vector<Cel
 	}
 }
 
-int GameController::isNeighbour(std::vector<std::vector<Cell>>& gameBoard, int x, int y) {
-	if (gameBoard[x][y].printValue() == 0) {
+int GameController::isNeighbour(const GameBoard& board, int x, int y) {
+	if (board.gameBoard()[board.realIndex(x, y)].printValue() == 0) {
 		return 0;
 	}
 	return 1;
@@ -98,17 +100,16 @@ void GameController::countNeighbourIsCountChange(Cell& cell , int countNeighbour
 
 void GameController::needChange(Cell& cell, Game& game) {
 	int countNeighbour = 0;
-	const int sizeX = game.gameSizeX();
-	const int sizeY = game.gameSizeY();
-	std::vector<std::vector<Cell>>& gameBoard = game.gameBoard();
-	countNeighbour += isNeighbour(gameBoard, (cell.X() + 1) % sizeX, cell.Y());
-	countNeighbour += isNeighbour(gameBoard, cell.X(), (cell.Y() + 1) % sizeY);
-	countNeighbour += isNeighbour(gameBoard, (cell.X() + 1) % sizeX, (cell.Y() + 1) % sizeY);
-	countNeighbour += isNeighbour(gameBoard, (cell.X() + 1) % sizeX, (cell.Y() - 1 + sizeY) % sizeY);
-	countNeighbour += isNeighbour(gameBoard, cell.X(), (cell.Y() - 1 + sizeY) % sizeY);
-	countNeighbour += isNeighbour(gameBoard, (cell.X() - 1 + sizeX) % sizeX, (cell.Y() - 1 + sizeY) % sizeY);
-	countNeighbour += isNeighbour(gameBoard, (cell.X() - 1 + sizeX) % sizeX, cell.Y());
-	countNeighbour += isNeighbour(gameBoard, (cell.X() - 1 + sizeX) % sizeX, (cell.Y() + 1) % sizeY);
+	const int sizeX = game.returnBoard().gameSizeX();
+	const int sizeY = game.returnBoard().gameSizeY();
+	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() + 1) % sizeX, cell.Y());
+	countNeighbour += isNeighbour(game.returnBoard(), cell.X(), (cell.Y() + 1) % sizeY);
+	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() + 1) % sizeX, (cell.Y() + 1) % sizeY);
+	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() + 1) % sizeX, (cell.Y() - 1 + sizeY) % sizeY);
+	countNeighbour += isNeighbour(game.returnBoard(), cell.X(), (cell.Y() - 1 + sizeY) % sizeY);
+	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() - 1 + sizeX) % sizeX, (cell.Y() - 1 + sizeY) % sizeY);
+	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() - 1 + sizeX) % sizeX, cell.Y());
+	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() - 1 + sizeX) % sizeX, (cell.Y() + 1) % sizeY);
 	if (cell.printValue() == 0 ) {
 		countNeighbourIsCountChange(cell, countNeighbour, game.needForBorn(), 0);
 	}
@@ -119,21 +120,21 @@ void GameController::needChange(Cell& cell, Game& game) {
 
 void GameController::tick(int step, Game& game, Viewer& viewer) {
 	for (int i = 0; i < step; ++i) {
-		for (int x = 0; x < game.gameSizeX(); ++x) {
-			for (int y = 0; y < game.gameSizeY(); ++y) {
-				needChange(game.gameBoard()[x][y], game);
+		for (int y = 0; y < game.returnBoard().gameSizeY(); ++y) {
+			for (int x = 0; x < game.returnBoard().gameSizeX(); ++x) {
+				needChange(game.returnBoard().gameBoard() [game.returnBoard().realIndex(x,y)], game);
 			}
 		}
-		for (int x = 0; x < game.gameSizeX(); ++x) {
-			for (int y = 0; y < game.gameSizeY(); ++y) {
-				if (game.gameBoard()[x][y].needChangeStatus()) {
-					game.gameBoard()[x][y].changeStatus();
+		for (int y = 0; y < game.returnBoard().gameSizeY(); ++y) {
+			for (int x = 0; x < game.returnBoard().gameSizeX(); ++x) {
+				if (game.returnBoard().gameBoard()[game.returnBoard().realIndex(x, y)].needChangeStatus()) {
+					game.returnBoard().gameBoard()[game.returnBoard().realIndex(x, y)].changeStatus();
 				}
 			}
 		}
 		if (game.gameMode() == "online") {
 			Sleep(300);
-			viewer.printFiel(game);
+			viewer.printFiel(game.returnBoard());
 		}
 	}
 

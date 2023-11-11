@@ -2,6 +2,7 @@
 #include <gameController/gameController.h>
 #include <gameState/gameState.h>
 #include <viewer/viewer.h>
+#include <gameBoard/gameBoard.h>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <fstream>
@@ -46,7 +47,6 @@ TEST(cell, changeStatusTest) {
 }
 
 TEST(gameState, constrOnlineStandartTest) {
-    
     std::ofstream file("in.txt");
     if (file.is_open()) {
         file << "#Life 1.06" << std::endl;
@@ -73,19 +73,19 @@ TEST(gameState, constrOnlineStandartTest) {
     EXPECT_EQ(gameState.gameMode(), "online");
     EXPECT_EQ(gameState.needForBorn(), countForBornTest);
     EXPECT_EQ(gameState.needForSafe(), countForSafeTest);
-    EXPECT_EQ(gameState.gameName(), "Test universe");
+    EXPECT_EQ(gameState.returnBoard().gameName(), "Test universe");
     EXPECT_EQ(gameState.gameOutFile(), "none");
-    EXPECT_EQ(gameState.gameSizeX(), 3);
-    EXPECT_EQ(gameState.gameSizeY(), 3);
-    EXPECT_EQ(gameState.gameBoard()[0][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[0][1].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[0][2].printValue(), 0);
-    EXPECT_EQ(gameState.gameBoard()[1][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[1][1].printValue(), 0);
-    EXPECT_EQ(gameState.gameBoard()[1][2].printValue(), 0);
-    EXPECT_EQ(gameState.gameBoard()[2][0].printValue(), 0);
-    EXPECT_EQ(gameState.gameBoard()[2][1].printValue(), 0);
-    EXPECT_EQ(gameState.gameBoard()[2][0].printValue(), 0);
+    EXPECT_EQ(gameState.returnBoard().gameSizeX(), 3);
+    EXPECT_EQ(gameState.returnBoard().gameSizeY(), 3);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0 , 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 1)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 2)].printValue(), 0);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 1)].printValue(), 0);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 2)].printValue(), 0);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(2, 0)].printValue(), 0);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(2, 1)].printValue(), 0);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(2, 2)].printValue(), 0);
 }
 
 TEST(gameState, constrOnlineNonDataTest) {
@@ -113,16 +113,16 @@ TEST(gameState, constrOnlineNonDataTest) {
     countForBornTest.push_back(1);
     countForBornTest.push_back(2);
     EXPECT_EQ(gameState.gameMode(), "online");
-    EXPECT_EQ(gameState.gameName(), "live");
+    EXPECT_EQ(gameState.returnBoard().gameName(), "live");
     EXPECT_EQ(gameState.gameOutFile(), "none");
     EXPECT_EQ(gameState.needForBorn(), countForBornTest);
     EXPECT_EQ(gameState.needForSafe(), countForSafeTest);
-    EXPECT_EQ(gameState.gameSizeX(), 2);
-    EXPECT_EQ(gameState.gameSizeY(), 2);
-    EXPECT_EQ(gameState.gameBoard()[0][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[0][1].printValue(), 0);
-    EXPECT_EQ(gameState.gameBoard()[1][0].printValue(), 0);
-    EXPECT_EQ(gameState.gameBoard()[1][1].printValue(), 0);
+    EXPECT_EQ(gameState.returnBoard().gameSizeX(), 2);
+    EXPECT_EQ(gameState.returnBoard().gameSizeY(), 2);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 1)].printValue(), 0);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 0)].printValue(), 0);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 1)].printValue(), 0);
 }
 
 TEST(gameState, constrOnlineNonFileTest) {
@@ -136,16 +136,16 @@ TEST(gameState, constrOnlineNonFileTest) {
     countForBornTest.push_back(1);
     countForBornTest.push_back(2);
     EXPECT_EQ(gameState.gameMode(), "online");
-    EXPECT_EQ(gameState.gameName(), "live");
+    EXPECT_EQ(gameState.returnBoard().gameName(), "live");
     EXPECT_EQ(gameState.needForBorn(), countForBornTest);
     EXPECT_EQ(gameState.needForSafe(), countForSafeTest);
     EXPECT_EQ(gameState.gameOutFile(), "none");
-    EXPECT_EQ(gameState.gameSizeX(), 2);
-    EXPECT_EQ(gameState.gameSizeY(), 2);
-    EXPECT_EQ(gameState.gameBoard()[0][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[0][1].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[1][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[1][1].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameSizeX(), 2);
+    EXPECT_EQ(gameState.returnBoard().gameSizeY(), 2);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 1)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 1)].printValue(), 1);
 }
 
 TEST(gameState, constrOfflineShortTest) {
@@ -163,17 +163,17 @@ TEST(gameState, constrOfflineShortTest) {
     countForBornTest.push_back(1);
     countForBornTest.push_back(2);
     EXPECT_EQ(gameState.gameMode(), "offline");
-    EXPECT_EQ(gameState.gameName(), "live");
+    EXPECT_EQ(gameState.returnBoard().gameName(), "live");
     EXPECT_EQ(gameState.step(), 12);
     EXPECT_EQ(gameState.gameOutFile(), "out.txt");
     EXPECT_EQ(gameState.needForBorn(), countForBornTest);
     EXPECT_EQ(gameState.needForSafe(), countForSafeTest);
-    EXPECT_EQ(gameState.gameSizeX(), 2);
-    EXPECT_EQ(gameState.gameSizeY(), 2);
-    EXPECT_EQ(gameState.gameBoard()[0][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[0][1].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[1][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[1][1].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameSizeX(), 2);
+    EXPECT_EQ(gameState.returnBoard().gameSizeY(), 2);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 1)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 1)].printValue(), 1);
 }
 
 TEST(gameState, constrOfflineLongTest) {
@@ -189,17 +189,17 @@ TEST(gameState, constrOfflineLongTest) {
     countForBornTest.push_back(1);
     countForBornTest.push_back(2);
     EXPECT_EQ(gameState.gameMode(), "offline");
-    EXPECT_EQ(gameState.gameName(), "live");
+    EXPECT_EQ(gameState.returnBoard().gameName(), "live");
     EXPECT_EQ(gameState.step(), 12);
     EXPECT_EQ(gameState.gameOutFile(), "out.txt");
     EXPECT_EQ(gameState.needForBorn(), countForBornTest);
     EXPECT_EQ(gameState.needForSafe(), countForSafeTest);
-    EXPECT_EQ(gameState.gameSizeX(), 2);
-    EXPECT_EQ(gameState.gameSizeY(), 2);
-    EXPECT_EQ(gameState.gameBoard()[0][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[0][1].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[1][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[1][1].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameSizeX(), 2);
+    EXPECT_EQ(gameState.returnBoard().gameSizeY(), 2);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 1)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 1)].printValue(), 1);
 }
 
 TEST(gameController, tickTest) {
@@ -223,17 +223,17 @@ TEST(gameController, tickTest) {
     arguments.push_back("--iterations=1");
     arguments.push_back("--output=out.txt");
     Game gameState(arguments);
-    Viewer viewer{ gameState };
+    Viewer viewer{ gameState.returnBoard(), gameState.gameMode()};
     GameController controller{ gameState, viewer };
-    EXPECT_EQ(gameState.gameBoard()[0][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[0][1].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[0][2].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[1][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[1][1].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[1][2].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[2][0].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[2][1].printValue(), 1);
-    EXPECT_EQ(gameState.gameBoard()[2][0].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 1)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(0, 2)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 1)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(1, 2)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(2, 0)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(2, 1)].printValue(), 1);
+    EXPECT_EQ(gameState.returnBoard().gameBoard()[gameState.returnBoard().realIndex(2, 2)].printValue(), 1);
 }
 
 int main(int argc, char** argv) {

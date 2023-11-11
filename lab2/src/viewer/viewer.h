@@ -7,7 +7,7 @@
 
 class Viewer {
 public:
-	Viewer(const Game& game);
+	Viewer(const GameBoard& gameBoard, std::string mode);
 	~Viewer();
-	void printFiel(const Game& game);
+	void printFiel(const GameBoard& gameBoard);
 };

@@ -12,12 +12,12 @@
 class GameController {
 	bool isRead;
 	void countNeighbourIsCountChange(Cell& cell, int countNeighbour, const std::vector<int>& countChange, int isSafe);
-	void needChange(Cell& cell, Game&);
-	int isNeighbour(std::vector<std::vector<Cell>>& gameBoard, int x, int y);
+	void needChange(Cell& cell, Game& game);
+	int isNeighbour(const GameBoard& board, int x, int y);
 public:
 	GameController(Game& game, Viewer& viewer);
 	void reader(Game& game, Viewer& viewer);
-	void dump(std::string outFile, const std::vector<std::vector<Cell>> & gameBoard);
+	void dump(std::string outFile, const GameBoard& board);
 	void tick(int step, Game& game, Viewer& viewer);
 	void help();
 	void exit();

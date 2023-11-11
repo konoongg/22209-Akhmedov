@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	}
 	std::vector<std::string> arguments(argv, argv + argc);
 	Game gameState{ arguments };
-	Viewer viewer{ gameState };
+	Viewer viewer{ gameState.returnBoard(), gameState.gameMode()};
 	GameController controller{ gameState, viewer };
 	return 0;
 }
