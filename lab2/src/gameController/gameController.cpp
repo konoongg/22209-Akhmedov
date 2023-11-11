@@ -1,6 +1,5 @@
 #include "gameController.h"
 
-
 GameController::GameController(Game& game, Viewer& viewer) {
 	if (game.gameMode() == "online") {
 		isRead = false;
