@@ -1,4 +1,5 @@
 #include "viewer.h"
+#include <iostream>
 
 Viewer::Viewer(const GameBoard& gameBoard, std::string mode) {
 	if (mode == "online") {
@@ -17,11 +18,10 @@ void Viewer::printFiel(const GameBoard& gameBoard) {
 		std::cout << "-";
 	}
 	std::cout << std::endl;
-	const std::vector<Cell> board = gameBoard.gameBoard();
 	for (int x = 0; x < gameBoard.gameSizeX(); ++x) {
 		std::cout << "|";
 		for (int y = 0; y < gameBoard.gameSizeY(); ++y) {
-			std::cout << board[gameBoard.realIndex(x, y)].printValue();
+			std::cout << gameBoard.returnCell(x,y).printValue();
 		}
 		std::cout << "|" << std::endl;
 	}

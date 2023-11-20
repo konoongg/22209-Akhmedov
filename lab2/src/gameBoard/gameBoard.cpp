@@ -9,7 +9,7 @@ GameBoard::GameBoard() {
 	this->sizeY = 4;
 	board.resize(sizeX * sizeY);
 	for (int i = 0; i < sizeX * sizeY; ++i) {
-		board[i] = Cell{ i % sizeX, i / sizeX };
+		board[i] = Cell{  };
 	}
 }
 
@@ -19,7 +19,7 @@ GameBoard::GameBoard(int sizeX, int sizeY, std::string name) {
 	this->sizeY = sizeY;
 	board.resize(sizeX * sizeY);
 	for (int i = 0; i < sizeX * sizeY; ++i) {
-		board[i] = Cell{i % sizeX, i / sizeX};
+		board[i] = Cell{};
 	}
 }
 
@@ -27,12 +27,21 @@ const int GameBoard::realIndex(int x, int y) const {
 	return (y * sizeX) + x;
 }
 
-std::vector<Cell>& GameBoard::gameBoard() {
+/*std::vector<Cell>& GameBoard::gameBoard() {
 	return board;
+}*/
+
+/*const std::vector<Cell>& GameBoard::gameBoard() const {
+	return board;
+}*/
+
+const Cell&  GameBoard::returnCell(int x, int y) const{
+	return board[realIndex((x + sizeX) % sizeX, (y + sizeY) % sizeY)];
+	
 }
 
-const std::vector<Cell>& GameBoard::gameBoard() const {
-	return board;
+ Cell& GameBoard::returnCell(int x, int y) {
+	 return board[realIndex((x + sizeX) % sizeX, (y + sizeY) % sizeY)];
 }
 
 const int GameBoard::gameSizeX() const {

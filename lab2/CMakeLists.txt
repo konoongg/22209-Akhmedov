@@ -15,4 +15,7 @@ add_executable(lab2
     src/gameController/gameController.h
     src/gameState/gameState.h
     src/viewer/viewer.h
- "src/gameBoard/gameBoard.cpp" "src/gameBoard/gameBoard.h")
+    src/gameBoard/gameBoard.cpp 
+    src/gameBoard/gameBoard.h
+    src/inputParser/inputParser.cpp
+    src/inputParser/inputParser.h)

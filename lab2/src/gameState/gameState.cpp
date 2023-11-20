@@ -1,33 +1,10 @@
 #include "gameState.h"
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
-Game::Game(std::vector<std::string> argc) {
-	outFile = "none";
-	mode = "online";
-	if (argc.size() > 1 && argc[1].find(".txt") != std::string::npos) {
-		inFile = argc[1];
-	}
-	else {
-		inFile = "standart.txt";
-	}
-	for (int i = 1; i < argc.size(); ++i) {
-		if (argc[i] == "-o") {
-			mode = "offline";
-			outFile = argc[i + 1];
-			i++;
-		}
-		else if (argc[i].find("--output=") != std::string::npos) {
-			mode = "offline";
-			outFile = argc[i].substr(9);
-		}
-		else if (argc[i] == "-i") {
-			countStep = std::stoi(argc[i + 1]);
-			i++;
-		}
-		else if (argc[i].find("--iterations=") != std::string::npos) {
-			countStep = std::stoi(argc[i].substr(13));
-		}
-	}
+Game::Game(std::string inFile) {
 	std::ifstream inputFile;
 	inputFile.open(inFile);
 	if (inputFile.is_open()) {
@@ -49,10 +26,10 @@ Game::Game(std::vector<std::string> argc) {
 		if (linesForFile[index].find("#R") != std::string::npos) {
 			for (char sym : linesForFile[index]) {
 				if (isdigit(sym) && isBorn == false) {
-					countForBorn.push_back(std::stoi(&sym));
+					countForBorn.set(std::stoi(&sym));
 				}
 				else if (isdigit(sym) && isBorn == true) {
-					countForSafe.push_back(std::stoi(&sym));
+					countForSafe.set(std::stoi(&sym));
 				}
 				else if (sym == '/') {
 					isBorn = true;
@@ -61,10 +38,10 @@ Game::Game(std::vector<std::string> argc) {
 			index += 1;
 		}
 		else {
-			countForBorn.push_back(1);
-			countForBorn.push_back(2);
-			countForSafe.push_back(3);
-			countForSafe.push_back(4);
+			countForBorn.set(1);
+			countForBorn.set(2);
+			countForSafe.set(3);
+			countForSafe.set(4);
 		}
 		std::stringstream ss(linesForFile[index].substr(3));
 		std::vector<std::string> size;
@@ -85,8 +62,8 @@ Game::Game(std::vector<std::string> argc) {
 			}
 			int x = std::stoi(cord[0]);
 			int y = std::stoi(cord[1]);
-			if (board.gameBoard()[board.realIndex(x, y)].printValue() == 0) {
-				board.gameBoard()[board.realIndex(x, y)].changeStatus();
+			if (board.returnCell(x,y).printValue() == 0) {
+				board.returnCell(x, y).changeStatus();
 			}
 		}
 	}
@@ -95,24 +72,12 @@ Game::Game(std::vector<std::string> argc) {
 	}
 }
 
-const std::vector<int>& Game::needForSafe() const {
+const std::bitset<8>& Game::needForSafe() const {
 	return countForSafe;
 }
 
-const std::vector<int>& Game::needForBorn() const {
+const std::bitset<8>& Game::needForBorn() const {
 	return countForBorn;
-}
-
-const std::string Game::gameMode() const {
-	return mode;
-}
-
-const int Game::step() const {
-	return countStep;
-}
-
-const std::string Game::gameOutFile() const {
-	return outFile;
 }
 
 GameBoard& Game::returnBoard() {

@@ -2,27 +2,20 @@
 
 #include <string>
 #include <vector>
-#include <iostream>
-#include <fstream>
-#include <sstream>
+#include <bitset>
 #include "../cell/cell.h"
 #include "../gameBoard/gameBoard.h"
-
+#include "../inputParser/inputParser.h"
 class Game {
 	int countStep;
-	std::vector<int> countForSafe;
-	std::vector<int> countForBorn;
-	std::string outFile;
-	std::string inFile;
-	std::string mode;
+	std::bitset<8> countForSafe;
+	std::bitset<8> countForBorn;
 	GameBoard board;
 	
 public:
-	Game(std::vector<std::string> argc);
-	const std::string gameMode() const;
-	const int step() const;
-	const std::vector<int>& needForSafe() const;
-	const std::vector<int>& needForBorn() const;
+	Game(std::string inFile);
+	const std::bitset<8>& needForSafe() const;
+	const std::bitset<8>& needForBorn() const;
 	const std::string gameOutFile() const;
 	GameBoard& returnBoard();
 };

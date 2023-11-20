@@ -1,18 +1,18 @@
 #include "gameController.h"
 
-GameController::GameController(Game& game, Viewer& viewer) {
-	if (game.gameMode() == "online") {
+GameController::GameController(InputParser& inputParser, Game& game, Viewer& viewer) {
+	if (inputParser.gameMode() == "online") {
 		isRead = false;
 		std::cout << "game ready" << std::endl;
-		reader(game, viewer);
+		reader(inputParser,game, viewer);
 	}
 	else {
-		tick(game.step(), game, viewer);
-		dump(game.gameOutFile(), game.returnBoard());
+		tick(inputParser.step(), inputParser, game, viewer);
+		dump(inputParser.gameOutFile(), game.returnBoard());
 	}
 }
 
-void GameController::reader(Game& game, Viewer& viewer) {
+void GameController::reader(InputParser& inputParser, Game& game, Viewer& viewer) {
 	std::cout << "enter some command" << std::endl;
 	std::string input;
 	while (isRead == false) {
@@ -26,16 +26,16 @@ void GameController::reader(Game& game, Viewer& viewer) {
 		}
 		else if (input.find("tick <n=") != std::string::npos) {
 			int step = std::stoi(input.substr(8, input.size() - 8 - 1));
-			tick(step, game, viewer);
+			tick(step, inputParser, game, viewer);
 			std::cout << "enter some command" << std::endl;
 		}
 		else if (input.find("t <n=") != std::string::npos) {
 			int step = std::stoi(input.substr(5, input.size() - 5 - 1));
-			tick(step, game, viewer);
+			tick(step, inputParser, game, viewer);
 			std::cout << "enter some command" << std::endl;
 		}
 		else if (input == "t" || input == "tick") {
-			tick(1, game, viewer);
+			tick(1, inputParser, game, viewer);
 			std::cout << "enter some command" << std::endl;
 		}
 		else if (input.find("dump <") != std::string::npos) {
@@ -59,13 +59,11 @@ void GameController::help() {
 void GameController::dump(std::string outFile, const GameBoard& board) {
 	std::ofstream file(outFile);
 	if (file.is_open()) {
-		int countCell = 0;
-		for (auto cell: board.gameBoard()) {
-			countCell++;
-			file << cell.printValue() << ' ';
-			if (countCell % board.gameSizeX() == 0) {
-				file << std::endl;
+		for (int y = 0; y < board.gameSizeY(); ++y) {
+			for (int x = 0; x < board.gameSizeX(); ++x) {
+				file << board.returnCell(x,y).printValue() << ' ';
 			}
+			file << std::endl;
 		}
 		file.close();
 		std::cout << "save the universe to " << outFile << std::endl;
@@ -76,40 +74,40 @@ void GameController::dump(std::string outFile, const GameBoard& board) {
 }
 
 int GameController::isNeighbour(const GameBoard& board, int x, int y) {
-	if (board.gameBoard()[board.realIndex(x, y)].printValue() == 0) {
+	if (board.returnCell(x,y).printValue() == 0) {
 		return 0;
 	}
 	return 1;
 }
 
-void GameController::countNeighbourIsCountChange(Cell& cell , int countNeighbour, const std::vector<int>& countChange, int isSafe) {
-	for (auto count : countChange) {
-		if (countNeighbour == count) {
-			if (isSafe == 1) {
-				return;
-			}
+void GameController::countNeighbourIsCountChange(Cell& cell, int countNeighbour, const std::bitset<8>& countChange, int isSafe) {
+	bool isNeedMark = countChange.test(countNeighbour);
+	if (isSafe == 1) {
+		if (!isNeedMark) {
 			cell.markChangeStatus();
-			return;
+		}
+		return;
+	}
+	else {
+		if (isNeedMark) {
+			cell.markChangeStatus();
 		}
 	}
-	if (isSafe == 1) {
-		cell.markChangeStatus();
-	}
 }
-
-void GameController::needChange(Cell& cell, Game& game) {
+	
+void GameController::needChange(Cell& cell, Game& game, int x, int y) {
 	int countNeighbour = 0;
 	const int sizeX = game.returnBoard().gameSizeX();
 	const int sizeY = game.returnBoard().gameSizeY();
-	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() + 1) % sizeX, cell.Y());
-	countNeighbour += isNeighbour(game.returnBoard(), cell.X(), (cell.Y() + 1) % sizeY);
-	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() + 1) % sizeX, (cell.Y() + 1) % sizeY);
-	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() + 1) % sizeX, (cell.Y() - 1 + sizeY) % sizeY);
-	countNeighbour += isNeighbour(game.returnBoard(), cell.X(), (cell.Y() - 1 + sizeY) % sizeY);
-	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() - 1 + sizeX) % sizeX, (cell.Y() - 1 + sizeY) % sizeY);
-	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() - 1 + sizeX) % sizeX, cell.Y());
-	countNeighbour += isNeighbour(game.returnBoard(), (cell.X() - 1 + sizeX) % sizeX, (cell.Y() + 1) % sizeY);
-	if (cell.printValue() == 0 ) {
+	countNeighbour += isNeighbour(game.returnBoard(), x + 1 , y);
+	countNeighbour += isNeighbour(game.returnBoard(), x, y + 1);
+	countNeighbour += isNeighbour(game.returnBoard(), x + 1, y + 1);
+	countNeighbour += isNeighbour(game.returnBoard(), x + 1, y - 1);
+	countNeighbour += isNeighbour(game.returnBoard(), x, y - 1);
+	countNeighbour += isNeighbour(game.returnBoard(), x - 1, y - 1);
+	countNeighbour += isNeighbour(game.returnBoard(), x - 1, y);
+	countNeighbour += isNeighbour(game.returnBoard(), x - 1, y + 1);
+	if (cell.printValue() == 0) {
 		countNeighbourIsCountChange(cell, countNeighbour, game.needForBorn(), 0);
 	}
 	else {
@@ -117,21 +115,21 @@ void GameController::needChange(Cell& cell, Game& game) {
 	}
 }
 
-void GameController::tick(int step, Game& game, Viewer& viewer) {
+void GameController::tick(int step,InputParser& inputParser, Game& game, Viewer& viewer) {
 	for (int i = 0; i < step; ++i) {
 		for (int y = 0; y < game.returnBoard().gameSizeY(); ++y) {
 			for (int x = 0; x < game.returnBoard().gameSizeX(); ++x) {
-				needChange(game.returnBoard().gameBoard() [game.returnBoard().realIndex(x,y)], game);
+				needChange(game.returnBoard().returnCell(x,y), game, x, y);
 			}
 		}
 		for (int y = 0; y < game.returnBoard().gameSizeY(); ++y) {
 			for (int x = 0; x < game.returnBoard().gameSizeX(); ++x) {
-				if (game.returnBoard().gameBoard()[game.returnBoard().realIndex(x, y)].needChangeStatus()) {
-					game.returnBoard().gameBoard()[game.returnBoard().realIndex(x, y)].changeStatus();
+				if (game.returnBoard().returnCell(x, y).needChangeStatus()) {
+					game.returnBoard().returnCell(x, y).changeStatus();
 				}
 			}
 		}
-		if (game.gameMode() == "online") {
+		if (inputParser.gameMode() == "online") {
 			Sleep(300);
 			viewer.printFiel(game.returnBoard());
 		}
