@@ -8,9 +8,6 @@ GameBoard::GameBoard() {
 	this->sizeX = 3;
 	this->sizeY = 4;
 	board.resize(sizeX * sizeY);
-	for (int i = 0; i < sizeX * sizeY; ++i) {
-		board[i] = Cell{  };
-	}
 }
 
 GameBoard::GameBoard(int sizeX, int sizeY, std::string name) {
@@ -18,9 +15,6 @@ GameBoard::GameBoard(int sizeX, int sizeY, std::string name) {
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;
 	board.resize(sizeX * sizeY);
-	for (int i = 0; i < sizeX * sizeY; ++i) {
-		board[i] = Cell{ };
-	}
 }
 
 const int GameBoard::realIndex(int x, int y) const {
