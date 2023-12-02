@@ -6,12 +6,12 @@
 #include "../wawFileHeader.h"
 #include "../editor/wawEditor.h"
 #include "../returnerSemples/returnerSemples.h"
+#include "../writeOutFile/writeOutFile.h"
 
 class ApplyConverters {
+	WriteOutFile writeOutFile;
 	ReturnerSamples returnerSamples;
-	void writeHeader(std::string outFile, TWawFileHeader& header);
-	void applyOperations(std::vector<std::string>& wawFiles, std::vector<Operation>& operations);
-	void writeToOutFIle(short semplesOnOneSecByMainInputFile[44100], std::string outWawFile);
+	void applyOperations(std::vector<std::string>& wawFiles, std::vector<std::shared_ptr<IConverter>>& converters);
 public:
-	ApplyConverters(std::vector<std::string>& wawFiles, std::vector<Operation>& operations);
+	ApplyConverters(std::vector<std::string>& wawFiles, std::vector<std::shared_ptr<IConverter>>& converters);
 };

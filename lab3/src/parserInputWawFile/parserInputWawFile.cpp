@@ -54,7 +54,8 @@ int ParserInputWawFile::defineDate(std::ifstream& file) {
 		file.read(subArray2, 2);
 		DateIndex += 2;
 	}
-	return DateIndex;
+	// +5 тут потому что index вернет инндекс элемента a из dat[a]
+	return DateIndex + 5;
 }
 
 void ParserInputWawFile::defineSubchunk2Size(char* subchunk2Size, TWawFileHeader& header) {

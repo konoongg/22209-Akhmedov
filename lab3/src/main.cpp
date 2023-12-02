@@ -9,6 +9,7 @@
 #include "exeption/wrongConsoleParam/wrongConsoleParam.h"
 #include "exeption/faildOpenFile/faildOpenFile.h"
 #include "exeption/wrongFormatFIle/wrongFormatFIle.h"
+#include "modeEnum.h"
 
 int main(int argc, char* argv[]) {
 	if (argc < 2) {
@@ -36,7 +37,7 @@ int main(int argc, char* argv[]) {
 		return err.returnCode();
 	}
 	WawEditor editor{ arguments };
-	if (editor.returnMode() == 'c') {
+	if (editor.returnMode() == EMode::apllyConverter) {
 		try {
 			ApplyConverters{ editor.allFile(), editor.convOperations() };
 		}

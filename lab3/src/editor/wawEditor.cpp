@@ -4,7 +4,6 @@
 #include <fstream>
 
 #include "wawEditor.h"
-#include "../operation/operation.h"
 #include "../iConverter/iConverter.h"
 #include "../createConverter/createConverter.h"
 #include "../createConverter/createMute/createMute.h"
@@ -14,6 +13,7 @@
 #include "../exeption/wrongConsoleParam/wrongConsoleParam.h"
 #include "../exeption/faildOpenFile/faildOpenFile.h"
 #include "../exeption/wrongFormatFIle/wrongFormatFIle.h"
+#include "../modeEnum.h"
 
 WawEditor::WawEditor(std::vector<std::string> argc) {
 	initConverters();
@@ -23,7 +23,7 @@ WawEditor::WawEditor(std::vector<std::string> argc) {
 	catch (FaildOpenFile& err) {
 		throw err;
 	}
-	if (mode == 'c') {
+	if (mode == EMode::apllyConverter) {
 		std::string config = argc[2];
 		for (int i = 3; i < argc.size(); ++i) {
 			if ( !(argc[i].find("wav") != std::string::npos)) {
@@ -41,25 +41,27 @@ WawEditor::WawEditor(std::vector<std::string> argc) {
 			throw err;
 		}
 	}
-	else if (mode == 'h') {
-		for (auto conv: converters) {
-			conv.second->info();
-		}
+	else if (mode == EMode::help) {
+		printInfoConv();
 	}
 	
 }
+void WawEditor::printInfoConv() {
+	for (auto conv : createrConverters) {
+		conv.second->create()->info();
+	}
+}
 
-const char WawEditor::determineMode(std::string mode) const {
+EMode WawEditor::determineMode(std::string mode) const {
 	if (mode == "-c") {
-		return 'c';
+		return EMode::apllyConverter;
 	}
 	else if (mode == "-h") {
-		return 'h';
+		return EMode::help;
 	}
 	else {
 		throw WrongConsoleParam { "wrong mode" };
 	}
-	return 0;
 }
 
 void WawEditor::readConfig(std::string config) {
@@ -82,12 +84,9 @@ void WawEditor::readConfig(std::string config) {
 }
 
 void WawEditor::initConverters() {
-	std::shared_ptr<CreateConverter> creater = std::make_shared<CreateMute>();
-	converters["mute"] = creater->create();
-	creater = std::make_shared<CreateMix>();
-	converters["mix"] = creater->create();
-	creater = std::make_shared<CreateCensorship>();
-	converters["censorship"] = creater->create();
+	createrConverters["mute"] = std::make_shared<CreateMute>();
+	createrConverters["mix"] = std::make_shared<CreateMix>();
+	createrConverters["censorship"] = std::make_shared<CreateCensorship>();
 }
 
 void WawEditor::addOperatin(std::string line) {
@@ -99,76 +98,49 @@ void WawEditor::addOperatin(std::string line) {
 		throw WrongConfig{ "no converter" };
 	}
 	if (mode == "mute") {
-		ss >> param;
-		if (param == "") {
-			throw WrongConfig{ "wrong argument, so less params" };
+		try {
+			std::shared_ptr<IConverter> converter = createrConverters["mute"]->create();
+			converter->initParams(line);
+			converters.push_back(converter);
 		}
-		int startTime = (int)std::stod(param);
-		ss >> param;
-		if (param == "") {
-			throw WrongConfig{ "wrong argument, so less params" };
+		catch (WrongConfig& err) {
+			throw err;
 		}
-		int endTime = (int)std::stod(param);
-		if (startTime > endTime) {
-			throw WrongConfig{ "startTime can't be more than endTime" };
-		}
-		if (startTime < 0 || endTime < 0) {
-			throw WrongConfig{ "you nedd to startTime be > 0 and endTime be > 0" };
-		}
-		operations.push_back(Operation{ converters["mute"], startTime, endTime });
 	}
 	else if (mode == "mix") {
-		ss >> param;
-		if (param == "") {
-			throw WrongConfig{ "wrong argument, so less params" };
+		try {
+			std::shared_ptr<IConverter> converter = createrConverters["mix"]->create();
+			converter->initParams(line);
+			converters.push_back(converter);
 		}
-		if (!(param.find("$") != std::string::npos)) {
-			throw WrongConfig{ "wrong argument, you need to use $ with index wav file " };
+		catch (WrongConfig& err) {
+			throw err;
 		}
-		unsigned char index = (unsigned char)std::stod(param.substr(1));
-		ss >> param;
-		if (param == "") {
-			throw WrongConfig{ "wrong argument, so less params" };
-		}
-		int startTime = (int)std::stod(param);
-		if (startTime < 0 ) {
-			throw WrongConfig{ "you need to startTime be > 0" };
-		}
-		operations.push_back(Operation{ converters["mix"], startTime, index });
 	}
 	
 	else if (mode == "censorship") {
-		ss >> param;
-		if (param =="") {
-			throw WrongConfig{ "wrong argument, so less params" };
+		try {
+			std::shared_ptr<IConverter> converter = createrConverters["censorship"]->create();
+			converter->initParams(line);
+			converters.push_back(converter);
 		}
-		int startTime = (int)std::stod(param);
-		ss >> param;
-		if (param == "") {
-			throw WrongConfig{ "wrong argument, so less params" };
+		catch (WrongConfig& err) {
+			throw err;
 		}
-		int endTime = (int)std::stod(param);
-		if (startTime > endTime) {
-			throw WrongConfig{ "startTime can't be more than endTime" };
-		}
-		if (startTime < 0 || endTime < 0) {
-			throw WrongConfig{ "you need to startTime be > 0 and endTime be > 0" };
-		}
-		operations.push_back(Operation{ converters["censorship"], startTime, endTime });
 	}
 	else {
 		throw WrongConfig{"wrong converter " + mode};
 	}
 }
 
-std::vector<Operation>& WawEditor::convOperations()  {
-	return operations;
+std::vector<std::shared_ptr<IConverter>>& WawEditor::convOperations()  {
+	return converters;
 }
 
 std::vector<std::string>& WawEditor::allFile()  {
 	return wawFile;
 }
 
-char WawEditor::returnMode() {
+EMode WawEditor::returnMode() {
 	return mode;
 }

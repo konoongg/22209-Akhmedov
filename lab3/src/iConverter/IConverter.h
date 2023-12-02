@@ -3,8 +3,12 @@
 #include "../returnerSemples/returnerSemples.h"
 
 class IConverter {
-	virtual bool checkTime(int curSec, int startTime, int endTime) = 0;
+	int startTime;
+	int endTime;
+	unsigned char indexWawFile;
+	virtual bool checkTime(int curSec) = 0;
 public:
-	virtual void change(short mainInputFile[44100], ReturnerSamples& returnerSamples,  int curSec, int startTime, int endTIme, unsigned char indexWawFile) = 0;
+	virtual void initParams(std::string params) = 0;
+	virtual void change(short mainInputFile[44100], ReturnerSamples& returnerSamples,  int curSec) = 0;
 	virtual void info() = 0;
 };

@@ -38,14 +38,10 @@ void ReturnerSamples::openFile(unsigned char indexWawFile) {
 	ParserInputWawFile parserInputWawFile{};
 	std::ifstream file(indexWawFiles[indexWawFile], std::ios::binary);
 	if (file.is_open()) {
-		dataIndex[indexWawFile] = defineFirstSample(parserInputWawFile.defineDate(file)) ;
+		dataIndex[indexWawFile] = parserInputWawFile.defineDate(file) ;
 		openFiles.emplace(indexWawFile, std::move(file));
 	}
 	else {
 		throw FaildOpenFile{ "can't to open the file " + indexWawFiles[indexWawFile] };
 	}
-}
-
-int ReturnerSamples::defineFirstSample(int lastDataByte) {
-	return lastDataByte + 5;
 }

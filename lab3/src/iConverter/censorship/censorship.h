@@ -1,10 +1,16 @@
 #pragma once
 
+#include <sstream>
+
 #include "../IConverter.h"
 
 class Censorship : public IConverter {
-	bool checkTime(int curSec, int startTime, int endTime);
+	int startTime;
+	int endTime;
+	unsigned char indexWawFile;
+	bool checkTime(int curSec);
 public:
-	void change(short mainInputFile[44100], ReturnerSamples& returnerSemples, int curSec, int startTime, int endTime, unsigned char indexWawFile) override;
+	void initParams(std::string params) override;
+	void change(short mainInputFile[44100], ReturnerSamples& returnerSemples, int curSec) override;
 	void info() override;
 };

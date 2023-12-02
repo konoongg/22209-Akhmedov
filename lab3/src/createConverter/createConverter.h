@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include "../iConverter/IConverter.h"
 
 class CreateConverter {
