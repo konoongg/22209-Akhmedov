@@ -1,5 +1,5 @@
 #include "consoleParser.h"
-#include "../exñeption/wrongConsoleParam/wrongConsoleParam.h"
+#include "../exception/wrongConsoleParam/wrongConsoleParam.h"
 
 ConsoleParser::ConsoleParser(std::vector<std::string> arguments) {
 	try {

@@ -4,8 +4,8 @@
 #include <sstream>
 #include <string>
 
-#include "../src/exñeption/wrongColumn/wrongColumn.h"
-#include "../src/exñeption/wrongRow/wrongRow.h"
+#include "../exception/wrongColumn/wrongColumn.h"
+#include "../exception/wrongRow/wrongRow.h"
 
 template <class... args>
 class CSVParser {

@@ -6,9 +6,9 @@
 
 #include "consoleParser/consoleParser.h"
 #include "CSVParser/CSVParser.h"
-#include "exñeption/wrongConsoleParam/wrongConsoleParam.h"
-#include "exñeption/wrongColumn/wrongColumn.h"
-#include "exñeption/wrongRow/wrongRow.h"
+#include "exception/wrongConsoleParam/wrongConsoleParam.h"
+#include "exception/wrongColumn/wrongColumn.h"
+#include "exception/wrongRow/wrongRow.h"
 
 
 template <typename Ch, typename Tr, int counter, class ...args>
