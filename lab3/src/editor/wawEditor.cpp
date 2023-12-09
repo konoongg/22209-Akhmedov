@@ -97,30 +97,10 @@ void WawEditor::addOperatin(std::string line) {
 	if (mode == "") {
 		throw WrongConfig{ "no converter" };
 	}
-	if (mode == "mute") {
+	auto it = createrConverters.find(mode);
+	if (it != createrConverters.end()) {
 		try {
-			std::shared_ptr<IConverter> converter = createrConverters["mute"]->create();
-			converter->initParams(line);
-			converters.push_back(converter);
-		}
-		catch (WrongConfig& err) {
-			throw err;
-		}
-	}
-	else if (mode == "mix") {
-		try {
-			std::shared_ptr<IConverter> converter = createrConverters["mix"]->create();
-			converter->initParams(line);
-			converters.push_back(converter);
-		}
-		catch (WrongConfig& err) {
-			throw err;
-		}
-	}
-	
-	else if (mode == "censorship") {
-		try {
-			std::shared_ptr<IConverter> converter = createrConverters["censorship"]->create();
+			std::shared_ptr<IConverter> converter = it->second->create();
 			converter->initParams(line);
 			converters.push_back(converter);
 		}
@@ -129,7 +109,7 @@ void WawEditor::addOperatin(std::string line) {
 		}
 	}
 	else {
-		throw WrongConfig{"wrong converter " + mode};
+		throw WrongConfig{ "wrong converter " + mode };
 	}
 }
 
