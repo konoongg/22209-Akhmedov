@@ -20,19 +20,21 @@ class CSVParser {
     void readLine(std::ifstream& file, std::string& line);
 
 	template <typename T>
-	T strDefineTypes(std::istringstream& iss);
+	T createDataCell(std::istringstream& iss);
 
 	template <size_t... numberArgc>
-	void defineTypes(std::index_sequence<numberArgc...>);
+	void defineTypesInLine(std::index_sequence<numberArgc...>);
 
 public:
     class Iterator {
 		CSVParser& parser;
+		bool itIsEnd;
     public:
-		Iterator(CSVParser& p);
+		Iterator(CSVParser& p, bool endFlag);
         std::tuple<args...> operator*();
         Iterator& operator++();
         bool operator!=(Iterator const&  other);
+		bool operator==(Iterator const&  other);
     };
     Iterator begin();
     Iterator end();
@@ -51,7 +53,7 @@ namespace {
 
 
 template <class... args>
-CSVParser<args...>::Iterator::Iterator(CSVParser& p) : parser(p) {};
+CSVParser<args...>::Iterator::Iterator(CSVParser& p, bool endFlag) : parser(p), itIsEnd{endFlag} {};
 
 template <class... args>
 CSVParser<args...>::CSVParser(std::ifstream& file, int countSkipRows, char delimiterRows, char delimiterInLine, char shieldingSym)  : CSVFile(file) {
@@ -80,7 +82,7 @@ void CSVParser<args...>::readLine(std::ifstream& file, std::string& line) {
 	bool shielding = false;
 	while (file.get(sym) && (sym != delimiterRows || shielding == true)) {
 		if (sym == shieldingSym) {
-			line.push_back(sym);
+			line.append(1, sym);
 			if (shielding == false) {
 				shielding = true;
 			}
@@ -89,7 +91,7 @@ void CSVParser<args...>::readLine(std::ifstream& file, std::string& line) {
 			}
 		}
 		else {
-			line.push_back(sym);
+			line.append(1, sym);
 		}
 	}
 	if (line == "" && !file.eof()) {
@@ -100,7 +102,7 @@ void CSVParser<args...>::readLine(std::ifstream& file, std::string& line) {
 
 template <typename... args>
 template <typename T>
-T CSVParser<args...>::strDefineTypes(std::istringstream& iss) {
+T CSVParser<args...>::createDataCell(std::istringstream& iss) {
 	std::string cell;
 	bool shielding = false;
 	char sym;
@@ -129,10 +131,10 @@ T CSVParser<args...>::strDefineTypes(std::istringstream& iss) {
 
 template <class... args>
 template <size_t... numberArgc>
-void CSVParser<args...>::defineTypes(std::index_sequence<numberArgc...>) {
+void CSVParser<args...>::defineTypesInLine(std::index_sequence<numberArgc...>) {
 	std::istringstream iss(CSVLine);
 	try {
-		((std::get<numberArgc>(CSVTuple) = strDefineTypes<std::tuple_element_t<numberArgc, decltype(CSVTuple)>>(iss)), ...);
+		((std::get<numberArgc>(CSVTuple) = createDataCell<std::tuple_element_t<numberArgc, decltype(CSVTuple)>>(iss)), ...);
 	}
 	catch (WrongRow& err) {
 		throw err;
@@ -142,7 +144,7 @@ void CSVParser<args...>::defineTypes(std::index_sequence<numberArgc...>) {
 template <class... args>
 std::tuple<args...> CSVParser<args...>::Iterator::operator*() {
 	try {
-		parser.defineTypes(std::index_sequence_for<args...>{});
+		parser.defineTypesInLine(std::index_sequence_for<args...>{});
 	}
 	catch (WrongRow& err) {
 		throw err;
@@ -155,6 +157,9 @@ template <class... args>
 typename CSVParser<args...>::Iterator& CSVParser<args...>::Iterator::operator++() {
 	try {
 		parser.readLine(parser.CSVFile, parser.CSVLine);
+		if(parser.CSVFile.eof()){
+			itIsEnd = true;
+		}
 	}
 	catch (WrongColumn& err) {
 		throw err;
@@ -170,18 +175,26 @@ typename CSVParser<args...>::Iterator CSVParser<args...>::begin() {
 	catch(WrongColumn& err) {
 		throw err;
 	}
-	return CSVParser<args...>::Iterator(*this);
+	return CSVParser<args...>::Iterator(*this, false);
 }
 
 template <class... args>
 typename CSVParser<args...>::Iterator CSVParser<args...>::end() {
-	return CSVParser<args...>::Iterator(*this);
+	return CSVParser<args...>::Iterator(*this, true);
 }
 
 template <class... args>
 bool CSVParser<args...>::Iterator::operator!=(Iterator const& other) {
-	if (parser.CSVFile.eof()) {
-		return false;
+	if (!((*this) == other)) {
+		return true;
 	}
-	return true;
+	return false;
+}
+
+template <class... args>
+bool CSVParser<args...>::Iterator::operator==(Iterator const& other) {
+	if (parser.CSVLine == other.parser.CSVLine && itIsEnd == other.itIsEnd ) {
+		return true;
+	}
+	return false;
 }

@@ -29,13 +29,16 @@ auto& operator<<(std::basic_ostream<Ch, Tr>& os, std::tuple<args...> const& data
 }
 
 int main(int argc, char* argv[]) {
-	if (argc < 1) {
+	if (argc <= 1) {
 		std::cout << "not enough arguments\n";
 		return 1;
 	}
 	std::vector<std::string> arguments(argv, argv + argc);
 	try {
 		ConsoleParser consoleParser{ arguments };
+		if (consoleParser.returnMode() == 'h') {
+			return 0;
+		}
 	}
 	catch (WrongConsoleParam& err) {
 		std::cout << err.what() << std::endl;

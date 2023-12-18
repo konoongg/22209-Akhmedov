@@ -1,17 +1,35 @@
+#include <iostream>
+
 #include "consoleParser.h"
 #include "../exception/wrongConsoleParam/wrongConsoleParam.h"
 
 ConsoleParser::ConsoleParser(std::vector<std::string> arguments) {
-	try {
-		defineInputCSV(arguments);
+	if (itIsHelp(arguments)) {
+		mode = 'h';
 	}
-	catch (WrongConsoleParam& err) {
-		throw err;
+	else {
+		try {
+			defineInputCSV(arguments);
+		}
+		catch (WrongConsoleParam& err) {
+			throw err;
+		}
+		defineDelShi(arguments);
+		mode = 'p';
 	}
-	defineDelShi(arguments);
-
 }
 
+bool ConsoleParser::itIsHelp(std::vector<std::string> arguments) {
+	if (arguments[1] == "-help" || arguments[1] == "-h") {
+		std::cout << "-R [delimiter for Rows]" << std::endl;
+		std::cout << "-C [delimiter for line]" << std::endl;
+		std::cout << "-S [shielding symbol]" << std::endl;
+		std::cout << "example:"  << std::endl;
+		std::cout << "file.exe -R [,] -C [.]  -S [a]"  << std::endl;
+		return true;
+	}
+	return false;
+}
 
 void ConsoleParser::defineInputCSV(std::vector<std::string> arguments) {
 	if ((arguments[1].find("csv") != std::string::npos)) {
@@ -57,4 +75,8 @@ char ConsoleParser::returnDelimiterRows() {
 
 char ConsoleParser::returnShieldingSym() {
 	return shieldingSym;
+}
+
+char ConsoleParser::returnMode() {
+	return mode;
 }
