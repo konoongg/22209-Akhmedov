@@ -169,12 +169,7 @@ typename CSVParser<args...>::Iterator& CSVParser<args...>::Iterator::operator++(
 
 template <class... args>
 typename CSVParser<args...>::Iterator CSVParser<args...>::begin() {
-	try {
-		readLine(CSVFile, CSVLine);
-	}
-	catch(WrongColumn& err) {
-		throw err;
-	}
+	readLine(CSVFile, CSVLine);
 	return CSVParser<args...>::Iterator(*this, false);
 }
 
@@ -185,7 +180,7 @@ typename CSVParser<args...>::Iterator CSVParser<args...>::end() {
 
 template <class... args>
 bool CSVParser<args...>::Iterator::operator!=(Iterator const& other) {
-	if (!((*this) == other)) {
+	if (!(*this == other)) {
 		return true;
 	}
 	return false;

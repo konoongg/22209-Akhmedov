@@ -20,7 +20,7 @@ ConsoleParser::ConsoleParser(std::vector<std::string> arguments) {
 }
 
 bool ConsoleParser::itIsHelp(std::vector<std::string> arguments) {
-	if (arguments[1] == "-help" || arguments[1] == "-h") {
+	if (arguments[1] == "--help" || arguments[1] == "-h") {
 		std::cout << "-R [delimiter for Rows]" << std::endl;
 		std::cout << "-C [delimiter for line]" << std::endl;
 		std::cout << "-S [shielding symbol]" << std::endl;
