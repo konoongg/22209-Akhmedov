@@ -180,10 +180,7 @@ typename CSVParser<args...>::Iterator CSVParser<args...>::end() {
 
 template <class... args>
 bool CSVParser<args...>::Iterator::operator!=(Iterator const& other) {
-	if (!(*this == other)) {
-		return true;
-	}
-	return false;
+	return !(*this == other);
 }
 
 template <class... args>
