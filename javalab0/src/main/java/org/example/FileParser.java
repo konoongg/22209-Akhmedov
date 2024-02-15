@@ -18,15 +18,14 @@ public class FileParser {
     }
 
     private void ReadString(){
-        try{
+        try(Scanner scanner = new Scanner(new java.io.File(fileName))){
             Map<String, Integer> noSortCountWord = new LinkedHashMap<>();
-            Scanner scanner = new Scanner(new java.io.File(fileName));
             while (scanner.hasNextLine()){
                 String line = scanner.nextLine();
                 line = RemoveWrongChar(line);
                 DefineWorld(line, noSortCountWord);
             }
-            scanner.close();
+
             SortMapByValue(noSortCountWord);
         }
         catch(FileNotFoundException e){
@@ -68,7 +67,6 @@ public class FileParser {
                 return o2.getValue().compareTo(o1.getValue());
             }
         });
-
         for (Map.Entry<String, Integer> entry : list) {
             countWord.put(entry.getKey(), entry.getValue());
         }

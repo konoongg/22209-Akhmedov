@@ -10,8 +10,7 @@ public class CsvWrite {
      }
 
      void  CreateCsv(Map<String, Integer> countWords, int countAllWords){
-         try{
-             BufferedWriter bw = new BufferedWriter(new FileWriter("result.csv"));
+         try(BufferedWriter bw = new BufferedWriter(new FileWriter("result.csv"));){
              bw.write("word" + "," + "count" +  "," + "percent" + "\n");
              for(Map.Entry<String, Integer> entry : countWords.entrySet()) {
                  if(entry.getKey().length() == 0 ){
