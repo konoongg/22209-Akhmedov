@@ -5,14 +5,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 public class Interpreter {
-    private Fabric fabric;
+    private Factory factory;
     private Context context;
 
     private  void InputReader(InputStream inputStream){
         try( BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));){
             String line;
             while ((line = reader.readLine()) != null) {
-                fabric.
+                String[] arguments = line.split(" ");
+                IOperation operation = factory.CreateOperation(arguments[0]);
+                operation.Do(context, arguments);
             }
         }
         catch (IOException e){
@@ -22,7 +24,7 @@ public class Interpreter {
     }
     public Interpreter(InputStream inputStream){
         context = new Context();
-        fabric = new Fabric();
+        factory = new Factory();
         InputReader(inputStream);
     }
 

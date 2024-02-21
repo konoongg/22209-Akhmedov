@@ -6,17 +6,26 @@ import java.util.Map;
 
 public class Context {
     private Stack<Double> stack;
-    private Map<String, Double> define;
+    private Map<String, Double> defineMap;
     public Context(){
         stack = new Stack<>();
-        define = new HashMap<>();
+        defineMap = new HashMap<>();
     }
-    public Stack<Double> ReturnStack(){
-        return stack;
+    public double Pop(){
+        return stack.pop();
     }
-
-    public Map<String, Double> ReturnDefine(){
-        return define;
+    public void Push(String elem){
+        try{
+            double number = Double.parseDouble(elem);
+            stack.push(number);
+        }
+        catch (NumberFormatException e) {
+            double number = defineMap.get(elem);
+            stack.push(number);
+        }
+    }
+    public void Define(String name, double definition){
+        defineMap.put(name, definition);
     }
 
 }
