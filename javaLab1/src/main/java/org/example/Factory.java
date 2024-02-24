@@ -6,37 +6,63 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.lang.ClassNotFoundException;
+import java.lang.IllegalAccessException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+import org.example.exceptions.CantFindConfig;
+import org.example.exceptions.EmptyConfig;
 public class Factory{
+    private Logger logger;
     private Map<String, String> pathToClass;
-    private void ReadConfig(){
-        InputStream inputStream = Factory.class.getResourceAsStream("config.txt");
+    private void ReadConfig() throws NullPointerException, CantFindConfig, EmptyConfig {
+        InputStream inputStream = Factory.class.getResourceAsStream("/config.txt");
+        System.out.println(inputStream);
         if(inputStream != null){
             Scanner scanner = new Scanner(inputStream);
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
+                System.out.println(line);
                 String[] pathAndName = line.split(" ");
-                pathToClass.put(pathAndName[0], pathAndName[1]);
+                try{
+                    pathToClass.put(pathAndName[0], pathAndName[1]);
+                }
+                catch(java.lang.NullPointerException e){
+                    throw e;
+                }
             }
+            logger.log(Level.INFO, " successeful reading config" );
         }
         else{
-            System.out.println("error");
+            throw new CantFindConfig("cant find config /config");
         }
         if(pathToClass.isEmpty()){
-            System.out.println("error");
+           throw new EmptyConfig("config /config is empty");
         }
     }
-    public Factory(){
-        ReadConfig();
+    public Factory(Logger logger) throws CantFindConfig, NullPointerException, EmptyConfig {
+        this.logger = logger;
+        pathToClass = new HashMap<>();
+        try{
+            ReadConfig();
+        }
+        catch(NullPointerException | CantFindConfig | EmptyConfig e){
+            throw e;
+        }
     }
 
-    public IOperation CreateOperation(String operationName){
+    public IOperation CreateOperation(String operationName) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         String className = pathToClass.get(operationName);
         try{
-            IOperation operation = (IOperation) Class.forName(className).newInstance();
+            IOperation operation = (IOperation) Class.forName(className).getDeclaredConstructor().newInstance();
+
+            logger.log(Level.INFO, "create operation: " + className);
             return operation;
         }
-        catch(ClassNotFoundException | InstantiationException | IllegalAccessException e){
-            return null;
+        catch(ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException |
+              IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
+              throw e;
         }
     }
 }

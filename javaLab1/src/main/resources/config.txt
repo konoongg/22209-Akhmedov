@@ -1,0 +1,9 @@
+SQRT org.example.Sqrt
+POP org.example.Pop
+PUSH org.example.Push
+* org.example.Mult
+/ org.example.Div
+- org.example.Minus
++ org.example.Plus
+PRINT org.example.Print
+DEFINE org.example.Define
