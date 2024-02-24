@@ -13,6 +13,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import org.example.exceptions.CantFindConfig;
 import org.example.exceptions.EmptyConfig;
+import org.example.operation.*;
 public class Factory{
     private Logger logger;
     private Map<String, String> pathToClass;

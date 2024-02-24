@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import org.example.exceptions.EmptyStack;
+import org.example.operation.*;
+
 public class Interpreter {
     private  Logger logger;
     private Factory factory;

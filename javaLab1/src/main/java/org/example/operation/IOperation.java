@@ -1,5 +1,6 @@
-package org.example;
+package org.example.operation;
 
+import org.example.Context;
 import org.example.exceptions.EmptyStack;
 
 public interface IOperation {
