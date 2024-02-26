@@ -8,62 +8,56 @@ import java.util.Scanner;
 import java.lang.ClassNotFoundException;
 import java.lang.IllegalAccessException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import org.example.exceptions.CantFindConfig;
-import org.example.exceptions.EmptyConfig;
+import java.util.Properties;
+
+import org.example.exceptions.ErrorCreateOperation;
+import org.example.exceptions.WrongFormatOfConfig;
 import org.example.operation.*;
 public class Factory{
-    private Logger logger;
+    private CalcLogger calcLogger;
     private Map<String, String> pathToClass;
-    private void ReadConfig() throws NullPointerException, CantFindConfig, EmptyConfig {
+    private void ReadConfig() throws CantFindConfig, WrongFormatOfConfig {
         InputStream inputStream = Factory.class.getResourceAsStream("/config.txt");
-        System.out.println(inputStream);
         if(inputStream != null){
-            Scanner scanner = new Scanner(inputStream);
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                System.out.println(line);
-                String[] pathAndName = line.split(" ");
-                try{
-                    pathToClass.put(pathAndName[0], pathAndName[1]);
-                }
-                catch(java.lang.NullPointerException e){
-                    throw e;
+            Properties properties = new Properties();
+            try{
+                properties.load(inputStream);
+                for (String key : properties.stringPropertyNames()) {
+                    String value = properties.getProperty(key);
+                    pathToClass.put(key, value);
                 }
             }
-            logger.log(Level.INFO, " successeful reading config" );
+            catch(IOException e){
+                throw new WrongFormatOfConfig("cant close config");
+            }
+            calcLogger.LogInfo("successeful reading config");
+            try{
+                inputStream.close();
+            }
+            catch(IOException e){
+                throw new WrongFormatOfConfig("cant close config");
+            }
         }
         else{
             throw new CantFindConfig("cant find config /config");
         }
         if(pathToClass.isEmpty()){
-           throw new EmptyConfig("config /config is empty");
+           throw new  WrongFormatOfConfig("config /config is empty");
         }
     }
-    public Factory(Logger logger) throws CantFindConfig, NullPointerException, EmptyConfig {
-        this.logger = logger;
+    public Factory() throws CantFindConfig, NullPointerException, WrongFormatOfConfig, ErrorCreateOperation {
+        calcLogger = CalcLogger.getInstance();
         pathToClass = new HashMap<>();
-        try{
-            ReadConfig();
-        }
-        catch(NullPointerException | CantFindConfig | EmptyConfig e){
-            throw e;
-        }
+        ReadConfig();
     }
 
     public IOperation CreateOperation(String operationName) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         String className = pathToClass.get(operationName);
-        try{
-            IOperation operation = (IOperation) Class.forName(className).getDeclaredConstructor().newInstance();
-
-            logger.log(Level.INFO, "create operation: " + className);
-            return operation;
-        }
-        catch(ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException |
-              IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
-              throw e;
-        }
+        IOperation operation = (IOperation) Class.forName(className).getDeclaredConstructor().newInstance();
+        calcLogger.LogInfo("create operation: " + className);
+        return operation;
     }
 }

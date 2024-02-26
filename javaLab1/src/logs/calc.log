@@ -1,56 +1,12 @@
-февр. 24, 2024 9:14:42 PM org.example.Main main
-INFO: start the programm
-февр. 24, 2024 9:14:42 PM org.example.Main main
-INFO: read form file:/home/konoongglts/work/22209-Akhmedov/javaLab1/src/main/resources/data.txt
-февр. 24, 2024 9:14:42 PM org.example.Factory ReadConfig
-INFO:  successeful reading config
-февр. 24, 2024 9:14:42 PM org.example.Factory CreateOperation
-INFO: create operation: org.example.operation.Push
-февр. 24, 2024 9:14:42 PM org.example.Context Push
-INFO: push concreat num: 1
-февр. 24, 2024 9:14:42 PM org.example.Interpreter InputReader
-INFO: done operation: PUSH 1
-февр. 24, 2024 9:14:42 PM org.example.Factory CreateOperation
-INFO: create operation: org.example.operation.Pop
-февр. 24, 2024 9:14:42 PM org.example.Context Pop
+февр. 26, 2024 12:29:31 PM org.example.CalcLogger LogInfo
+INFO: push concreat num: 1.0
+февр. 26, 2024 12:29:31 PM org.example.CalcLogger LogInfo
+INFO: push concreat num: 2.0
+февр. 26, 2024 12:29:31 PM org.example.CalcLogger LogInfo
 INFO: pop
-февр. 24, 2024 9:14:42 PM org.example.Interpreter InputReader
-INFO: done operation: POP
-февр. 24, 2024 9:14:42 PM org.example.Factory CreateOperation
-INFO: create operation: org.example.operation.Define
-февр. 24, 2024 9:14:42 PM org.example.Context Define
-INFO: defined INT 4.0
-февр. 24, 2024 9:14:42 PM org.example.Interpreter InputReader
-INFO: done operation: DEFINE INT 4
-февр. 24, 2024 9:14:42 PM org.example.Factory CreateOperation
-INFO: create operation: org.example.operation.Push
-февр. 24, 2024 9:14:42 PM org.example.Context Push
-INFO: push defined num: INT
-февр. 24, 2024 9:14:42 PM org.example.Interpreter InputReader
-INFO: done operation: PUSH INT
-февр. 24, 2024 9:14:42 PM org.example.Factory CreateOperation
-INFO: create operation: org.example.operation.Push
-февр. 24, 2024 9:14:42 PM org.example.Context Push
-INFO: push defined num: INT
-февр. 24, 2024 9:14:42 PM org.example.Interpreter InputReader
-INFO: done operation: PUSH INT
-февр. 24, 2024 9:14:42 PM org.example.Factory CreateOperation
-INFO: create operation: org.example.operation.Plus
-февр. 24, 2024 9:14:42 PM org.example.Context Pop
+февр. 26, 2024 12:29:31 PM org.example.CalcLogger LogInfo
 INFO: pop
-февр. 24, 2024 9:14:42 PM org.example.Context Pop
-INFO: pop
-февр. 24, 2024 9:14:42 PM org.example.Context Push
-INFO: push concreat num: 8.0
-февр. 24, 2024 9:14:42 PM org.example.Interpreter InputReader
-INFO: done operation: +
-февр. 24, 2024 9:14:42 PM org.example.Factory CreateOperation
-INFO: create operation: org.example.operation.Print
-февр. 24, 2024 9:14:42 PM org.example.Context Pop
-INFO: pop
-февр. 24, 2024 9:14:42 PM org.example.Context Push
-INFO: push concreat num: 8.0
-февр. 24, 2024 9:14:42 PM org.example.Interpreter InputReader
-INFO: done operation: PRINT
-февр. 24, 2024 9:14:42 PM org.example.Main main
-INFO: end the programm
+февр. 26, 2024 12:29:31 PM org.example.CalcLogger LogInfo
+INFO: push concreat num: 3.0
+февр. 26, 2024 12:29:31 PM org.example.CalcLogger LogInfo
+INFO: push concreat num: 3.0

@@ -1,8 +1,6 @@
 package org.example;
 
-import org.example.exceptions.CantFindConfig;
-import org.example.exceptions.EmptyConfig;
-import org.example.exceptions.EmptyStack;
+import org.example.exceptions.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.*;
@@ -14,47 +12,36 @@ import org.example.exceptions.EmptyStack;
 import org.example.operation.*;
 
 public class Interpreter {
-    private  Logger logger;
+    private CalcLogger calcLogger;
     private Factory factory;
     private Context context;
-    private  void InputReader(InputStream inputStream) throws EmptyStack, IOException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    private  void InputReader(InputStream inputStream) throws EmptyStack, UndefinedVariable,  WrongFormatOfOperation, ErrorCreateOperation {
         try( BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));){
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] arguments = line.split(" ");
+                if(arguments.length == 0){
+                    throw new WrongFormatOfOperation("empty operation ");
+                }
                 if(arguments[0].charAt(0) == '#'){
-                    logger.log(Level.INFO, "comment");
+                    calcLogger.LogInfo("comment");
                     continue;
                 }
-                try{
-
-                    IOperation operation = factory.CreateOperation(arguments[0]);
-                    operation.Do(context, arguments);
-                }
-                catch(EmptyStack | ClassNotFoundException | InvocationTargetException |  NoSuchMethodException
-                      |  InstantiationException| IllegalAccessException e){
-                    throw e;
-                }
-                logger.log(Level.INFO, "done operation: " + line);
+                IOperation operation = factory.CreateOperation(arguments[0]);
+                operation.Do(context, arguments);
+                calcLogger.LogInfo("done operation: " + line);
             }
         }
         catch (IOException | ClassNotFoundException | InvocationTargetException | NoSuchMethodException |
                InstantiationException | IllegalAccessException e){
-            throw e;
+            throw new ErrorCreateOperation("Error create operation: " + e.getMessage());
         }
     }
-    public Interpreter(InputStream inputStream, Logger logger) throws EmptyStack, IOException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, EmptyConfig, CantFindConfig {
-        this.logger = logger;
-        context = new Context(logger);
-        try {
-
-            factory = new Factory(logger);
-            InputReader(inputStream);
-        }
-        catch(EmptyStack | IOException | ClassNotFoundException | InvocationTargetException | NoSuchMethodException |
-              InstantiationException | IllegalAccessException | CantFindConfig | EmptyConfig e){
-            throw e;
-        }
+    public Interpreter(InputStream inputStream) throws EmptyStack, UndefinedVariable, ErrorCreateOperation, ClassNotFoundException, WrongFormatOfOperation,  WrongFormatOfConfig, CantFindConfig {
+        calcLogger = CalcLogger.getInstance();
+        context = new Context();
+        factory = new Factory();
+        InputReader(inputStream);
 
     }
 }

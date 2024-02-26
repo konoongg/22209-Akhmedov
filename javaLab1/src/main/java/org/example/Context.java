@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -9,13 +10,14 @@ import java.util.Stack;
 import java.util.HashMap;
 import java.util.Map;
 import org.example.exceptions.EmptyStack;
+import org.example.exceptions.UndefinedVariable;
 
 public class Context {
-    private Logger logger;
+    private CalcLogger calcLogger;
     private Stack<Double> stack;
     private Map<String, Double> defineMap;
-    public Context(Logger logger){
-        this.logger = logger;
+    public Context(){
+        calcLogger = CalcLogger.getInstance();
         stack = new Stack<>();
         defineMap = new HashMap<>();
     }
@@ -23,24 +25,25 @@ public class Context {
         if(stack.size() == 0){
             throw new EmptyStack("stack is empty");
         }
-        logger.log(Level.INFO, "pop");
+        calcLogger.LogInfo("pop");
         return stack.pop();
     }
-    public void Push(String elem){
-        try{
-            double number = Double.parseDouble(elem);
-            stack.push(number);
-            logger.log(Level.INFO, "push concreat num: " + elem);
-        }
-        catch (NumberFormatException e) {
-            double number = defineMap.get(elem);
-            stack.push(number);
-            logger.log(Level.INFO, "push defined num: " + elem);
-        }
-    }
-    public void Define(String name, double definition){
-        logger.log(Level.INFO, "defined " + name+ " " + Double.toString(definition) );
-        defineMap.put(name, definition);
+    public void Push(double number){
+       stack.push(number);
+       calcLogger.LogInfo("push concreat num: " + number);
     }
 
+    public void PushDefined(String name) throws UndefinedVariable {
+        double number = defineMap.get(name);
+        if(Objects.isNull(number)){
+            throw new UndefinedVariable("undefined variable " + name);
+        }
+        stack.push(number);
+        calcLogger.LogInfo("push defined num: " + name);
+
+    }
+    public void Define(String name, double definition){
+        calcLogger.LogInfo("defined " + name+ " " + Double.toString(definition) );
+        defineMap.put(name, definition);
+    }
 }

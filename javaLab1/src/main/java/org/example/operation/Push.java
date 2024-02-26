@@ -1,9 +1,20 @@
 package org.example.operation;
 
 import org.example.Context;
+import org.example.exceptions.UndefinedVariable;
+import org.example.exceptions.WrongFormatOfOperation;
+
 public class Push implements IOperation {
     @Override
-    public void Do(Context context, String[] arguments){
-        context.Push(arguments[1]);
+    public void Do(Context context, String[] arguments) throws UndefinedVariable, WrongFormatOfOperation {
+        try {
+            Double.parseDouble(arguments[1]);
+            context.Push(Double.parseDouble(arguments[1]));
+        } catch (NumberFormatException e) {
+            context.PushDefined(arguments[1]);
+        }
+        catch(ArrayIndexOutOfBoundsException e){
+            throw new WrongFormatOfOperation("wrong format of operation, need more arguments " + arguments[0]);
+        }
     }
 }
