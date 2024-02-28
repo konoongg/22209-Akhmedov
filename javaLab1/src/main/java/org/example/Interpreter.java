@@ -15,8 +15,8 @@ public class Interpreter {
     private CalcLogger calcLogger;
     private Factory factory;
     private Context context;
-    private  void InputReader(InputStream inputStream) throws EmptyStack, UndefinedVariable,  WrongFormatOfOperation, ErrorCreateOperation {
-        try( BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));){
+    private  void InputReader(InputOperation reader) throws EmptyStack, UndefinedVariable,  WrongFormatOfOperation, ErrorCreateOperation {
+        try{
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] arguments = line.split(" ");
@@ -32,16 +32,15 @@ public class Interpreter {
                 calcLogger.LogInfo("done operation: " + line);
             }
         }
-        catch (IOException | ClassNotFoundException | InvocationTargetException | NoSuchMethodException |
-               InstantiationException | IllegalAccessException e){
+        catch (IOException e){
             throw new ErrorCreateOperation("Error create operation: " + e.getMessage());
         }
     }
-    public Interpreter(InputStream inputStream) throws EmptyStack, UndefinedVariable, ErrorCreateOperation, ClassNotFoundException, WrongFormatOfOperation,  WrongFormatOfConfig, CantFindConfig {
+    public Interpreter(InputOperation reader ) throws EmptyStack, UndefinedVariable, ErrorCreateOperation, WrongFormatOfOperation,  WrongFormatOfConfig, CantFindConfig {
         calcLogger = CalcLogger.getInstance();
         context = new Context();
         factory = new Factory();
-        InputReader(inputStream);
+        InputReader(reader);
 
     }
 }

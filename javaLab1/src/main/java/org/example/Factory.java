@@ -15,6 +15,7 @@ import java.util.Properties;
 
 import org.example.exceptions.ErrorCreateOperation;
 import org.example.exceptions.WrongFormatOfConfig;
+import org.example.exceptions.WrongFormatOfOperation;
 import org.example.operation.*;
 public class Factory{
     private CalcLogger calcLogger;
@@ -48,16 +49,30 @@ public class Factory{
            throw new  WrongFormatOfConfig("config /config is empty");
         }
     }
-    public Factory() throws CantFindConfig, NullPointerException, WrongFormatOfConfig, ErrorCreateOperation {
+    public Factory() throws CantFindConfig,  WrongFormatOfConfig{
         calcLogger = CalcLogger.getInstance();
+        calcLogger.LogInfo("START FACRORY");
         pathToClass = new HashMap<>();
         ReadConfig();
     }
 
-    public IOperation CreateOperation(String operationName) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public IOperation CreateOperation(String operationName) throws WrongFormatOfOperation {
+        calcLogger.LogInfo("start create opearation " + operationName);
         String className = pathToClass.get(operationName);
-        IOperation operation = (IOperation) Class.forName(className).getDeclaredConstructor().newInstance();
-        calcLogger.LogInfo("create operation: " + className);
-        return operation;
+        try{
+            IOperation operation = (IOperation) Class.forName(className).getDeclaredConstructor().newInstance();
+            calcLogger.LogInfo("create operation: " + className);
+            calcLogger.LogInfo("successful opearation " + operationName);
+            return operation;
+        }
+        catch(ClassNotFoundException | NullPointerException  e){
+            throw new WrongFormatOfOperation("can't find name class: " + operationName + "\n" + e) ;
+        }
+        catch(NoSuchMethodException e){
+            throw new WrongFormatOfOperation("can't find method eception: " + operationName + "\n" + e) ;
+        }
+        catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new WrongFormatOfOperation("can't instance: " + operationName + "\n" + e) ;
+        }
     }
 }

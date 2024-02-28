@@ -13,28 +13,10 @@ public class Main {
     public static void main(String[] args) {
         CalcLogger calcLogger = CalcLogger.getInstance();
         calcLogger.LogInfo("start the programm");
-        InputStream inputStream;
-        if(args.length >= 1){
-            try{
-                calcLogger.LogInfo("read form file:" + args[0]);
-                inputStream =  new FileInputStream(args[0]);
-            }
-            catch (IOException e){
-                calcLogger.LogError("Took start arguments. Error reading file: "+ e.getMessage());
-                System.out.println("Error reading file: " + e.getMessage());
-                return;
-            }
+        try (InputOperation reader = new InputOperation(args);) {
+            Interpreter interpreter = new Interpreter(reader);
         }
-        else {
-            calcLogger.LogInfo("read from console");
-            inputStream = System.in;
-        }
-        try{
-            Interpreter interpreter = new Interpreter(inputStream);
-        }
-        catch(EmptyStack | UndefinedVariable | ErrorCreateOperation | ClassNotFoundException | WrongFormatOfOperation |
-              CantFindConfig | WrongFormatOfConfig e){
-
+        catch(Exception e){
             calcLogger.LogError("error " + e.getMessage());
             System.out.println("error " + e.getMessage());
         }

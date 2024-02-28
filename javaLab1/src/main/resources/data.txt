@@ -5,3 +5,4 @@ PUSH INT
 PUSH 2
 -
 PRINT
+PP
