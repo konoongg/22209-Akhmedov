@@ -1,9 +1,0 @@
-SQRT org.example.operation.Sqrt
-POP org.example.operation.Pop
-PUSH org.example.operation.Push
-* org.example.operation.Mult
-/ org.example.operation.Div
-- org.example.operation.Minus
-+ org.example.operation.Plus
-PRINT org.example.operation.Print
-DEFINE org.example.operation.Define

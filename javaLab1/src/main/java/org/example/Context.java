@@ -34,9 +34,12 @@ public class Context {
     }
 
     public void PushDefined(String name) throws UndefinedVariable {
-        double number = defineMap.get(name);
-        if(Objects.isNull(number)){
-            throw new UndefinedVariable("undefined variable " + name);
+        double number = 0;
+        try{
+            number = defineMap.get(name);
+        }
+        catch (NullPointerException e){
+            throw new UndefinedVariable("undefined varable " + name);
         }
         stack.push(number);
         calcLogger.LogInfo("push defined num: " + name);

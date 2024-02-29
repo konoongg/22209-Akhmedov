@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.exceptions.ErrorCreateOperation;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.FileReader;
@@ -24,8 +26,13 @@ public class InputOperation implements AutoCloseable {
         }
     }
 
-    public String readLine() throws IOException {
-        return reader.readLine();
+    public String readLine() throws  ErrorCreateOperation {
+        try{
+            return reader.readLine();
+        }
+        catch(Exception e){
+            throw new ErrorCreateOperation("can't read from data file " + e.getMessage());
+        }
     }
     @Override
     public void close() throws Exception {
