@@ -15,7 +15,7 @@ public class Interpreter {
     private CalcLogger calcLogger;
     private Factory factory;
     private Context context;
-    private  void InputReader(InputOperation reader) throws EmptyStack, UndefinedVariable,  WrongFormatOfOperation, ErrorCreateOperation {
+    private  void InputReader(InputOperation reader) throws EmptyStack, UndefinedVariable,  WrongFormatOfOperation, ErrorCreateOperation, WrongFormatOfConfig {
         try{
             String line;
             while ((line = reader.readLine()) != null) {
@@ -41,6 +41,5 @@ public class Interpreter {
         context = new Context();
         factory = new Factory();
         InputReader(reader);
-
     }
 }

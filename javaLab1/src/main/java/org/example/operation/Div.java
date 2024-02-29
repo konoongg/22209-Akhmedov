@@ -8,7 +8,7 @@ public class Div implements IOperation {
     public void Do(Context context, String[] arguments) throws EmptyStack {
         double num1 = context.Pop();
         double num2 = context.Pop();
-        double div = num1 / num2;
+        double div = num2 / num1;
         context.Push(div);
     }
 }

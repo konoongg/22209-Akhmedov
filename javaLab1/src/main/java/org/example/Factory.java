@@ -56,7 +56,7 @@ public class Factory{
         ReadConfig();
     }
 
-    public IOperation CreateOperation(String operationName) throws WrongFormatOfOperation {
+    public IOperation CreateOperation(String operationName) throws  WrongFormatOfConfig {
         calcLogger.LogInfo("start create opearation " + operationName);
         String className = pathToClass.get(operationName);
         try{
@@ -66,13 +66,13 @@ public class Factory{
             return operation;
         }
         catch(ClassNotFoundException | NullPointerException  e){
-            throw new WrongFormatOfOperation("can't find name class: " + operationName + "\n" + e) ;
+            throw new WrongFormatOfConfig("can't find name class: " + operationName + "\n" + e) ;
         }
         catch(NoSuchMethodException e){
-            throw new WrongFormatOfOperation("can't find method eception: " + operationName + "\n" + e) ;
+            throw new WrongFormatOfConfig("can't find method eception: " + operationName + "\n" + e) ;
         }
         catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new WrongFormatOfOperation("can't instance: " + operationName + "\n" + e) ;
+            throw new WrongFormatOfConfig("can't instance: " + operationName + "\n" + e) ;
         }
     }
 }
