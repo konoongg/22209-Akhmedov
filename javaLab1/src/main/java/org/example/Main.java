@@ -2,18 +2,33 @@ package org.example;
 
 import org.example.exceptions.*;
 
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.IOException;
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
+    private static BufferedReader createReader(String[] args) throws IOException
+    {
+        BufferedReader reader;
+        if(args.length >= 1){
+            try{
+                reader = new BufferedReader(new FileReader(args[0]));
+            }
+            catch (IOException e){
+                System.out.println("Error reading file: " + e.getMessage());
+                throw e;
+            }
+        }
+        else{
+            reader = new BufferedReader(new InputStreamReader(System.in));
+        }
+        return reader;
+    }
     public static void main(String[] args) {
         CalcLogger calcLogger = CalcLogger.getInstance();
         calcLogger.LogInfo("start the programm");
-        try (InputOperation reader = new InputOperation(args);) {
+        try (BufferedReader reader = createReader(args)) {
             Interpreter interpreter = new Interpreter(reader);
         }
         catch(Exception e){

@@ -3,6 +3,9 @@ import org.example.exceptions.*;
 import org.example.operation.IOperation;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.Assert.assertEquals;
@@ -50,29 +53,11 @@ public class TestException
         }
     }
 
-    @Test(expected = ErrorCreateOperation.class)
-    public void ErrorCreateOperation() throws ErrorCreateOperation {
-        CalcLogger calcLogger = CalcLogger.getInstance();
-        String[] args = new String[1];
-        args[0] = "";
-        try (InputOperation reader = new InputOperation(args);) {
-            Interpreter interpreter = new Interpreter(reader);
-        }
-        catch(ErrorCreateOperation e){
-            throw e;
-        }
-        catch(Exception e){
-            calcLogger.LogError("error " + e);
-            System.out.println("error " + e);
-        }
-    }
-
     @Test(expected = WrongFormatOfOperation.class)
     public void WrongFormatOfOperation() throws WrongFormatOfOperation {
         CalcLogger calcLogger = CalcLogger.getInstance();
-        String[] args = new String[1];
-        args[0] = "/home/konoongglts/work/22209-Akhmedov/javaLab1/src/test/resources/empty.txt";
-        try (InputOperation reader = new InputOperation(args);) {
+        String exampleFile = "PUSH 3 \n \n PUSH 2";
+        try (BufferedReader reader = new BufferedReader(new StringReader(exampleFile))) {
             Interpreter interpreter = new Interpreter(reader);
         }
         catch(WrongFormatOfOperation e){
@@ -87,9 +72,8 @@ public class TestException
     @Test(expected = WrongFormatOfOperation.class)
     public void UncorDefine() throws WrongFormatOfOperation {
         CalcLogger calcLogger = CalcLogger.getInstance();
-        String[] args = new String[1];
-        args[0] = "/home/konoongglts/work/22209-Akhmedov/javaLab1/src/test/resources/uncorDefine.txt";
-        try (InputOperation reader = new InputOperation(args);) {
+        String exampleFile = "DEFINE A";
+        try (BufferedReader reader = new BufferedReader(new StringReader(exampleFile))) {
             Interpreter interpreter = new Interpreter(reader);
         }
         catch(WrongFormatOfOperation e){
@@ -104,9 +88,8 @@ public class TestException
     @Test(expected = WrongFormatOfOperation.class)
     public void UncorPush() throws WrongFormatOfOperation {
         CalcLogger calcLogger = CalcLogger.getInstance();
-        String[] args = new String[1];
-        args[0] = "/home/konoongglts/work/22209-Akhmedov/javaLab1/src/test/resources/uncorPush.txt";
-        try (InputOperation reader = new InputOperation(args);) {
+        String exampleFile = "PUSH";
+        try (BufferedReader reader = new BufferedReader(new StringReader(exampleFile))) {
             Interpreter interpreter = new Interpreter(reader);
         }
         catch(WrongFormatOfOperation e){

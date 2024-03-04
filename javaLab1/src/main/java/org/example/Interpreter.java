@@ -13,10 +13,10 @@ import org.example.exceptions.EmptyStack;
 import org.example.operation.*;
 
 public class Interpreter {
-    private CalcLogger calcLogger;
-    private Factory factory;
-    private Context context;
-    private  void InputReader(InputOperation reader) throws EmptyStack, UndefinedVariable,  WrongFormatOfOperation, ErrorCreateOperation, WrongFormatOfConfig {
+    private final CalcLogger calcLogger;
+    private final Factory factory;
+    private final Context context;
+    private  void InputReader(BufferedReader reader) throws EmptyStack, UndefinedVariable, WrongFormatOfOperation, WrongFormatOfConfig, IOException {
         String line;
         while ((line = reader.readLine()) != null) {
             String[] arguments = line.split(" ");
@@ -33,10 +33,15 @@ public class Interpreter {
         }
     }
 
-    public Interpreter(InputOperation reader ) throws EmptyStack, UndefinedVariable, ErrorCreateOperation, WrongFormatOfOperation,  WrongFormatOfConfig, CantFindConfig {
+    public Interpreter(BufferedReader reader ) throws EmptyStack, UndefinedVariable, ErrorCreateOperation, WrongFormatOfOperation,  WrongFormatOfConfig, CantFindConfig {
         calcLogger = CalcLogger.getInstance();
         context = new Context();
         factory = new Factory();
-        InputReader(reader);
+        try{
+            InputReader(reader);
+        }
+        catch(IOException e){
+            throw new WrongFormatOfOperation("can't  read operation " + e.getMessage());
+        }
     }
 }

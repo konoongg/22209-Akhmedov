@@ -21,33 +21,32 @@ public class Factory{
     private CalcLogger calcLogger;
     private Map<String, String> pathToClass;
     private void ReadConfig() throws CantFindConfig, WrongFormatOfConfig {
-        InputStream inputStream = Factory.class.getResourceAsStream("/config.txt");
-        if(inputStream != null){
-            Properties properties = new Properties();
-            try{
-                properties.load(inputStream);
-                for (String key : properties.stringPropertyNames()) {
-                    String value = properties.getProperty(key);
-                    pathToClass.put(key, value);
+        try(InputStream inputStream = Factory.class.getResourceAsStream("/config.txt")){
+            if(inputStream != null){
+                Properties properties = new Properties();
+                try{
+                    properties.load(inputStream);
+                    for (String key : properties.stringPropertyNames()) {
+                        String value = properties.getProperty(key);
+                        pathToClass.put(key, value);
+                    }
                 }
+                catch(IOException e){
+                    throw new WrongFormatOfConfig("cant close config");
+                }
+                calcLogger.LogInfo("successeful reading config");
             }
-            catch(IOException e){
-                throw new WrongFormatOfConfig("cant close config");
+            else{
+                throw new CantFindConfig("cant find config /config");
             }
-            calcLogger.LogInfo("successeful reading config");
-            try{
-                inputStream.close();
+            if(pathToClass.isEmpty()){
+                throw new  WrongFormatOfConfig("config /config is empty");
             }
-            catch(IOException e){
-                throw new WrongFormatOfConfig("cant close config");
-            }
+        } catch (IOException e) {
+            throw new WrongFormatOfConfig("cant close config");
         }
-        else{
-            throw new CantFindConfig("cant find config /config");
-        }
-        if(pathToClass.isEmpty()){
-           throw new  WrongFormatOfConfig("config /config is empty");
-        }
+
+
     }
     public Factory() throws CantFindConfig,  WrongFormatOfConfig{
         calcLogger = CalcLogger.getInstance();
