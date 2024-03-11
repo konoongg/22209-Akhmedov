@@ -1,0 +1,12 @@
+мар. 11, 2024 9:57:45 AM org.example.CalcLogger LogInfo
+INFO: start the programm
+мар. 11, 2024 9:57:46 AM org.example.CalcLogger LogInfo
+INFO: START FACRORY
+мар. 11, 2024 9:57:46 AM org.example.CalcLogger LogInfo
+INFO: successeful reading config
+мар. 11, 2024 9:57:51 AM org.example.CalcLogger LogInfo
+INFO: start create opearation EIXT
+мар. 11, 2024 9:57:51 AM org.example.CalcLogger LogInfo
+INFO: can't find name command: EIXT
+мар. 11, 2024 9:57:53 AM org.example.CalcLogger LogInfo
+INFO: end the programm

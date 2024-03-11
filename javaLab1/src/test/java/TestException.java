@@ -13,91 +13,51 @@ import static org.junit.Assert.assertEquals;
 public class TestException
 {
     @Test(expected = EmptyStack.class)
-    public void TestStackIsEmpty() throws  EmptyStack {
+    public void TestStackIsEmpty() throws EmptyStack, UndefinedVariable, WrongFormatOfOperation, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         CalcLogger calcLogger = CalcLogger.getInstance();
         Context context = new Context();
-        try{
-            IOperation pop = (IOperation) Class.forName("org.example.operation.Pop").getDeclaredConstructor().newInstance();
-            String[] arguments = new String[1];
-            arguments[0] = "POP";
-            pop.Do(context, arguments);
-        }
-        catch(ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
-              InvocationTargetException |  UndefinedVariable | WrongFormatOfOperation e){
-            System.out.println("ERROR " + e.getMessage());
-        }
+        IOperation pop = (IOperation) Class.forName("org.example.operation.Pop").getDeclaredConstructor().newInstance();
+        String[] arguments = new String[1];
+        arguments[0] = "POP";
+        pop.Do(context, arguments);
     }
 
-    @Test(expected = WrongFormatOfConfig.class)
-    public void TestWrongFormatOfConfig() throws WrongFormatOfConfig  {
+    @Test(expected = UndefindedCommand.class)
+    public void TestWrongFormatOfConfig() throws UndefindedCommand, WrongFormatOfConfig, CantFindConfig {
         CalcLogger calcLogger = CalcLogger.getInstance();
         Context context = new Context();
-        try{
-            Factory factory = new Factory();
-            IOperation operation = factory.CreateOperation("PP");
-        }
-        catch (CantFindConfig e) {
-            System.out.println("ERROR " + e);
-        }
+        Factory factory = new Factory();
+        IOperation operation = factory.CreateOperation("PP");
     }
 
     @Test(expected = UndefinedVariable.class)
     public void UndefinedVariable() throws UndefinedVariable  {
         CalcLogger calcLogger = CalcLogger.getInstance();
         Context context = new Context();
-        try{
-            context.PushDefined("name");
-        }
-        catch(NullPointerException e){
-            System.out.println("error" + e);
-        }
+        context.PushDefined("name");
     }
 
     @Test(expected = WrongFormatOfOperation.class)
-    public void WrongFormatOfOperation() throws WrongFormatOfOperation {
+    public void WrongFormatOfOperation() throws WrongFormatOfOperation, WrongFormatOfConfig, UndefinedVariable, ErrorCreateOperation, EmptyStack, CantFindConfig {
         CalcLogger calcLogger = CalcLogger.getInstance();
         String exampleFile = "PUSH 3 \n \n PUSH 2";
-        try (BufferedReader reader = new BufferedReader(new StringReader(exampleFile))) {
-            Interpreter interpreter = new Interpreter(reader);
-        }
-        catch(WrongFormatOfOperation e){
-            throw e;
-        }
-        catch(Exception e){
-            calcLogger.LogError("error " + e);
-            System.out.println("error " + e);
-        }
+        BufferedReader reader = new BufferedReader(new StringReader(exampleFile));
+        Interpreter interpreter = new Interpreter(reader);
     }
 
     @Test(expected = WrongFormatOfOperation.class)
-    public void UncorDefine() throws WrongFormatOfOperation {
+    public void UncorDefine() throws WrongFormatOfOperation, WrongFormatOfConfig, UndefinedVariable, ErrorCreateOperation, EmptyStack, CantFindConfig {
         CalcLogger calcLogger = CalcLogger.getInstance();
         String exampleFile = "DEFINE A";
-        try (BufferedReader reader = new BufferedReader(new StringReader(exampleFile))) {
-            Interpreter interpreter = new Interpreter(reader);
-        }
-        catch(WrongFormatOfOperation e){
-            throw e;
-        }
-        catch(Exception e){
-            calcLogger.LogError("error " + e);
-            System.out.println("error " + e);
-        }
+        BufferedReader reader = new BufferedReader(new StringReader(exampleFile));
+        Interpreter interpreter = new Interpreter(reader);
     }
 
     @Test(expected = WrongFormatOfOperation.class)
-    public void UncorPush() throws WrongFormatOfOperation {
+    public void UncorPush() throws WrongFormatOfOperation, WrongFormatOfConfig, UndefinedVariable, ErrorCreateOperation, EmptyStack, CantFindConfig {
         CalcLogger calcLogger = CalcLogger.getInstance();
         String exampleFile = "PUSH";
-        try (BufferedReader reader = new BufferedReader(new StringReader(exampleFile))) {
-            Interpreter interpreter = new Interpreter(reader);
-        }
-        catch(WrongFormatOfOperation e){
-            throw e;
-        }
-        catch(Exception e){
-            calcLogger.LogError("error " + e);
-            System.out.println("error " + e);
-        }
+        BufferedReader reader = new BufferedReader(new StringReader(exampleFile));
+        Interpreter interpreter = new Interpreter(reader);
     }
 }

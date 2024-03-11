@@ -27,9 +27,18 @@ public class Interpreter {
                 calcLogger.LogInfo("comment");
                 continue;
             }
-            IOperation operation = factory.CreateOperation(arguments[0]);
-            operation.Do(context, arguments);
-            calcLogger.LogInfo("done operation: " + line);
+            if(arguments[0].equals("EXIT")){
+                break;
+            }
+            try{
+                IOperation operation = factory.CreateOperation(arguments[0]);
+                operation.Do(context, arguments);
+                calcLogger.LogInfo("done operation: " + line);
+            }
+            catch (UndefindedCommand e){
+                calcLogger.LogInfo(e.getMessage());
+                System.out.println(e.getMessage());
+            }
         }
     }
 

@@ -10,26 +10,20 @@ import java.lang.IllegalAccessException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import org.example.exceptions.CantFindConfig;
+
+import org.example.exceptions.*;
+
 import java.util.Properties;
 
-import org.example.exceptions.ErrorCreateOperation;
-import org.example.exceptions.WrongFormatOfConfig;
-import org.example.exceptions.WrongFormatOfOperation;
 import org.example.operation.*;
 public class Factory{
     private CalcLogger calcLogger;
-    private Map<String, String> pathToClass;
+    private Properties pathToClass;
     private void ReadConfig() throws CantFindConfig, WrongFormatOfConfig {
         try(InputStream inputStream = Factory.class.getResourceAsStream("/config.txt")){
             if(inputStream != null){
-                Properties properties = new Properties();
                 try{
-                    properties.load(inputStream);
-                    for (String key : properties.stringPropertyNames()) {
-                        String value = properties.getProperty(key);
-                        pathToClass.put(key, value);
-                    }
+                    pathToClass.load(inputStream);
                 }
                 catch(IOException e){
                     throw new WrongFormatOfConfig("cant close config");
@@ -51,13 +45,16 @@ public class Factory{
     public Factory() throws CantFindConfig,  WrongFormatOfConfig{
         calcLogger = CalcLogger.getInstance();
         calcLogger.LogInfo("START FACRORY");
-        pathToClass = new HashMap<>();
+        pathToClass = new Properties();
         ReadConfig();
     }
 
-    public IOperation CreateOperation(String operationName) throws  WrongFormatOfConfig {
+    public IOperation CreateOperation(String operationName) throws WrongFormatOfConfig, UndefindedCommand {
         calcLogger.LogInfo("start create opearation " + operationName);
-        String className = pathToClass.get(operationName);
+        String className = pathToClass.getProperty(operationName);
+        if(className == null){
+            throw new UndefindedCommand("can't find name command: " + operationName) ;
+        }
         try{
             IOperation operation = (IOperation) Class.forName(className).getDeclaredConstructor().newInstance();
             calcLogger.LogInfo("create operation: " + className);
@@ -65,13 +62,13 @@ public class Factory{
             return operation;
         }
         catch(ClassNotFoundException | NullPointerException  e){
-            throw new WrongFormatOfConfig("can't find name class: " + operationName + "\n" + e) ;
+            throw new WrongFormatOfConfig("can't find name command: " + operationName) ;
         }
         catch(NoSuchMethodException e){
-            throw new WrongFormatOfConfig("can't find method eception: " + operationName + "\n" + e) ;
+            throw new WrongFormatOfConfig("can't find method eception: " + operationName) ;
         }
         catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new WrongFormatOfConfig("can't instance: " + operationName + "\n" + e) ;
+            throw new WrongFormatOfConfig("can't instance: " + operationName) ;
         }
     }
 }
