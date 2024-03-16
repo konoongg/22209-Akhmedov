@@ -8,6 +8,8 @@ public class Main {
     public static void main(String[] args) {
         try{
             GameStat gameStat = new GameStat("/mapConfig.txt");
+            Viewer viewer = new Viewer();
+            GameContoller gameContoller = new GameContoller(gameStat, viewer);
         } catch (IOException e) {
             System.out.println("somethink error: " + e);
         }

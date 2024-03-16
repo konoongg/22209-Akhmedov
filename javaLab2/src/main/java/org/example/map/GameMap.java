@@ -8,11 +8,12 @@ import java.io.InputStreamReader;
 public class GameMap {
     private int sizeX;
     private int sizeY;
-    String nameMap;
+    private String nameMap;
+    private String sprite;
     private final int cellSize = 50;
-    Cell[] cells;
+    private Cell[] cells;
 
-    private void GetName(BufferedReader reader) throws IOException {
+    private void DefineName(BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if(line == null){
             System.out.println("empty config");
@@ -21,7 +22,16 @@ public class GameMap {
         nameMap = line;
     }
 
-    private void GetSize(BufferedReader reader) throws IOException {
+    private void DefineSprite(BufferedReader reader) throws IOException {
+        String line = reader.readLine();
+        if(line == null){
+            System.out.println("empty config");
+            throw new IOException("can't read sprite");
+        }
+        sprite = line;
+    }
+
+    private void DefineSize(BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if(line == null){
             System.out.println("cant' read size");
@@ -33,7 +43,7 @@ public class GameMap {
     }
 
     //тут надо првоерять, что если в строке бред
-    private void GetCells(BufferedReader reader) throws IOException {
+    private void DefineCells(BufferedReader reader) throws IOException {
         int cellX = sizeX / cellSize;
         int cellY = sizeY / cellSize;
         int countCell = cellX * cellY;
@@ -55,9 +65,10 @@ public class GameMap {
                 throw new IOException("inputString it is null config: " + config);
             }
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            GetName(reader);
-            GetSize(reader);
-            GetCells(reader);
+            DefineName(reader);
+            DefineSprite(reader);
+            DefineSize(reader);
+            DefineCells(reader);
         }
         catch(IOException e){
             System.out.println("cant read config");
@@ -66,5 +77,21 @@ public class GameMap {
     }
     public GameMap(String config) throws IOException {
         CreateField(config);
+    }
+
+    public String GetName(){
+        return nameMap;
+    }
+
+    public String GetSprite(){
+        return sprite;
+    }
+
+    public int GetSizeX(){
+        return sizeX;
+    }
+
+    public int GetSizeY(){
+        return sizeY;
     }
 }

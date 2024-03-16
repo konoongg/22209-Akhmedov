@@ -5,10 +5,10 @@ import org.example.Coords;
 import java.util.ArrayList;
 
 public class Cell {
-    Coords start;
-    Coords end;
-    CellStatus status;
-    ArrayList<CellEffect> effects;
+    private Coords start;
+    private Coords end;
+    private CellStatus status;
+    private ArrayList<CellEffect> effects;
 
     public Cell(int numCellX, int numCellY, int sizeCell, CellStatus status){
         start = new Coords(sizeCell * numCellX, sizeCell * numCellY);
