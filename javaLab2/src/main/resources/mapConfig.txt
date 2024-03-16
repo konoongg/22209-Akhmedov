@@ -1,0 +1,6 @@
+nameMaps
+100 100
+0 0 ROAD_UP
+0 1 ROAD_UP
+1 0 FREE
+1 1 FREE
