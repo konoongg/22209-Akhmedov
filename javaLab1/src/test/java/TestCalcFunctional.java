@@ -1,14 +1,15 @@
 import org.example.CalcLogger;
 import org.example.Context;
-import org.example.exceptions.EmptyStack;
-import org.example.exceptions.UndefinedVariable;
-import org.example.exceptions.WrongFormatOfOperation;
+import org.example.Interpreter;
+import org.example.exceptions.*;
 import org.example.operation.IOperation;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
+import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 
 public class TestCalcFunctional {
@@ -244,4 +245,19 @@ public class TestCalcFunctional {
         assertEquals(4.0,  result, 0);
     }
 
+    @Test
+    public void Exit() throws WrongFormatOfConfig, UndefinedVariable,EmptyStack, WrongFormatOfOperation, CantFindConfig, UndefindedCommand {
+        CalcLogger calcLogger = CalcLogger.getInstance();
+        String exampleFile = "EXIT";
+        BufferedReader reader = new BufferedReader(new StringReader(exampleFile));
+        Interpreter interpreter = new Interpreter(reader, "/config.txt");
+    }
+
+    @Test
+    public void Comment() throws WrongFormatOfConfig, UndefinedVariable, EmptyStack, WrongFormatOfOperation, CantFindConfig, UndefindedCommand {
+        CalcLogger calcLogger = CalcLogger.getInstance();
+        String exampleFile = "#test";
+        BufferedReader reader = new BufferedReader(new StringReader(exampleFile));
+        Interpreter interpreter = new Interpreter(reader, "/config.txt");
+    }
 }

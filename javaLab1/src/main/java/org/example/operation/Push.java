@@ -16,8 +16,5 @@ public class Push implements IOperation {
         } catch (NumberFormatException e) {
             context.PushDefined(arguments[1]);
         }
-        catch(ArrayIndexOutOfBoundsException e){
-            throw new WrongFormatOfOperation("wrong format of operation, need more arguments " + arguments[0]);
-        }
     }
 }

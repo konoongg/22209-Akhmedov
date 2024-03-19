@@ -26,10 +26,11 @@ public class Main {
         return reader;
     }
     public static void main(String[] args) {
+        String config = "/config.txt";
         CalcLogger calcLogger = CalcLogger.getInstance();
         calcLogger.LogInfo("start the programm");
         try (BufferedReader reader = createReader(args)) {
-            Interpreter interpreter = new Interpreter(reader);
+            Interpreter interpreter = new Interpreter(reader, config);
         }
         catch(Exception e){
             calcLogger.LogError("error " + e.getMessage());

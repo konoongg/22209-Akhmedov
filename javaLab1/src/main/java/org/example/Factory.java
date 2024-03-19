@@ -19,15 +19,10 @@ import org.example.operation.*;
 public class Factory{
     private CalcLogger calcLogger;
     private Properties pathToClass;
-    private void ReadConfig() throws CantFindConfig, WrongFormatOfConfig {
-        try(InputStream inputStream = Factory.class.getResourceAsStream("/config.txt")){
+    private void ReadConfig(String config) throws CantFindConfig, WrongFormatOfConfig {
+        try(InputStream inputStream = Factory.class.getResourceAsStream(config)){
             if(inputStream != null){
-                try{
-                    pathToClass.load(inputStream);
-                }
-                catch(IOException e){
-                    throw new WrongFormatOfConfig("cant close config");
-                }
+                pathToClass.load(inputStream);
                 calcLogger.LogInfo("successeful reading config");
             }
             else{
@@ -42,11 +37,11 @@ public class Factory{
 
 
     }
-    public Factory() throws CantFindConfig,  WrongFormatOfConfig{
+    public Factory(String config) throws CantFindConfig,  WrongFormatOfConfig{
         calcLogger = CalcLogger.getInstance();
         calcLogger.LogInfo("START FACRORY");
         pathToClass = new Properties();
-        ReadConfig();
+        ReadConfig(config);
     }
 
     public IOperation CreateOperation(String operationName) throws WrongFormatOfConfig, UndefindedCommand {
