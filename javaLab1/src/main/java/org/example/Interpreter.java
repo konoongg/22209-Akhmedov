@@ -36,7 +36,7 @@ public class Interpreter {
         }
     }
 
-    public Interpreter(BufferedReader reader, String config ) throws EmptyStack, UndefinedVariable, WrongFormatOfOperation, WrongFormatOfConfig, CantFindConfig, UndefindedCommand {
+    public Interpreter(BufferedReader reader, InputStream config ) throws EmptyStack, UndefinedVariable, WrongFormatOfOperation, WrongFormatOfConfig, CantFindConfig, UndefindedCommand {
         calcLogger = CalcLogger.getInstance();
         context = new Context();
         factory = new Factory(config);

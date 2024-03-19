@@ -1,5 +1,6 @@
 import org.example.CalcLogger;
 import org.example.Context;
+import org.example.Factory;
 import org.example.Interpreter;
 import org.example.exceptions.*;
 import org.example.operation.IOperation;
@@ -9,6 +10,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 
@@ -246,18 +249,21 @@ public class TestCalcFunctional {
     }
 
     @Test
-    public void Exit() throws WrongFormatOfConfig, UndefinedVariable,EmptyStack, WrongFormatOfOperation, CantFindConfig, UndefindedCommand {
+    public void Exit() throws WrongFormatOfConfig, UndefinedVariable, EmptyStack, WrongFormatOfOperation, CantFindConfig, UndefindedCommand, IOException {
         CalcLogger calcLogger = CalcLogger.getInstance();
         String exampleFile = "EXIT";
         BufferedReader reader = new BufferedReader(new StringReader(exampleFile));
-        Interpreter interpreter = new Interpreter(reader, "/config.txt");
+        InputStream inputStream = Factory.class.getResourceAsStream("/config.txt");
+        Interpreter interpreter = new Interpreter(reader, inputStream);
     }
 
     @Test
-    public void Comment() throws WrongFormatOfConfig, UndefinedVariable, EmptyStack, WrongFormatOfOperation, CantFindConfig, UndefindedCommand {
+    public void Comment() throws WrongFormatOfConfig, UndefinedVariable, EmptyStack, WrongFormatOfOperation, CantFindConfig, UndefindedCommand, IOException {
         CalcLogger calcLogger = CalcLogger.getInstance();
         String exampleFile = "#test";
         BufferedReader reader = new BufferedReader(new StringReader(exampleFile));
-        Interpreter interpreter = new Interpreter(reader, "/config.txt");
+        InputStream inputStream = Factory.class.getResourceAsStream("/config.txt");
+        Interpreter interpreter = new Interpreter(reader, inputStream);
     }
 }
+

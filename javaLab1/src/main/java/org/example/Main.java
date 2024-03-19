@@ -30,7 +30,8 @@ public class Main {
         CalcLogger calcLogger = CalcLogger.getInstance();
         calcLogger.LogInfo("start the programm");
         try (BufferedReader reader = createReader(args)) {
-            Interpreter interpreter = new Interpreter(reader, config);
+            InputStream inputStream = Factory.class.getResourceAsStream(config);
+            Interpreter interpreter = new Interpreter(reader, inputStream);
         }
         catch(Exception e){
             calcLogger.LogError("error " + e.getMessage());

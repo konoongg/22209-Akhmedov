@@ -19,25 +19,26 @@ import org.example.operation.*;
 public class Factory{
     private CalcLogger calcLogger;
     private Properties pathToClass;
-    private void ReadConfig(String config) throws CantFindConfig, WrongFormatOfConfig {
-        try(InputStream inputStream = Factory.class.getResourceAsStream(config)){
-            if(inputStream != null){
+    private void ReadConfig(InputStream inputStream ) throws CantFindConfig, WrongFormatOfConfig{
+        if(inputStream != null){
+            try {
                 pathToClass.load(inputStream);
-                calcLogger.LogInfo("successeful reading config");
             }
-            else{
-                throw new CantFindConfig("cant find config /config");
+            catch (IOException e) {
+                throw new WrongFormatOfConfig("cant' read config");
             }
-            if(pathToClass.isEmpty()){
-                throw new  WrongFormatOfConfig("config /config is empty");
-            }
-        } catch (IOException e) {
-            throw new WrongFormatOfConfig("cant close config");
+            calcLogger.LogInfo("successeful reading config");
         }
-
-
+        else{
+            throw new CantFindConfig("cant find config /config");
+        }
+        if(pathToClass.isEmpty()){
+            throw new  WrongFormatOfConfig("config /config is empty");
+        }
     }
-    public Factory(String config) throws CantFindConfig,  WrongFormatOfConfig{
+
+
+    public Factory(InputStream  config) throws CantFindConfig, WrongFormatOfConfig {
         calcLogger = CalcLogger.getInstance();
         calcLogger.LogInfo("START FACRORY");
         pathToClass = new Properties();

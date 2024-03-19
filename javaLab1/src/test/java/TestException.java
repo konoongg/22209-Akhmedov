@@ -3,9 +3,7 @@ import org.example.exceptions.*;
 import org.example.operation.IOperation;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.StringReader;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.Assert.assertEquals;
@@ -32,7 +30,8 @@ public class TestException
         CalcLogger calcLogger = CalcLogger.getInstance();
         String exampleFile = "PP";
         BufferedReader reader = new BufferedReader(new StringReader(exampleFile));
-        Interpreter interpreter = new Interpreter(reader, "/config.txt");
+        InputStream inputStream = Factory.class.getResourceAsStream("/config.txt");
+        Interpreter interpreter = new Interpreter(reader, inputStream);
     }
 
     @Test(expected = UndefinedVariable.class)
@@ -43,36 +42,73 @@ public class TestException
     }
 
     @Test(expected = WrongFormatOfOperation.class)
-    public void WrongFormatOfOperation() throws WrongFormatOfOperation, WrongFormatOfConfig, UndefinedVariable, EmptyStack, CantFindConfig, UndefindedCommand {
+    public void WrongFormatOfOperation() throws WrongFormatOfOperation, WrongFormatOfConfig, UndefinedVariable, EmptyStack, CantFindConfig, UndefindedCommand{
         CalcLogger calcLogger = CalcLogger.getInstance();
         String exampleFile = "PUSH 3 \n \n PUSH 2";
         BufferedReader reader = new BufferedReader(new StringReader(exampleFile));
-        Interpreter interpreter = new Interpreter(reader, "/config.txt");
+        InputStream inputStream = Factory.class.getResourceAsStream("/config.txt");
+        Interpreter interpreter = new Interpreter(reader, inputStream);
     }
 
     @Test(expected = WrongFormatOfOperation.class)
-    public void UncorDefine() throws WrongFormatOfOperation, WrongFormatOfConfig, UndefinedVariable, EmptyStack, CantFindConfig, UndefindedCommand {
+    public void UncorDefine() throws WrongFormatOfOperation, WrongFormatOfConfig, UndefinedVariable, EmptyStack, CantFindConfig, UndefindedCommand{
         CalcLogger calcLogger = CalcLogger.getInstance();
         String exampleFile = "DEFINE A";
         BufferedReader reader = new BufferedReader(new StringReader(exampleFile));
-        Interpreter interpreter = new Interpreter(reader, "/config.txt");
+        InputStream inputStream = Factory.class.getResourceAsStream("/config.txt");
+        Interpreter interpreter = new Interpreter(reader, inputStream);
     }
 
     @Test(expected = WrongFormatOfOperation.class)
-    public void UncorPush() throws WrongFormatOfOperation, WrongFormatOfConfig, UndefinedVariable, EmptyStack, CantFindConfig, UndefindedCommand {
+    public void UncorPush() throws WrongFormatOfOperation, WrongFormatOfConfig, UndefinedVariable, EmptyStack, CantFindConfig, UndefindedCommand{
         CalcLogger calcLogger = CalcLogger.getInstance();
         String exampleFile = "PUSH";
         BufferedReader reader = new BufferedReader(new StringReader(exampleFile));
-        Interpreter interpreter = new Interpreter(reader, "/config.txt");
+        InputStream inputStream = Factory.class.getResourceAsStream("/config.txt");
+        Interpreter interpreter = new Interpreter(reader, inputStream);
     }
 
     @Test(expected = CantFindConfig.class)
     public void NotExistenceConfig() throws WrongFormatOfConfig, CantFindConfig {
-        Factory fac = new Factory("/test.txt");
+        InputStream inputStream = Factory.class.getResourceAsStream("/test.txt");
+        Factory fac = new Factory(inputStream);
     }
 
-    /*@Test(expected = WrongFormatOfConfig.class)
-    public void UncorConfig() throws WrongFormatOfConfig, CantFindConfig {
-        Factory fac = new Factory("/data.txt");
-    }*/
+    @Test(expected = WrongFormatOfConfig.class)
+    public void EmptyConfig() throws WrongFormatOfConfig, CantFindConfig {
+        String exampleFile = "";
+        InputStream inputStream = new ByteArrayInputStream(exampleFile.getBytes());
+        Factory fac = new Factory(inputStream);
+    }
+    @Test(expected = WrongFormatOfConfig.class)
+    public void ClassNotFounded() throws WrongFormatOfConfig, CantFindConfig, UndefindedCommand {
+        String exampleFile = "TEST org.exmaple.testClass";
+        InputStream inputStream = new ByteArrayInputStream(exampleFile.getBytes());
+        Factory fac = new Factory(inputStream);
+        fac.CreateOperation("TEST");
+    }
+
+    @Test(expected = WrongFormatOfConfig.class)
+    public void CantCreatPropirties() throws WrongFormatOfConfig, CantFindConfig, UndefindedCommand {
+        InputStream fakeInputStream = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                throw new IOException("IOException");
+            }
+        };
+        Factory fac = new Factory(fakeInputStream);
+        fac.CreateOperation("TEST");
+    }
+
+    @Test(expected = WrongFormatOfOperation.class)
+    public void FakeReader() throws WrongFormatOfConfig, CantFindConfig, UndefindedCommand, UndefinedVariable, EmptyStack, WrongFormatOfOperation {
+        BufferedReader fakeReader = new BufferedReader(new StringReader("TEST")) {
+            @Override
+            public String readLine() throws IOException {
+                throw new IOException("Fake IOException");
+            }
+        };
+        InputStream inputStream = Factory.class.getResourceAsStream("/config.txt");
+        Interpreter interpreter = new Interpreter(fakeReader, inputStream);
+    }
 }
