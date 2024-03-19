@@ -16,29 +16,28 @@ import org.example.exceptions.*;
 import java.util.Properties;
 
 import org.example.operation.*;
-public class Factory{
+public class Factory {
     private CalcLogger calcLogger;
     private Properties pathToClass;
-    private void ReadConfig(InputStream inputStream ) throws CantFindConfig, WrongFormatOfConfig{
-        if(inputStream != null){
+
+    private void ReadConfig(InputStream inputStream) throws CantFindConfig, WrongFormatOfConfig {
+        if (inputStream != null) {
             try {
                 pathToClass.load(inputStream);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw new WrongFormatOfConfig("cant' read config");
             }
             calcLogger.LogInfo("successeful reading config");
-        }
-        else{
+        } else {
             throw new CantFindConfig("cant find config /config");
         }
-        if(pathToClass.isEmpty()){
-            throw new  WrongFormatOfConfig("config /config is empty");
+        if (pathToClass.isEmpty()) {
+            throw new WrongFormatOfConfig("config /config is empty");
         }
     }
 
 
-    public Factory(InputStream  config) throws CantFindConfig, WrongFormatOfConfig {
+    public Factory(InputStream config) throws CantFindConfig, WrongFormatOfConfig {
         calcLogger = CalcLogger.getInstance();
         calcLogger.LogInfo("START FACRORY");
         pathToClass = new Properties();
@@ -48,23 +47,21 @@ public class Factory{
     public IOperation CreateOperation(String operationName) throws WrongFormatOfConfig, UndefindedCommand {
         calcLogger.LogInfo("start create opearation " + operationName);
         String className = pathToClass.getProperty(operationName);
-        if(className == null){
-            throw new UndefindedCommand("can't find name command: " + operationName) ;
+        if (className == null) {
+            throw new UndefindedCommand("can't find name command: " + operationName);
         }
-        try{
+        try {
             IOperation operation = (IOperation) Class.forName(className).getDeclaredConstructor().newInstance();
             calcLogger.LogInfo("create operation: " + className);
             calcLogger.LogInfo("successful opearation " + operationName);
             return operation;
+        } catch (ClassNotFoundException | NullPointerException e) {
+            throw new WrongFormatOfConfig("can't find name command: " + operationName);
+        } catch (NoSuchMethodException e) {
+            throw new WrongFormatOfConfig("can't find method eception: " + operationName);
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new WrongFormatOfConfig("can't instance: " + operationName);
         }
-        catch(ClassNotFoundException | NullPointerException  e){
-            throw new WrongFormatOfConfig("can't find name command: " + operationName) ;
-        }
-        catch(NoSuchMethodException e){
-            throw new WrongFormatOfConfig("can't find method eception: " + operationName) ;
-        }
-        catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new WrongFormatOfConfig("can't instance: " + operationName) ;
-        }
+
     }
 }

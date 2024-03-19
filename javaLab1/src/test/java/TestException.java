@@ -89,6 +89,30 @@ public class TestException
     }
 
     @Test(expected = WrongFormatOfConfig.class)
+    public void MethodNotFounded() throws WrongFormatOfConfig, CantFindConfig, UndefindedCommand {
+        String exampleFile = "TEST test.TestOperationMethodEr";
+        InputStream inputStream = new ByteArrayInputStream(exampleFile.getBytes());
+        Factory fac = new Factory(inputStream);
+        fac.CreateOperation("TEST");
+    }
+
+    @Test(expected = WrongFormatOfConfig.class)
+    public void PrivateConstr() throws WrongFormatOfConfig, CantFindConfig, UndefindedCommand {
+        String exampleFile = "TEST test.TestOperationPrivateConstr";
+        InputStream inputStream = new ByteArrayInputStream(exampleFile.getBytes());
+        Factory fac = new Factory(inputStream);
+        fac.CreateOperation("TEST");
+    }
+
+    @Test(expected = WrongFormatOfConfig.class)
+    public void ExceptConstr() throws WrongFormatOfConfig, CantFindConfig, UndefindedCommand {
+        String exampleFile = "TEST test.TestOperationExceptConstr";
+        InputStream inputStream = new ByteArrayInputStream(exampleFile.getBytes());
+        Factory fac = new Factory(inputStream);
+        fac.CreateOperation("TEST");
+    }
+
+    @Test(expected = WrongFormatOfConfig.class)
     public void CantCreatPropirties() throws WrongFormatOfConfig, CantFindConfig, UndefindedCommand {
         InputStream fakeInputStream = new InputStream() {
             @Override
