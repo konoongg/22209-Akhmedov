@@ -5,14 +5,15 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import javax.imageio.ImageIO;
 
 public class ImagePanel extends JPanel {
     private BufferedImage image;
 
-    public ImagePanel(String imagePath) {
+    public ImagePanel(URL imagePath) {
         try {
-            image = ImageIO.read(new File(imagePath));
+            image = ImageIO.read(imagePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

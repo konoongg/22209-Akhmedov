@@ -14,7 +14,7 @@ public class Cell {
         start = new Coords(sizeCell * numCellX, sizeCell * numCellY);
         end = new Coords(sizeCell * (numCellX + 1), sizeCell * (numCellY + 1));
         this.status = status;
-        effects = new ArrayList<>();
+        effects = new ArrayList<CellEffect>();
     }
     public void ChangeStatus(CellStatus newStatus){
         status = newStatus;

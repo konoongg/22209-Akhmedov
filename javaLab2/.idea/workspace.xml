@@ -5,11 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="acee78b5-86a4-4e6d-bd28-391b9bcfb0c4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/ImagePanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/enemy/Artist.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/enemy/EnemyFactory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/enemyConfig.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Coords.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Coords.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/GameStat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/GameStat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/ImagePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/ImagePanel.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Viewer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Viewer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/enemy/IEnemy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/enemy/IEnemy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/map/Cell.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/map/Cell.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,15 +40,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.conf.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;javaLab2&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.conf.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "javaLab2",
+    "kotlin-language-version-configured": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="conf" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="org.example.Main" />
@@ -70,5 +75,16 @@
       <updated>1711005973681</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

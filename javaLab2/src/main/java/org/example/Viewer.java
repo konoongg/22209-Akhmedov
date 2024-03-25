@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 public class Viewer {
     private JFrame gameField;
@@ -16,8 +17,8 @@ public class Viewer {
     private JPanel charactersList;
 
     private void CreateMap(){
-        BufferedImage image;
-        map = new JPanel();
+        URL mapUrl = getClass().getResource("/Images/map.png");
+        map = new ImagePanel(mapUrl);
         map.setBackground(Color.BLUE);
         map.setBorder(new LineBorder(Color.BLACK));
     }

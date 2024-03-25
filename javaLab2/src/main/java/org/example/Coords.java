@@ -7,4 +7,19 @@ public class Coords {
         this.x = x;
         this.y = y;
     }
+     public void ChangeX(double x){
+        this.x = x;
+     }
+
+     public void ChangeY(double y){
+        this.y = y;
+     }
+
+     public double X(){
+        return x;
+     }
+
+     public double Y(){
+        return y;
+     }
 }
