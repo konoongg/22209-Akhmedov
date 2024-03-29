@@ -1,43 +1,56 @@
 package org.example;
 
+import org.example.characters.CharacterFactory;
 import org.example.characters.ICharacter;
 import org.example.enemy.EnemyFactory;
 import org.example.enemy.IEnemy;
 import org.example.map.GameMap;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class GameStat {
-    private GameMap gameMap;
-    private EnemyFactory enemyFactory;
-    private ArrayList<IEnemy> enemyList;
-
-    private ArrayList<ICharacter> characterList;
+    private final GameMap gameMap;
+    private final EnemyFactory enemyFactory;
+    private final CharacterFactory characterFactory;
+    private final ArrayList<IEnemy> enemyList;
+    private final ArrayList<ICharacter> characterList;
     public GameStat (String config) throws IOException {
         gameMap = new GameMap(config);
         enemyFactory = new EnemyFactory();
-        enemyList = new ArrayList<IEnemy>();
-        characterList = new ArrayList<ICharacter>();
-        ReadEnemyConfig();
+        characterFactory = new CharacterFactory();
+        enemyList = new ArrayList<>();
+        characterList = new ArrayList<>();
     }
 
-    private 
+    private Coords GetRandomCoords(){
+        Random random = new Random();
+        ArrayList<Coords> enemySpawn = gameMap.GetEnemySpawn();
+        int randomIndex = random.nextInt(enemySpawn.size());
+        return enemySpawn.get(randomIndex);
+    }
 
-    public void CreateNewEnemy(){
-        IEnemy enemy = enemyFactory.CreateEnemy();
+    public void CreateNewEnemy() throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Coords enemyCords = GetRandomCoords();
+        IEnemy enemy = enemyFactory.CreateRandomEnemy(enemyCords);
         enemyList.add(enemy);
     }
 
+    public void CreateNewCharacter(Coords characterCoords, String name) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        ICharacter character = characterFactory.CreateCharacter(name, characterCoords);
+        characterList.add(character);
+    }
     public void CreateNewCharacter(ICharacter character){
         characterList.add(character);
     }
 
-    public ArrayList<ICharacter> CharacterList(){
+    public ArrayList<ICharacter> ReturnCharacterList(){
         return characterList;
     }
 
-    public ArrayList<IEnemy> EnemyList(){
+    public ArrayList<IEnemy> ReturnEnemyList(){
         return enemyList;
     }
     public GameMap GetMap(){

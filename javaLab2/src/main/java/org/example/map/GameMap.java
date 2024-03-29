@@ -1,18 +1,22 @@
 package org.example.map;
 
+import org.example.Coords;
+import org.example.Sprite;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 public class GameMap {
     private int sizeX;
     private int sizeY;
     private String nameMap;
-    private String sprite;
+    private Sprite sprite;
     private final int cellSize = 50;
     private Cell[] cells;
-
+    private ArrayList<Coords> enemySpawn;
     private void DefineName(BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if(line == null){
@@ -22,24 +26,31 @@ public class GameMap {
         nameMap = line;
     }
 
-    private void DefineSprite(BufferedReader reader) throws IOException {
+    private String DefineSpritePath(BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if(line == null){
             System.out.println("empty config");
             throw new IOException("can't read sprite");
         }
-        sprite = line;
+        return  line;
     }
 
-    private void DefineSize(BufferedReader reader) throws IOException {
+    private void DefineSprite(BufferedReader reader) throws IOException {
+        String path = DefineSpritePath(reader);
+        String[] coords = DefineSize(reader);
+        sizeX = Integer.parseInt(coords[0]);
+        sizeY = Integer.parseInt(coords[1]);
+        sprite = new Sprite(path, sizeX, sizeY);
+    }
+
+    private String[] DefineSize(BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if(line == null){
             System.out.println("cant' read size");
             throw new IOException("cant't read size");
         }
         String[] coords = line.split(" ");
-        sizeX = Integer.parseInt(coords[0]);
-        sizeY = Integer.parseInt(coords[1]);
+        return coords;
     }
 
     //тут надо првоерять, что если в строке бред
@@ -59,7 +70,20 @@ public class GameMap {
         }
     }
 
+    private void DefineEnemySpawn(BufferedReader reader) throws IOException {
+        String line = reader.readLine();;
+        int countSpawns = Integer.parseInt(line);
+        for(int i = 0; i < countSpawns; ++i){
+            line = reader.readLine();
+            String[] cell = line.split(" ");
+            int coordX = Integer.parseInt(cell[0]);
+            int coordY = Integer.parseInt(cell[1]);
+            Coords coordsSpawn = new Coords(coordX, coordY);
+            enemySpawn.add(coordsSpawn);
+        }
+    }
     private void CreateField(String config) throws IOException {
+        enemySpawn = new ArrayList<>();
         try(InputStream inputStream = GameMap.class.getResourceAsStream(config)){
             if(inputStream == null){
                 throw new IOException("inputString it is null config: " + config);
@@ -67,8 +91,8 @@ public class GameMap {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             DefineName(reader);
             DefineSprite(reader);
-            DefineSize(reader);
             DefineCells(reader);
+            DefineEnemySpawn(reader);
         }
         catch(IOException e){
             System.out.println("cant read config");
@@ -83,15 +107,10 @@ public class GameMap {
         return nameMap;
     }
 
-    public String GetSprite(){
+    public Sprite GetSprite(){
         return sprite;
     }
-
-    public int GetSizeX(){
-        return sizeX;
-    }
-
-    public int GetSizeY(){
-        return sizeY;
+    public ArrayList<Coords> GetEnemySpawn(){
+        return enemySpawn;
     }
 }

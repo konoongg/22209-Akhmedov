@@ -7,5 +7,7 @@ public interface ICharacter {
     int sizeX = 2;
     int sizeY = 2;
     void UseSkill();
+
+    void Create(Coords characterStart);
     void GetInfo();
 }
