@@ -17,6 +17,7 @@ public class GameMap {
     private final int cellSize = 50;
     private Cell[] cells;
     private ArrayList<Coords> enemySpawn;
+    private Cell startCell;
     private void DefineName(BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if(line == null){
@@ -76,9 +77,10 @@ public class GameMap {
         for(int i = 0; i < countSpawns; ++i){
             line = reader.readLine();
             String[] cell = line.split(" ");
+
             int coordX = Integer.parseInt(cell[0]);
             int coordY = Integer.parseInt(cell[1]);
-            Coords coordsSpawn = new Coords(coordX, coordY);
+            Coords coordsSpawn = new Coords(coordX * cellSize, coordY * cellSize);
             enemySpawn.add(coordsSpawn);
         }
     }
@@ -110,7 +112,12 @@ public class GameMap {
     public Sprite GetSprite(){
         return sprite;
     }
+
+    public int GetCellSize(){
+        return cellSize;
+    }
     public ArrayList<Coords> GetEnemySpawn(){
         return enemySpawn;
     }
+
 }

@@ -1,9 +1,9 @@
 package org.example;
 
 public class Sprite {
-    private String spritePath;
-    private int spriteSizeX;
-    private int spriteSizey;
+    private final String spritePath;
+    private final int spriteSizeX;
+    private final int spriteSizey;
     public Sprite(String spritePath, int spriteSizeX, int spriteSizey){
         this.spritePath = spritePath;
         this.spriteSizeX = spriteSizeX;

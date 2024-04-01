@@ -2,16 +2,17 @@ package org.example.enemy;
 
 import org.example.Coords;
 import org.example.Sprite;
+import org.example.map.Cell;
+
+import java.io.IOException;
 
 public interface IEnemy {
-    Coords coords = null;
-    float speed = 10;
-    int hp = 100;
-    
-    Sprite sprite = null;
-    void Create(Coords enemyStart);
+    void Create(Coords enemyStart, Cell cell) throws IOException;
     double CoordsX();
     double CoordsY();
     Sprite Sprite();
-    void Move(double x, double y);
+
+    EnemyStatus Status();
+    void Move();
+    void ChangeSpriteTime(int timeTosleep);
 }

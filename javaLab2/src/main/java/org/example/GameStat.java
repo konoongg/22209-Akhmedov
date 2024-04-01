@@ -4,6 +4,7 @@ import org.example.characters.CharacterFactory;
 import org.example.characters.ICharacter;
 import org.example.enemy.EnemyFactory;
 import org.example.enemy.IEnemy;
+import org.example.map.Cell;
 import org.example.map.GameMap;
 
 import java.io.IOException;
@@ -32,8 +33,10 @@ public class GameStat {
         return enemySpawn.get(randomIndex);
     }
 
-    public void CreateNewEnemy() throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void CreateNewEnemy() throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         Coords enemyCords = GetRandomCoords();
+        int cellSize = gameMap.GetCellSize();
+        Cell startCell = new Cell(enemyCords.X() / cellSize, enemyCords.Y() / cellSize, cellSize, );
         IEnemy enemy = enemyFactory.CreateRandomEnemy(enemyCords);
         enemyList.add(enemy);
     }

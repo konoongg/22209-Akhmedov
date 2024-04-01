@@ -1,6 +1,7 @@
 package org.example.enemy;
 
 import org.example.Coords;
+import org.example.map.Cell;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +20,6 @@ public class EnemyFactory {
         }
         catch(IOException e){
             System.out.println("error");
-
         }
     }
     public EnemyFactory(){
@@ -27,21 +27,21 @@ public class EnemyFactory {
         ReadConfig();
     }
 
-    public IEnemy CreateEnemy(String enemyName, Coords enemyStart) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public IEnemy CreateEnemy(String enemyName, Coords enemyStart, Cell startCell) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException {
         String className = pathToClass.getProperty(enemyName);
         IEnemy enemy = (IEnemy) Class.forName(className).getDeclaredConstructor().newInstance();
-        enemy.Create(enemyStart);
+        enemy.Create(enemyStart, startCell);
         return enemy;
     }
 
-    public IEnemy CreateRandomEnemy(Coords enemyStart) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public IEnemy CreateRandomEnemy(Coords enemyStart, Cell startCell) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException {
         Random random = new Random();
         Collection<Object> valuesCollection = pathToClass.keySet();
         String[] valuesArray = valuesCollection.toArray(new String[0]);
         int randomIndex = random.nextInt(valuesArray.length);
         String className = pathToClass.getProperty(valuesArray[randomIndex]);
         IEnemy enemy = (IEnemy) Class.forName(className).getDeclaredConstructor().newInstance();
-        enemy.Create(enemyStart);
+        enemy.Create(enemyStart, startCell);
         return enemy;
     }
 }

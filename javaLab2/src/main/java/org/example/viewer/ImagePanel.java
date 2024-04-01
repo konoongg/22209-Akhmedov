@@ -25,9 +25,9 @@ public class ImagePanel extends JPanel {
                 throw new RuntimeException(new IOException());
             }
             map = ImageIO.read(mapURL);
-            this.characterList = characterList;
+            this.characterList = new ArrayList<>(characterList);
             this.mapSprite = mapSprite;
-            this.enemyList = enemyList;
+            this.enemyList = new ArrayList<>(enemyList);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -41,21 +41,30 @@ public class ImagePanel extends JPanel {
 
     private void PrintEnemys(Graphics g) throws IOException {
         if(!enemyList.isEmpty()){
-            for (IEnemy enemy : enemyList){
-                double enemyX = enemy.CoordsX();
-                double enemyY = enemy.CoordsY();
-                Sprite sprite = enemy.Sprite();
-                double startX = enemyX / mapSprite.SizeX() * getWidth();
-                double startY = enemyY / mapSprite.SizeY() * getHeight();
-                double endX = (enemyX + sprite.SizeX()) / mapSprite.SizeX() * getWidth();
-                double endY = (enemyY + sprite.SizeY()) / mapSprite.SizeY() * getHeight();
-                URL enemyURL = Viewer.class.getResource(sprite.Path());
-                if(enemyURL == null){
-                    throw new RuntimeException(new IOException());
+            try{
+                for (IEnemy enemy : enemyList){
+                    double enemyX = enemy.CoordsX();
+                    double enemyY = enemy.CoordsY();
+                    Sprite sprite = enemy.Sprite();
+                    double startX = enemyX / mapSprite.SizeX() * getWidth();
+                    double startY = enemyY / mapSprite.SizeY() * getHeight();
+                    double endX = (enemyX + sprite.SizeX()) / mapSprite.SizeX() * getWidth();
+                    double endY = (enemyY + sprite.SizeY()) / mapSprite.SizeY() * getHeight();
+                    double weight = endX- startX;
+                    double height = endY - startY;
+                    URL enemyURL = Viewer.class.getResource(sprite.Path());
+                    if(enemyURL == null){
+                        throw new RuntimeException(new IOException());
+                    }
+                    BufferedImage enemyImage = ImageIO.read(enemyURL);
+                    g.drawImage(enemyImage, (int)startX, (int)startY, (int)weight, (int)height, this);
                 }
-                BufferedImage enemyImage = ImageIO.read(enemyURL);
-                g.drawImage(enemyImage, (int)startX, (int)startY, (int)endX, (int)endY, this);
             }
+            catch(Exception e){
+                System.out.println("ERROR " + e);
+                throw new IOException(e);
+            }
+
         }
     }
 
