@@ -22,6 +22,10 @@ public class Cell {
     public CellStatus GetStatus(){
         return status;
     }
+
+    public ArrayList<CellEffect> GetCellEffects(){
+        return effects;
+    }
     public void AddEffect(CellEffect effect){
         effects.add(effect);
     }

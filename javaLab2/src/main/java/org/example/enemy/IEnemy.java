@@ -7,12 +7,16 @@ import org.example.map.Cell;
 import java.io.IOException;
 
 public interface IEnemy {
-    void Create(Coords enemyStart, Cell cell) throws IOException;
+    void Create(Coords enemyStart) throws IOException;
     double CoordsX();
     double CoordsY();
     Sprite Sprite();
 
-    EnemyStatus Status();
-    void Move();
-    void ChangeSpriteTime(int timeTosleep);
+    int Damage();
+
+    void ChangeHp(int damage);
+
+    EnemyAnimationStatus Status();
+    void Move(Cell cell);
+    void ChangeSpriteTime(int timeTosleep) throws IOException;
 }

@@ -1,9 +1,10 @@
-package org.example;
+package org.example.animation;
 
 import org.example.Sprite;
 import org.example.characters.ICharacter;
 import org.example.enemy.Artist;
 import org.example.viewer.Viewer;
+import org.w3c.dom.Node;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +15,7 @@ public class Animation {
      private final int animationTime;
      private final LinkedList<Sprite> animationFiles;
      private ListIterator<Sprite> iterator;
+     private final boolean rec;
 
      private void ReadAnimation(String pathToFolder, int spriteSizeX, int spriteSizeY) throws IOException {
         URL animationURL = Artist.class.getResource(pathToFolder);
@@ -42,9 +44,10 @@ public class Animation {
             throw new IOException(pathToFolder + "is not a folder");
         }
      }
-     public Animation(int animationTime, String pathToFolder, int spriteSizeX, int spriteSizeY) throws IOException {
+     public Animation(int animationTime, String pathToFolder, int spriteSizeX, int spriteSizeY, boolean rec ) throws IOException {
          this.animationTime = animationTime;
          animationFiles = new LinkedList<>();
+         this.rec = rec;
          ReadAnimation(pathToFolder, spriteSizeX,  spriteSizeY);
          iterator = animationFiles.listIterator();
      }
@@ -55,9 +58,14 @@ public class Animation {
 
      public Sprite GetNextSprite(){
          if (iterator.hasNext()) {
-             Sprite sprite = iterator.next();
-             return sprite;
+             return iterator.next();
          }
-         return null;
+         else if(rec){
+             iterator = animationFiles.listIterator();
+             return iterator.next();
+         }
+         else{
+             return null;
+         }
      }
 }

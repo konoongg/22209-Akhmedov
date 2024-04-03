@@ -17,7 +17,6 @@ public class GameMap {
     private final int cellSize = 50;
     private Cell[] cells;
     private ArrayList<Coords> enemySpawn;
-    private Cell startCell;
     private void DefineName(BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if(line == null){
@@ -56,9 +55,9 @@ public class GameMap {
 
     //тут надо првоерять, что если в строке бред
     private void DefineCells(BufferedReader reader) throws IOException {
-        int cellX = sizeX / cellSize;
-        int cellY = sizeY / cellSize;
-        int countCell = cellX * cellY;
+        int countCellX = sizeX / cellSize;
+        int countCellY = sizeY / cellSize;
+        int countCell = countCellX * countCellY;
         String line;
         cells = new Cell[countCell];
         for(int i = 0; i < countCell; ++i){
@@ -67,7 +66,7 @@ public class GameMap {
             int coordX = Integer.parseInt(cell[0]);
             int coordY = Integer.parseInt(cell[1]);
             String status = cell[2];
-            cells[coordY * cellY  + coordX ] = new Cell(coordX, coordY, cellSize, CellStatus.valueOf(status));
+            cells[coordY * countCellY  + coordX ] = new Cell(coordX, coordY, cellSize, CellStatus.valueOf(status));
         }
     }
 
@@ -77,7 +76,6 @@ public class GameMap {
         for(int i = 0; i < countSpawns; ++i){
             line = reader.readLine();
             String[] cell = line.split(" ");
-
             int coordX = Integer.parseInt(cell[0]);
             int coordY = Integer.parseInt(cell[1]);
             Coords coordsSpawn = new Coords(coordX * cellSize, coordY * cellSize);
@@ -118,6 +116,18 @@ public class GameMap {
     }
     public ArrayList<Coords> GetEnemySpawn(){
         return enemySpawn;
+    }
+
+    public Cell GetCell(Coords coords){
+        int Y = (int)coords.Y() / cellSize;
+        int X = (int)coords.X() / cellSize;
+        int countCellY = sizeY / cellSize;
+        int countCellX = sizeX / cellSize;
+        int cellIndex = Y *  countCellY + X;
+        if(cellIndex > countCellY * countCellX){
+            return  new Cell(0,0,0, CellStatus.NOT_IN_MAP);
+        }
+        return cells[cellIndex];
     }
 
 }

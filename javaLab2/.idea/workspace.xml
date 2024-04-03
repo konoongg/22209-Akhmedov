@@ -5,22 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="acee78b5-86a4-4e6d-bd28-391b9bcfb0c4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/Sprite.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/characters/CharacterFactory.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/charactersConfig.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/Player.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/animation/AnimationReader.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Animation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/animation/Animation.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/GameContoller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/GameContoller.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/GameStat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/GameStat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/ImagePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/viewer/ImagePanel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Viewer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/viewer/Viewer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/characters/ICharacter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/characters/ICharacter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/enemy/Artist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/enemy/Artist.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/enemy/EnemyFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/enemy/EnemyFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/enemy/EnemyStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/enemy/EnemyAnimationStatus.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/enemy/IEnemy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/enemy/IEnemy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/map/Cell.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/map/Cell.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/map/CellStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/map/CellStatus.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/map/GameMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/map/GameMap.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/mapConfig.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/mapConfig.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/viewer/Viewer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/viewer/Viewer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/Images/Enemys/Artist/animationConfig.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/Images/Enemys/Artist/animationConfig.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,6 +29,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Enum" />
         <option value="Class" />
       </list>
     </option>
@@ -104,6 +104,10 @@
         <breakpoint enabled="true" type="java-exception">
           <properties class="java.lang.NullPointerException" package="java.lang" />
           <option name="timeStamp" value="3" />
+        </breakpoint>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="java.util.ConcurrentModificationException" package="java.util" />
+          <option name="timeStamp" value="14" />
         </breakpoint>
       </breakpoints>
     </breakpoint-manager>

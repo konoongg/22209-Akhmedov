@@ -1,5 +1,5 @@
 package org.example.enemy;
 
-public enum EnemyStatus {
+public enum EnemyAnimationStatus {
     Spawn, Walk, Die;
 }

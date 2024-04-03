@@ -47,7 +47,14 @@ public class Viewer {
         map.setBorder(new LineBorder(Color.BLACK));
     }
 
-    public void start(GameMap gameMap, ArrayList<IEnemy> enemyList,  ArrayList<ICharacter> characterList) throws IOException {
+    public void CreateFinal(){
+        gameField.getContentPane().removeAll();
+
+        gameField.revalidate();
+        gameField.repaint();
+    }
+
+    public void Start(GameMap gameMap, ArrayList<IEnemy> enemyList,  ArrayList<ICharacter> characterList) throws IOException {
         gameField = new JFrame(gameMap.GetName());
         gameField.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gameField.setExtendedState(JFrame.MAXIMIZED_BOTH);

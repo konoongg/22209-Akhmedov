@@ -1,88 +1,76 @@
 package org.example.enemy;
 
-import org.example.Animation;
+import org.example.animation.Animation;
+import org.example.animation.AnimationReader;
 import org.example.Coords;
 import org.example.Sprite;
 import org.example.map.Cell;
+import org.example.map.CellEffect;
 import org.example.map.CellStatus;
-import org.example.viewer.Viewer;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Artist  implements  IEnemy{
     private Coords coords;
-    private Cell curCell;
     private int hp;
-    private float speed;
-    private EnemyStatus status;
+    private int damage;
+    private float maxSpeed;
+    private float curSpeed;
+    private EnemyAnimationStatus status;
     private Sprite sprite;
     private int spriteTime;
     private Map<String, Animation> animations;
 
     private void DefineAnimation() throws IOException {
         animations = new HashMap<>();
-        AnimationRead();
-        status = EnemyStatus.Spawn;
+        AnimationReader animationReader = new AnimationReader("/Images/Enemys/Artist", animations);
+        status = EnemyAnimationStatus.Spawn;
         Animation animation = animations.get("Spawn");
         sprite = animation.GetNextSprite();
         spriteTime = animation.GetTime();
     }
 
     @Override
-    public EnemyStatus Status(){
+    public EnemyAnimationStatus Status(){
         return status;
     }
     @Override
-    public void Create(Coords enemyStart, Cell cell) throws IOException {
+    public void Create(Coords enemyStart) throws IOException {
         DefineAnimation();
         coords = new Coords(enemyStart.X(), enemyStart.Y());
-        curCell = cell;
         hp = 100;
-        speed = 10;
-    }
-    private void AnimationRead() throws IOException {
-        String path = "/Images/Enemys/Artist";
-        URL artistURL = Artist.class.getResource(path);
-        if(artistURL == null){
-            throw new IOException(path + " is null ");
-        }
-        File folder = new File(artistURL.getPath());
-        if(folder.isDirectory()){
-            File[] files = folder.listFiles();
-            if(files.length == 0){
-                throw new IOException(path + "is empty");
-            }
-            for(File file : files){
-                String name = file.getName();
-                Animation animation = new Animation(50,"/Images/Enemys/Artist/" + name, 50, 50);
-                animations.put(name, animation);
-            }
-        }
-        else{
-            throw new IOException(path + " is not a folder");
-        }
+        maxSpeed = 10;
+        curSpeed = maxSpeed;
+        damage = 10;
     }
 
-    private void ChangeStatus(){
-        if(status == EnemyStatus.Spawn){
-            status = EnemyStatus.Walk;
+    private void ChangeStatus() throws IOException {
+        if(status == EnemyAnimationStatus.Spawn){
+            status = EnemyAnimationStatus.Walk;
         }
         else if(hp <= 0){
-            status = EnemyStatus.Die;
+            status = EnemyAnimationStatus.Die;
         }
+        Animation animation = animations.get(status.toString());
+        if(animation == null){
+            throw new IOException("empty animation");
+        }
+        sprite  = animation.GetNextSprite();
     }
 
     @Override
-    public void ChangeSpriteTime(int timeTosleep){
+    public void ChangeSpriteTime(int timeTosleep) throws IOException {
         if(spriteTime != 0){
             spriteTime -= timeTosleep;
         }
         else{
             Animation animation = animations.get(status.toString());
+            if(animation == null){
+                throw new IOException("empty animation");
+            }
             Sprite newSprite = animation.GetNextSprite();
             if(newSprite == null){
                 ChangeStatus();
@@ -94,20 +82,31 @@ public class Artist  implements  IEnemy{
         }
     }
 
+    private void CheckCellEffects(Cell cell){
+        ArrayList<CellEffect> cellEffects = cell.GetCellEffects();
+        if(cellEffects.contains(CellEffect.ACID)){
+            ChangeHp(5);
+        }
+        if(cellEffects.contains(CellEffect.SLOW)){
+            curSpeed = maxSpeed / 2;
+        }
+    }
+
     @Override
-    public void Move(){
-        CellStatus cellStatus = curCell.GetStatus();
+    public void Move(Cell cell){
+        CheckCellEffects(cell);
+        CellStatus cellStatus = cell.GetStatus();
         if(cellStatus == CellStatus.ROAD_UP){
-            coords.ChangeY(coords.Y() + speed);
+            coords.ChangeY(coords.Y() + curSpeed);
         }
         else if(cellStatus == CellStatus.ROAD_DOWN){
-            coords.ChangeY(coords.Y() - speed);
+            coords.ChangeY(coords.Y() - curSpeed);
         }
         else if(cellStatus == CellStatus.ROAD_LEFT){
-            coords.ChangeY(coords.X() - speed);
+            coords.ChangeY(coords.X() - curSpeed);
         }
         else if(cellStatus == CellStatus.ROAD_DOWN){
-            coords.ChangeY(coords.X() + speed);
+            coords.ChangeY(coords.X() + curSpeed);
         }
     }
 
@@ -124,5 +123,15 @@ public class Artist  implements  IEnemy{
     @Override
     public Sprite Sprite(){
         return sprite;
+    }
+
+    @Override
+    public int Damage() {
+        return damage;
+    }
+
+    @Override
+    public void ChangeHp(int damage) {
+        hp -= damage;
     }
 }

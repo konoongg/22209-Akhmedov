@@ -14,11 +14,13 @@ import java.util.Random;
 
 public class GameStat {
     private final GameMap gameMap;
+    private final Player player;
     private final EnemyFactory enemyFactory;
     private final CharacterFactory characterFactory;
     private final ArrayList<IEnemy> enemyList;
     private final ArrayList<ICharacter> characterList;
     public GameStat (String config) throws IOException {
+        player = new Player(100, 200);
         gameMap = new GameMap(config);
         enemyFactory = new EnemyFactory();
         characterFactory = new CharacterFactory();
@@ -36,11 +38,17 @@ public class GameStat {
     public void CreateNewEnemy() throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         Coords enemyCords = GetRandomCoords();
         int cellSize = gameMap.GetCellSize();
-        Cell startCell = new Cell(enemyCords.X() / cellSize, enemyCords.Y() / cellSize, cellSize, );
         IEnemy enemy = enemyFactory.CreateRandomEnemy(enemyCords);
         enemyList.add(enemy);
     }
 
+    public void DeleteEnemy(IEnemy enemy){
+        enemyList.remove(enemy);
+    }
+
+    public Player ReturnPlayer(){
+        return player;
+    }
     public void CreateNewCharacter(Coords characterCoords, String name) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         ICharacter character = characterFactory.CreateCharacter(name, characterCoords);
         characterList.add(character);
