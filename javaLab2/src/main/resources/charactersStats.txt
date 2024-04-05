@@ -1,0 +1,1 @@
+Scientist 100 40 /Images/Scientist/icon.png 1000

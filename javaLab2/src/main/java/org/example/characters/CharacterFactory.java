@@ -22,7 +22,6 @@ public class CharacterFactory {
         pathToClass = new Properties();
         ReadConfig();
     }
-
     public ICharacter CreateCharacter(String characterName, Coords characterStart) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         String className = pathToClass.getProperty(characterName);
         ICharacter character= (ICharacter) Class.forName(className).getDeclaredConstructor().newInstance();

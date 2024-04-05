@@ -39,7 +39,7 @@ public class GameContoller {
             enemy.ChangeSpriteTime(timeTosleep);
             if(enemy.Status() == EnemyAnimationStatus.Walk){
                 Coords enemyCooeds = new Coords(enemy.CoordsX(), enemy.CoordsY());
-                Cell curCell = gameStat.GetMap().GetCell(enemyCooeds);
+                Cell curCell = gameStat.ReturnMap().GetCell(enemyCooeds);
                 CellStatus curStatus = curCell.GetStatus();
                 if(curStatus == CellStatus.NOT_IN_MAP){
                     Player player = gameStat.ReturnPlayer();
@@ -53,19 +53,19 @@ public class GameContoller {
             }
         }
     }
-    private void StartMonitoring(GameStat gameStat, Viewer viewer, Sprite mapSprite) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+    private void StartMonitoring(GameStat gameStat, Viewer viewer) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         SpawnEnemy(gameStat);
         CheckEnemy(gameStat, viewer);
-        viewer.CreateFieldStructur(mapSprite, gameStat.ReturnEnemyList(), gameStat.ReturnCharacterList());
+        viewer.CreateFieldStructur(gameStat);
     }
     public GameContoller(GameStat gameStat, Viewer viewer) throws IOException, InterruptedException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         timeToSpawnEnemy = 1000;
         timeTosleep = 50;
         enemySpawnWait = 1000;
-        viewer.Start(gameStat.GetMap(), gameStat.ReturnEnemyList(), gameStat.ReturnCharacterList());
-        Sprite mapSprite = gameStat.GetMap().GetSprite();
+        viewer.Start(gameStat);
+        Sprite mapSprite = gameStat.ReturnMap().GetSprite();
         while (true){
-            StartMonitoring(gameStat, viewer, mapSprite);
+            // StartMonitoring(gameStat, viewer);
             Thread.sleep(timeTosleep);
         }
     }
