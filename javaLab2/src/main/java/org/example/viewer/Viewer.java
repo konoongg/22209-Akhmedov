@@ -4,11 +4,14 @@ import org.example.Sprite;
 import org.example.characters.CharactersParams;
 import org.example.characters.ICharacter;
 import org.example.enemy.IEnemy;
+import org.example.map.Cell;
 import org.example.map.GameMap;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -20,6 +23,16 @@ public class Viewer {
     private JFrame gameField;
     private JPanel map;
     private JScrollPane buyList;
+    private boolean visibleNet;
+    private String charName;
+
+    private String ReturnName(JPanel charPanel) {
+        JPanel panel = (JPanel) charPanel.getComponent(1);
+        JLabel label = (JLabel) (panel.getComponent(0));
+        String[] partOfString = label.getText().split(" ");
+        String name = partOfString[1];
+        return name;
+    }
 
     private void CreateIcon(JPanel charPanel,GridBagConstraints gbc,  CharactersParams params){
         gbc.gridx = 0;
@@ -55,33 +68,35 @@ public class Viewer {
     }
 
 
-    private void CreateCharPanel(JPanel buyListCont,  int blockHeight, CharactersParams params ){
+    private void CreateCharPanel(GameStat gameStat, JPanel buyListCont,  int blockHeight, CharactersParams params ){
         JPanel charPanel = new JPanel();
         charPanel.setPreferredSize(new Dimension(0, blockHeight)); // Установите предпочтительный размер для JPanel
         charPanel.setBackground(Color.RED);
         charPanel.setBorder(new LineBorder(Color.BLACK));
         charPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
+        CreateIcon(charPanel, gbc, params);
+        CreateInfo(charPanel, gbc, params);
         charPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println("Нажат панель: " + charPanel);
+                charName = ReturnName(charPanel);
+                visibleNet = true;
             }
         });
-        CreateIcon(charPanel, gbc, params);
-        CreateInfo(charPanel, gbc, params);
         buyListCont.add(charPanel);
     }
 
-    private void CreateList(ArrayList<CharactersParams> unicCharacters){
+    private void CreateList(GameStat gameStat){
+        ArrayList<CharactersParams> unicCharacters = gameStat.ReturnUnicCharacters();
         JPanel buyListCont = new JPanel();
         buyListCont.setBackground(Color.DARK_GRAY);
         int countRows = max(4, unicCharacters.size());
-        buyListCont.setLayout(new GridLayout(5, 1));
+        buyListCont.setLayout(new GridLayout(countRows, 1));
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int blockHeight = screenSize.height / 5;
         for(CharactersParams params : unicCharacters){
-           CreateCharPanel(buyListCont, blockHeight, params );
+           CreateCharPanel(gameStat, buyListCont, blockHeight, params );
         }
         buyList = new JScrollPane(buyListCont);
         buyList.setBorder(new LineBorder(Color.BLACK));
@@ -93,7 +108,8 @@ public class Viewer {
         Sprite mapSprite = gameStat.ReturnMap().GetSprite();
         ArrayList<IEnemy> enemyList = gameStat.ReturnEnemyList();
         ArrayList<ICharacter> characterList = gameStat.ReturnCharacterList();
-        CreateMap(mapSprite, enemyList, characterList);
+        Cell[] cells = gameStat.ReturnMap().GetAllCell();
+        CreateMap(mapSprite, enemyList, characterList, cells);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -109,7 +125,8 @@ public class Viewer {
         ArrayList<IEnemy> enemyList = gameStat.ReturnEnemyList();
         ArrayList<ICharacter> characterList = gameStat.ReturnCharacterList();
         gameField.setLayout(new GridBagLayout());
-        CreateMap(mapSprite, enemyList, characterList);
+        Cell[] cells = gameStat.ReturnMap().GetAllCell();
+        CreateMap(mapSprite, enemyList, characterList, cells);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -117,15 +134,15 @@ public class Viewer {
         gbc.weightx = 0.7;
         gbc.fill = GridBagConstraints.BOTH;
         gameField.add(map, gbc);
-        CreateList(gameStat.ReturnUnicCharacters());
+        CreateList(gameStat);
         gbc.gridx = 1;
         gbc.weighty = 1;
         gbc.weightx = 0.3;
         gameField.add(buyList, gbc);
     }
 
-    private void CreateMap(Sprite mapSprite, ArrayList<IEnemy> enemyList,  ArrayList<ICharacter> characterList){
-        map = new ImagePanel(mapSprite, enemyList, characterList);
+    private void CreateMap(Sprite mapSprite, ArrayList<IEnemy> enemyList,  ArrayList<ICharacter> characterList, Cell[] cells){
+        map = new ImagePanel(mapSprite, enemyList, cells, characterList, visibleNet, 50);
         map.setBackground(Color.BLUE);
         map.setBorder(new LineBorder(Color.BLACK));
     }
@@ -136,11 +153,33 @@ public class Viewer {
         gameField.repaint();
     }
 
+    private void KeyListener(){
+        gameField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    visibleNet = false;
+                    charName = null;
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+            }
+        });
+    }
+
     public void Start(GameStat gamestat) throws IOException {
+        visibleNet = false;
+        charName = null;
         GameMap gameMap = gamestat.ReturnMap();
         gameField = new JFrame(gameMap.GetName());
         gameField.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gameField.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        KeyListener();
         CreateFieldStructur(gamestat);
         gameField.setVisible(true);
     }

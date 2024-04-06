@@ -1,8 +1,11 @@
 package org.example.viewer;
 
+import org.example.Coords;
 import org.example.Sprite;
 import org.example.characters.ICharacter;
 import org.example.enemy.IEnemy;
+import org.example.map.Cell;
+import org.example.map.CellStatus;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +21,11 @@ public class ImagePanel extends JPanel {
     private final Sprite mapSprite;
     private final ArrayList<IEnemy> enemyList;
     private ArrayList<ICharacter> characterList;
-    public ImagePanel(Sprite mapSprite, ArrayList<IEnemy> enemyList,  ArrayList<ICharacter> characterList) {
+    private boolean visibleNet;
+    private double sizeNet;
+
+    private Cell[] cells;
+    public ImagePanel(Sprite mapSprite, ArrayList<IEnemy> enemyList, Cell[] cells, ArrayList<ICharacter> characterList, boolean visibleNet, double sizeNet ) {
         try {
             URL mapURL = Viewer.class.getResource(mapSprite.Path());
             if(mapURL == null){
@@ -27,7 +34,10 @@ public class ImagePanel extends JPanel {
             map = ImageIO.read(mapURL);
             this.characterList = new ArrayList<>(characterList);
             this.mapSprite = mapSprite;
+            this.cells = cells;
             this.enemyList = new ArrayList<>(enemyList);
+            this.visibleNet = visibleNet;
+            this.sizeNet = sizeNet;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -68,6 +78,34 @@ public class ImagePanel extends JPanel {
         }
     }
 
+    private Color CalculateCellColor(CellStatus status){
+        if(status == CellStatus.FREE){
+            return new Color(0, 255, 0, 128);
+        }
+        else{
+            return new Color(255, 0, 0, 64);
+        }
+    }
+
+    private void PrintNet(Graphics g){
+        for (Cell cell : cells){
+            double cofMonX = 1 / (double)mapSprite.SizeX() * getWidth();
+            double cofMonY = 1 / (double)mapSprite.SizeY() * getHeight();
+            Coords start = cell.GetStartCoords();
+            double startX = start.X() * cofMonX ;
+            double startY = start.Y() * cofMonY;
+            Coords end = cell.GetEndCoords();
+            double endX = end.X() * cofMonX;
+            double endY = end.Y() * cofMonY;
+            double weight = endX - startX;
+            double height = endY - startY;
+            Color cellColor = CalculateCellColor(cell.GetStatus());
+            g.setColor(cellColor);
+            g.fillRect((int)startX, (int)startY, (int)weight, (int)height);
+            g.drawRect((int)startX, (int)startY, (int)weight, (int)height);
+        }
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -76,6 +114,9 @@ public class ImagePanel extends JPanel {
             PrintEnemys(g);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+        if(visibleNet){
+            PrintNet(g);
         }
     }
 }

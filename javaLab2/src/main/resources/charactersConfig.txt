@@ -1,1 +1,1 @@
-scientist org.example.characters.Scientist
+Scientist org.example.characters.Scientist

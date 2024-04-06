@@ -129,5 +129,7 @@ public class GameMap {
         }
         return cells[cellIndex];
     }
-
+     public Cell[] GetAllCell(){
+        return cells;
+     }
 }

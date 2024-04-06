@@ -32,4 +32,12 @@ public class Cell {
     public void DeleteEffect(CellEffect effect){
         effects.remove(effect);
     }
+
+    public Coords GetStartCoords(){
+        return start;
+    }
+
+    public  Coords GetEndCoords(){
+        return end;
+    }
 }
