@@ -9,8 +9,9 @@ import org.example.map.GameMap;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import static java.lang.Math.max;
@@ -19,31 +20,94 @@ public class Viewer {
     private JFrame gameField;
     private JPanel map;
     private JScrollPane buyList;
-    private  URL mapUrl;
+
+    private void CreateIcon(JPanel charPanel,GridBagConstraints gbc,  CharactersParams params){
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weighty = 1;
+        gbc.weightx = 0.3;
+        gbc.fill = GridBagConstraints.BOTH;
+        JPanel icon = new IconPanel(params.GetPath());
+        icon.setBorder(new LineBorder(Color.BLACK));
+        charPanel.add(icon, gbc);
+    }
+
+    private void CreateLabel( JPanel info, String text, boolean visidle){
+        JLabel label = new JLabel(text);
+        label.setOpaque(visidle);
+        label.setBackground(Color.YELLOW);
+        info.add(label);
+
+    }
+    private void CreateInfo(JPanel charPanel,GridBagConstraints gbc,  CharactersParams params){
+        JPanel info = new JPanel();
+        gbc.gridx = 1;
+        gbc.weighty = 1;
+        gbc.weightx = 0.7;
+        info.setBackground(Color.GRAY);
+        info.setLayout(new GridLayout(4, 1));
+        info.setBorder(new LineBorder(Color.BLACK));
+        CreateLabel(info, "NAME: " + params.GetName(), true);
+        CreateLabel(info, "DAMAGE: " + params.GetDamage(), false);
+        CreateLabel(info, "DELAY: " + params.GetDelay() / 1000, false);
+        CreateLabel(info, "COAST: " + params.GetCoast(), false);
+        charPanel.add(info, gbc);
+    }
+
+
+    private void CreateCharPanel(JPanel buyListCont,  int blockHeight, CharactersParams params ){
+        JPanel charPanel = new JPanel();
+        charPanel.setPreferredSize(new Dimension(0, blockHeight)); // Установите предпочтительный размер для JPanel
+        charPanel.setBackground(Color.RED);
+        charPanel.setBorder(new LineBorder(Color.BLACK));
+        charPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        charPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                System.out.println("Нажат панель: " + charPanel);
+            }
+        });
+        CreateIcon(charPanel, gbc, params);
+        CreateInfo(charPanel, gbc, params);
+        buyListCont.add(charPanel);
+    }
+
     private void CreateList(ArrayList<CharactersParams> unicCharacters){
         JPanel buyListCont = new JPanel();
         buyListCont.setBackground(Color.DARK_GRAY);
-        int countRows = max(5, unicCharacters.size());
-        buyListCont.setLayout(new GridLayout(20, 1));
+        int countRows = max(4, unicCharacters.size());
+        buyListCont.setLayout(new GridLayout(5, 1));
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int blockHeight = screenSize.height / 5;
-        for(int i = 0; i < 20; ++i){
-            JPanel imagePanel = new JPanel();
-            imagePanel.setPreferredSize(new Dimension(0, blockHeight)); // Установите предпочтительный размер для JPanel
-            imagePanel.setBackground(Color.RED);
-            imagePanel.setBorder(new LineBorder(Color.BLACK));
-            buyListCont.add(imagePanel);
+        for(CharactersParams params : unicCharacters){
+           CreateCharPanel(buyListCont, blockHeight, params );
         }
         buyList = new JScrollPane(buyListCont);
         buyList.setBorder(new LineBorder(Color.BLACK));
         buyList.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         buyList.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     }
-    public void CreateFieldStructur(GameStat gameStat) throws IOException {
+    public void RepaintMap(GameStat gameStat){
+        gameField.getContentPane().remove(map);
         Sprite mapSprite = gameStat.ReturnMap().GetSprite();
         ArrayList<IEnemy> enemyList = gameStat.ReturnEnemyList();
         ArrayList<ICharacter> characterList = gameStat.ReturnCharacterList();
-        gameField.getContentPane().removeAll();
+        CreateMap(mapSprite, enemyList, characterList);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weighty = 1;
+        gbc.weightx = 0.7;
+        gbc.fill = GridBagConstraints.BOTH;
+        gameField.add(map, gbc);
+        gameField.revalidate();
+        gameField.repaint();
+    }
+    private void CreateFieldStructur(GameStat gameStat) throws IOException {
+        Sprite mapSprite = gameStat.ReturnMap().GetSprite();
+        ArrayList<IEnemy> enemyList = gameStat.ReturnEnemyList();
+        ArrayList<ICharacter> characterList = gameStat.ReturnCharacterList();
         gameField.setLayout(new GridBagLayout());
         CreateMap(mapSprite, enemyList, characterList);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -58,8 +122,6 @@ public class Viewer {
         gbc.weighty = 1;
         gbc.weightx = 0.3;
         gameField.add(buyList, gbc);
-        gameField.revalidate();
-        gameField.repaint();
     }
 
     private void CreateMap(Sprite mapSprite, ArrayList<IEnemy> enemyList,  ArrayList<ICharacter> characterList){

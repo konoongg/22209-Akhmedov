@@ -56,7 +56,7 @@ public class GameContoller {
     private void StartMonitoring(GameStat gameStat, Viewer viewer) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         SpawnEnemy(gameStat);
         CheckEnemy(gameStat, viewer);
-        viewer.CreateFieldStructur(gameStat);
+        viewer.RepaintMap(gameStat);
     }
     public GameContoller(GameStat gameStat, Viewer viewer) throws IOException, InterruptedException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         timeToSpawnEnemy = 1000;
@@ -65,7 +65,7 @@ public class GameContoller {
         viewer.Start(gameStat);
         Sprite mapSprite = gameStat.ReturnMap().GetSprite();
         while (true){
-            // StartMonitoring(gameStat, viewer);
+            StartMonitoring(gameStat, viewer);
             Thread.sleep(timeTosleep);
         }
     }
