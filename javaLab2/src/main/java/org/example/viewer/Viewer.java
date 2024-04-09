@@ -1,6 +1,7 @@
 package org.example.viewer;
 import org.example.GameStat;
 import org.example.Sprite;
+import org.example.ViewerListener;
 import org.example.characters.CharactersParams;
 import org.example.characters.ICharacter;
 import org.example.enemy.IEnemy;
@@ -21,17 +22,22 @@ import static java.lang.Math.max;
 
 public class Viewer {
     private JFrame gameField;
-    private JPanel map;
+    private ImagePanel map;
     private JScrollPane buyList;
     private boolean visibleNet;
-    private String charName;
+    private String createdName;
+    private ViewerListener listener;
 
-    private String ReturnName(JPanel charPanel) {
+    private String ReturnCharName(JPanel charPanel) {
         JPanel panel = (JPanel) charPanel.getComponent(1);
         JLabel label = (JLabel) (panel.getComponent(0));
         String[] partOfString = label.getText().split(" ");
         String name = partOfString[1];
         return name;
+    }
+
+    private void DoVisibleNet(){
+        visibleNet = true;
     }
 
     private void CreateIcon(JPanel charPanel,GridBagConstraints gbc,  CharactersParams params){
@@ -80,8 +86,8 @@ public class Viewer {
         charPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                charName = ReturnName(charPanel);
-                visibleNet = true;
+                createdName = ReturnCharName(charPanel);
+                DoVisibleNet();
             }
         });
         buyListCont.add(charPanel);
@@ -109,7 +115,7 @@ public class Viewer {
         ArrayList<IEnemy> enemyList = gameStat.ReturnEnemyList();
         ArrayList<ICharacter> characterList = gameStat.ReturnCharacterList();
         Cell[] cells = gameStat.ReturnMap().GetAllCell();
-        CreateMap(mapSprite, enemyList, characterList, cells);
+        map.Repaint(enemyList, cells, characterList,  visibleNet, 50);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -145,6 +151,16 @@ public class Viewer {
         map = new ImagePanel(mapSprite, enemyList, cells, characterList, visibleNet, 50);
         map.setBackground(Color.BLUE);
         map.setBorder(new LineBorder(Color.BLACK));
+        map.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                float x = (float)e.getX() / map.getWidth();
+                float y = (float)e.getY() / map.getHeight();
+                listener.HearCreateChar(createdName);
+                System.out.println("Клик по координатам: (" + x + ", " + y + ")");
+            }
+        });
+
     }
 
     public void CreateFinal(){
@@ -163,7 +179,6 @@ public class Viewer {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     visibleNet = false;
-                    charName = null;
                 }
             }
             @Override
@@ -172,9 +187,9 @@ public class Viewer {
         });
     }
 
-    public void Start(GameStat gamestat) throws IOException {
+    public void Start(GameStat gamestat, ViewerListener listener) throws IOException {
         visibleNet = false;
-        charName = null;
+        this.listener = listener;
         GameMap gameMap = gamestat.ReturnMap();
         gameField = new JFrame(gameMap.GetName());
         gameField.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

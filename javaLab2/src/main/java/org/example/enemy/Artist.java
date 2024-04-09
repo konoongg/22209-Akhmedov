@@ -103,10 +103,10 @@ public class Artist  implements  IEnemy{
             coords.ChangeY(coords.Y() - curSpeed);
         }
         else if(cellStatus == CellStatus.ROAD_LEFT){
-            coords.ChangeY(coords.X() - curSpeed);
+            coords.ChangeX(coords.X() - curSpeed);
         }
-        else if(cellStatus == CellStatus.ROAD_DOWN){
-            coords.ChangeY(coords.X() + curSpeed);
+        else if(cellStatus == CellStatus.ROAD_RIGHT){
+            coords.ChangeX(coords.X() + curSpeed);
         }
     }
 

@@ -87,14 +87,9 @@ public class GameStat {
         ICharacter character = characterFactory.CreateCharacter(name, characterCoords);
         characterList.add(character);
     }
-    public void CreateNewCharacter(ICharacter character){
-        characterList.add(character);
-    }
-
     public ArrayList<ICharacter> ReturnCharacterList(){
         return characterList;
     }
-
     public ArrayList<IEnemy> ReturnEnemyList(){
         return enemyList;
     }

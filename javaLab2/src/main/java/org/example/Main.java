@@ -12,7 +12,7 @@ public class Main {
         try{
             GameStat gameStat = new GameStat("/mapConfig.txt");
             Viewer viewer = new Viewer();
-            GameContoller gameContoller = new GameContoller(gameStat, viewer);
+            GameController gameContoller = new GameController(gameStat, viewer);
         } catch (IOException | InterruptedException e) {
             System.out.println("somethink error: " + e);
         } catch (ClassNotFoundException e) {

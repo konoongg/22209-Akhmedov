@@ -18,8 +18,8 @@ import javax.imageio.ImageIO;
 
 public class ImagePanel extends JPanel {
     private final BufferedImage map;
-    private final Sprite mapSprite;
-    private final ArrayList<IEnemy> enemyList;
+    private Sprite mapSprite;
+    private ArrayList<IEnemy> enemyList;
     private ArrayList<ICharacter> characterList;
     private boolean visibleNet;
     private double sizeNet;
@@ -41,6 +41,15 @@ public class ImagePanel extends JPanel {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void Repaint(ArrayList<IEnemy> enemyList, Cell[] cells, ArrayList<ICharacter> characterList, boolean visibleNet, double sizeNet ){
+        this.characterList = new ArrayList<>(characterList);
+        this.mapSprite = mapSprite;
+        this.cells = cells;
+        this.enemyList = new ArrayList<>(enemyList);
+        this.visibleNet = visibleNet;
+        this.sizeNet = sizeNet;
     }
 
     private void PrintMap(Graphics g){
