@@ -124,7 +124,7 @@ public class GameMap {
         int countCellY = sizeY / cellSize;
         int countCellX = sizeX / cellSize;
         int cellIndex = Y *  countCellY + X;
-        if(cellIndex > countCellY * countCellX){
+        if(X > countCellX - 1 || Y > countCellY - 1 ){
             return  new Cell(0,0,0, CellStatus.NOT_IN_MAP);
         }
         return cells[cellIndex];
@@ -132,4 +132,12 @@ public class GameMap {
      public Cell[] GetAllCell(){
         return cells;
      }
+
+    public int GetSizeX() {
+        return sizeX;
+    }
+
+    public int GetSizey(){
+        return sizeY;
+    }
 }

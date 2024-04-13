@@ -2,6 +2,8 @@ package org.example;
 
 import org.example.GameController;
 
+import java.lang.reflect.InvocationTargetException;
+
 public class ViewerListener {
     private GameController gameCrontoller;
 
@@ -9,7 +11,11 @@ public class ViewerListener {
         this.gameCrontoller = gameCrontoller;
     }
 
-    public void HearCreateChar(String name, float xConf, float yConf){
-        gameCrontoller.
+    public String HearCreateChar(String name, Coords confs){
+        try {
+            return gameCrontoller.CharPanelClick(name, confs);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

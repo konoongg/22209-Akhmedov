@@ -1,9 +1,11 @@
 package org.example;
 
+import org.example.characters.CreatingCharStatus;
 import org.example.enemy.EnemyAnimationStatus;
 import org.example.enemy.IEnemy;
 import org.example.map.Cell;
 import org.example.map.CellStatus;
+import org.example.map.GameMap;
 import org.example.viewer.Viewer;
 
 import javax.swing.*;
@@ -18,8 +20,18 @@ public class GameController {
     GameStat gameStat;
     Viewer viewer;
 
-    public void CharPanelClick(String name, Coords coords) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        gameStat.CreateNewCharacter(coords, name);
+    public String CharPanelClick(String name, Coords conf) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
+        GameMap map = gameStat.ReturnMap();
+        double x = conf.X() * map.GetSizeX();
+        double y = conf.Y() * map.GetSizey();
+        Cell startCell = map.GetCell(new Coords(x,y));
+        CreatingCharStatus  status = gameStat.CreateNewCharacter(startCell, name);
+        if(status == CreatingCharStatus.NOT_CHAR_SPAWN){
+            return "can't create on this plase";
+        }
+        else{
+            return "created" + name;
+        }
     }
 
     private void SpawnEnemy() throws IOException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {

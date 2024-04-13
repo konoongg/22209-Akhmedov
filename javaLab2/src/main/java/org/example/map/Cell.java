@@ -40,4 +40,8 @@ public class Cell {
     public  Coords GetEndCoords(){
         return end;
     }
+
+    public int GetSize(){
+        return (int)( end.X() - start.X());
+    }
 }

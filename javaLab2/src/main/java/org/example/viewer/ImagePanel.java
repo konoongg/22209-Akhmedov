@@ -2,6 +2,7 @@ package org.example.viewer;
 
 import org.example.Coords;
 import org.example.Sprite;
+import org.example.characters.CharactersParams;
 import org.example.characters.ICharacter;
 import org.example.enemy.IEnemy;
 import org.example.map.Cell;
@@ -58,6 +59,35 @@ public class ImagePanel extends JPanel {
         }
     }
 
+
+    private void PrintCharacter(Graphics g) throws IOException {
+        if(!characterList.isEmpty()){
+            try{
+                for(ICharacter character : characterList){
+                    Coords startCoords = character.GetStartCoords();
+                    Coords endCoords = character.GetEndCoords();
+                    double startX = startCoords.X() / mapSprite.SizeX() * getWidth();
+                    double startY = startCoords.Y() / mapSprite.SizeY() * getHeight();
+                    double endX = endCoords.X() / mapSprite.SizeX() * getWidth();
+                    double endY = endCoords.Y() / mapSprite.SizeY() * getHeight();
+                    double weight = endX - startX;
+                    double height = endY - startY;
+                    Sprite sprite = character.Sprite();
+                    URL enemyURL = Viewer.class.getResource(sprite.Path());
+                    if(enemyURL == null){
+                        throw new RuntimeException(new IOException());
+                    }
+                    BufferedImage enemyImage = ImageIO.read(enemyURL);
+                    g.drawImage(enemyImage, (int)startX, (int)startY, (int)weight, (int)height, this);
+                }
+            }
+            catch(Exception e){
+                System.out.println("ERROR " + e);
+                throw new IOException(e);
+            }
+        }
+    }
+
     private void PrintEnemys(Graphics g) throws IOException {
         if(!enemyList.isEmpty()){
             try{
@@ -91,6 +121,9 @@ public class ImagePanel extends JPanel {
         if(status == CellStatus.FREE){
             return new Color(0, 255, 0, 128);
         }
+        else if(status == CellStatus.BORROW){
+            return new Color(255, 50, 230, 64);
+        }
         else{
             return new Color(255, 0, 0, 64);
         }
@@ -101,7 +134,7 @@ public class ImagePanel extends JPanel {
             double cofMonX = 1 / (double)mapSprite.SizeX() * getWidth();
             double cofMonY = 1 / (double)mapSprite.SizeY() * getHeight();
             Coords start = cell.GetStartCoords();
-            double startX = start.X() * cofMonX ;
+            double startX = start.X() * cofMonX;
             double startY = start.Y() * cofMonY;
             Coords end = cell.GetEndCoords();
             double endX = end.X() * cofMonX;
@@ -126,6 +159,13 @@ public class ImagePanel extends JPanel {
         }
         if(visibleNet){
             PrintNet(g);
+        }
+        else{
+            try {
+                PrintCharacter(g);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

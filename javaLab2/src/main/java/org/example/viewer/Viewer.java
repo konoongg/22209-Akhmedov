@@ -1,4 +1,5 @@
 package org.example.viewer;
+import org.example.Coords;
 import org.example.GameStat;
 import org.example.Sprite;
 import org.example.ViewerListener;
@@ -17,6 +18,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import static java.lang.Math.max;
 
@@ -46,7 +48,7 @@ public class Viewer {
         gbc.weighty = 1;
         gbc.weightx = 0.3;
         gbc.fill = GridBagConstraints.BOTH;
-        JPanel icon = new IconPanel(params.GetPath());
+        JPanel icon = new IconPanel(params.GetPathFolder() + "icon.png");
         icon.setBorder(new LineBorder(Color.BLACK));
         charPanel.add(icon, gbc);
     }
@@ -94,15 +96,15 @@ public class Viewer {
     }
 
     private void CreateList(GameStat gameStat){
-        ArrayList<CharactersParams> unicCharacters = gameStat.ReturnUnicCharacters();
+        Map<String, CharactersParams> unicCharacters = gameStat.ReturnUnicCharacters();
         JPanel buyListCont = new JPanel();
         buyListCont.setBackground(Color.DARK_GRAY);
         int countRows = max(4, unicCharacters.size());
         buyListCont.setLayout(new GridLayout(countRows, 1));
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int blockHeight = screenSize.height / 5;
-        for(CharactersParams params : unicCharacters){
-           CreateCharPanel(gameStat, buyListCont, blockHeight, params );
+        for(Map.Entry<String, CharactersParams> entry : unicCharacters.entrySet()){
+           CreateCharPanel(gameStat, buyListCont, blockHeight, entry.getValue() );
         }
         buyList = new JScrollPane(buyListCont);
         buyList.setBorder(new LineBorder(Color.BLACK));
@@ -110,19 +112,10 @@ public class Viewer {
         buyList.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     }
     public void RepaintMap(GameStat gameStat){
-        gameField.getContentPane().remove(map);
-        Sprite mapSprite = gameStat.ReturnMap().GetSprite();
         ArrayList<IEnemy> enemyList = gameStat.ReturnEnemyList();
         ArrayList<ICharacter> characterList = gameStat.ReturnCharacterList();
         Cell[] cells = gameStat.ReturnMap().GetAllCell();
-        map.Repaint(enemyList, cells, characterList,  visibleNet, 50);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weighty = 1;
-        gbc.weightx = 0.7;
-        gbc.fill = GridBagConstraints.BOTH;
-        gameField.add(map, gbc);
+        map.Repaint(enemyList, cells, characterList,  visibleNet, gameStat.ReturnMap().GetCellSize());
         gameField.revalidate();
         gameField.repaint();
     }
@@ -147,6 +140,10 @@ public class Viewer {
         gameField.add(buyList, gbc);
     }
 
+    private void ChangeGameText(String message){
+        //some
+    }
+
     private void CreateMap(Sprite mapSprite, ArrayList<IEnemy> enemyList,  ArrayList<ICharacter> characterList, Cell[] cells){
         map = new ImagePanel(mapSprite, enemyList, cells, characterList, visibleNet, 50);
         map.setBackground(Color.BLUE);
@@ -154,13 +151,16 @@ public class Viewer {
         map.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                float x = (float)e.getX() / map.getWidth();
-                float y = (float)e.getY() / map.getHeight();
-                listener.HearCreateChar(createdName);
-                System.out.println("Клик по координатам: (" + x + ", " + y + ")");
+                if(visibleNet){
+                    float x = (float)e.getX() / map.getWidth();
+                    float y = (float)e.getY() / map.getHeight();
+                    Coords coordsClick = new Coords(x, y);
+                    String message = listener.HearCreateChar(createdName, coordsClick);
+                    ChangeGameText(message);
+                    visibleNet = false;
+                }
             }
         });
-
     }
 
     public void CreateFinal(){

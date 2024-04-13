@@ -6,15 +6,19 @@ public class CharactersParams {
     private int coast;
     private int damage;
     private int delay;
-    public CharactersParams(String name, String pathToIcon, int damage, int coast, int delay){
+    private int sizeCellX;
+    private int sizeCellY;
+    public CharactersParams(String name, String pathToIcon, int damage, int coast, int delay, int sizeCellX, int sizeCellY){
         this.name = name;
         this.coast = coast;
         this.damage = damage;
         this.pathToIcon = pathToIcon;
         this.delay = delay;
+        this.sizeCellX = sizeCellX;
+        this.sizeCellY = sizeCellY;
     }
 
-    public String GetPath(){
+    public String GetPathFolder(){
         return pathToIcon;
     }
 
@@ -34,4 +38,7 @@ public class CharactersParams {
         return name;
     }
 
+    public int GetSizeCellX(){return sizeCellX;}
+
+    public int GetSizeCellY(){return sizeCellY;}
 }

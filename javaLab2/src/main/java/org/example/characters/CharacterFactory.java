@@ -1,6 +1,7 @@
 package org.example.characters;
 
 import org.example.Coords;
+import org.example.map.Cell;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,10 +23,10 @@ public class CharacterFactory {
         pathToClass = new Properties();
         ReadConfig();
     }
-    public ICharacter CreateCharacter(String characterName, Coords characterStart) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public ICharacter CreateCharacter(String characterName, Cell startCell, CharactersParams params) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException {
         String className = pathToClass.getProperty(characterName);
         ICharacter character= (ICharacter) Class.forName(className).getDeclaredConstructor().newInstance();
-        character.Create(characterStart);
+        character.Create(startCell, params);
         return character;
     }
 }
