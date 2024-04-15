@@ -1,2 +1,3 @@
 Spawn 50 50 50 false
 Walk 50 50 50 true
+Die 50 50 50 false

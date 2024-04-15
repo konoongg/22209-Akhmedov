@@ -52,6 +52,10 @@ public class Animation {
          iterator = animationFiles.listIterator();
      }
 
+     public void UpdateItetaror(){
+         iterator = animationFiles.listIterator();
+     }
+
      public int GetTime(){
          return animationTime;
      }

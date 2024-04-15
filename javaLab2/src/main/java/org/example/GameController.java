@@ -1,6 +1,8 @@
 package org.example;
 
+import org.example.characters.CharacterAnimationStatus;
 import org.example.characters.CreatingCharStatus;
+import org.example.characters.ICharacter;
 import org.example.enemy.EnemyAnimationStatus;
 import org.example.enemy.IEnemy;
 import org.example.map.Cell;
@@ -38,7 +40,7 @@ public class GameController {
         if(enemySpawnWait <= 0){
             enemySpawnWait =  timeToSpawnEnemy;
             gameStat.CreateNewEnemy();
-            enemySpawnWait = 1000;
+            enemySpawnWait = 5000;
         }
         else{
             enemySpawnWait -= timeTosleep;
@@ -49,6 +51,20 @@ public class GameController {
         Player player = gameStat.ReturnPlayer();
         if(!player.IsAlive()){
             viewer.CreateFinal();
+        }
+    }
+
+    private void CheckCahracters() throws IOException {
+        ArrayList<ICharacter> characterList = new ArrayList<>(gameStat.ReturnCharacterList());
+        ArrayList<IEnemy> enemyList =  new ArrayList<>(gameStat.ReturnEnemyList());
+        for(ICharacter character: characterList){
+            character.ChangeSpriteTime(timeTosleep);
+            if(character.Status() == CharacterAnimationStatus.Wait){
+                character.Wait(timeTosleep);
+            }
+            else if(character.Status() == CharacterAnimationStatus.Atack){
+                character.UseSkill(enemyList);
+            }
         }
     }
 
@@ -70,17 +86,21 @@ public class GameController {
                     enemy.Move(curCell);
                 }
             }
+            else if(enemy.Status() == EnemyAnimationStatus.Died){
+                gameStat.DeleteEnemy(enemy);
+            }
         }
     }
     private void StartMonitoring() throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         SpawnEnemy();
+        CheckCahracters();
         CheckEnemy();
         viewer.RepaintMap(gameStat);
     }
     public GameController(GameStat gameStat, Viewer viewer) throws IOException, InterruptedException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        timeToSpawnEnemy = 1000;
+        timeToSpawnEnemy = 5000;
         timeTosleep = 50;
-        enemySpawnWait = 1000;
+        enemySpawnWait = 5000;
         this.viewer = viewer;
         this.gameStat = gameStat;
         ViewerListener listener = new ViewerListener(this);

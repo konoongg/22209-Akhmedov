@@ -42,7 +42,7 @@ public class Artist  implements  IEnemy{
         DefineAnimation();
         coords = new Coords(enemyStart.X(), enemyStart.Y());
         hp = 100;
-        maxSpeed = 10;
+        maxSpeed = 5;
         curSpeed = maxSpeed;
         damage = 10;
     }
@@ -50,6 +50,10 @@ public class Artist  implements  IEnemy{
     private void ChangeStatus() throws IOException {
         if(status == EnemyAnimationStatus.Spawn){
             status = EnemyAnimationStatus.Walk;
+        }
+        else if(status == EnemyAnimationStatus.Die  ){
+            status = EnemyAnimationStatus.Died;
+            return;
         }
         else if(hp <= 0){
             status = EnemyAnimationStatus.Die;
@@ -59,6 +63,7 @@ public class Artist  implements  IEnemy{
             throw new IOException("empty animation");
         }
         sprite  = animation.GetNextSprite();
+        spriteTime = animation.GetTime();
     }
 
     @Override
@@ -72,7 +77,7 @@ public class Artist  implements  IEnemy{
                 throw new IOException("empty animation");
             }
             Sprite newSprite = animation.GetNextSprite();
-            if(newSprite == null){
+            if(newSprite == null || (hp <= 0 && status == EnemyAnimationStatus.Walk )){
                 ChangeStatus();
             }
             else{

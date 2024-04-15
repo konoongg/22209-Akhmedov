@@ -1,1 +1,2 @@
-Atack 50 50 50 true
+Wait 50 50 50 true
+Atack 50 50 50 false

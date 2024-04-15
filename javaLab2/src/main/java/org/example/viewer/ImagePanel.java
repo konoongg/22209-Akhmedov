@@ -73,11 +73,11 @@ public class ImagePanel extends JPanel {
                     double weight = endX - startX;
                     double height = endY - startY;
                     Sprite sprite = character.Sprite();
-                    URL enemyURL = Viewer.class.getResource(sprite.Path());
-                    if(enemyURL == null){
+                    URL characterURL = Viewer.class.getResource(sprite.Path());
+                    if(characterURL == null){
                         throw new RuntimeException(new IOException());
                     }
-                    BufferedImage enemyImage = ImageIO.read(enemyURL);
+                    BufferedImage enemyImage = ImageIO.read(characterURL);
                     g.drawImage(enemyImage, (int)startX, (int)startY, (int)weight, (int)height, this);
                 }
             }
