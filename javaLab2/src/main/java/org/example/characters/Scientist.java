@@ -16,18 +16,18 @@ import java.util.Map;
 public class Scientist  implements ICharacter{
     private Cell characterStartCell;
     private CharactersParams params;
-
     private CharacterAnimationStatus status;
     private Sprite sprite;
     private int spriteTime;
     private Map<String, Animation> animations;
     private int curDelay;
     private IEnemy myEnemy;
+    private boolean atacked;
 
     @Override
-    public void Create(Cell characterStart, CharactersParams params) throws IOException {
+    public void Create(Cell startCell, CharactersParams params) throws IOException {
         DefineAnimation();
-        this.characterStartCell = characterStart;
+        this.characterStartCell = startCell;
         this.params = params;
         myEnemy = null;
         curDelay = params.GetDelay();
@@ -46,14 +46,18 @@ public class Scientist  implements ICharacter{
         }
     }
     @Override
-    public void UseSkill(ArrayList<IEnemy> enemyList) {
+    public void UseSkill(ArrayList<IEnemy> enemyList, Cell[] cells) {
         if(enemyList.isEmpty()){
+            return;
+        }
+        if(atacked){
             return;
         }
         if(myEnemy == null || myEnemy.Status() == EnemyAnimationStatus.Died){
             FindEnemy(enemyList);
         }
         myEnemy.ChangeHp(params.GetDamage());
+        atacked = true;
     }
 
     @Override
@@ -73,6 +77,7 @@ public class Scientist  implements ICharacter{
     private void ChangeStatus() throws IOException {
         if(curDelay <= 0 && status == CharacterAnimationStatus.Wait){
             status = CharacterAnimationStatus.Atack;
+            atacked = false;
         }
         else if(status == CharacterAnimationStatus.Atack){
             curDelay = params.GetDelay();
@@ -89,7 +94,7 @@ public class Scientist  implements ICharacter{
 
     @Override
     public void ChangeSpriteTime(int timeTosleep) throws IOException {
-        if(spriteTime != 0){
+        if(spriteTime > 0){
             spriteTime -= timeTosleep;
         }
         else{
@@ -107,6 +112,7 @@ public class Scientist  implements ICharacter{
             }
         }
     }
+
     @Override
     public Coords GetStartCoords() {
         Coords startCoords = characterStartCell.GetStartCoords();

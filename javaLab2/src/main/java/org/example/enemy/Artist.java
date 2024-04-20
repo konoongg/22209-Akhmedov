@@ -19,6 +19,9 @@ public class Artist  implements  IEnemy{
     private int damage;
     private float maxSpeed;
     private float curSpeed;
+    private float slowedSpeed;
+    private float normalSpeed;
+    private int prize;
     private EnemyAnimationStatus status;
     private Sprite sprite;
     private int spriteTime;
@@ -42,10 +45,15 @@ public class Artist  implements  IEnemy{
         DefineAnimation();
         coords = new Coords(enemyStart.X(), enemyStart.Y());
         hp = 100;
-        maxSpeed = 5;
-        curSpeed = maxSpeed;
+        maxSpeed = 10;
+        prize = 20;
+        normalSpeed = 2;
+        slowedSpeed = normalSpeed / 2;
+        curSpeed = normalSpeed;
         damage = 10;
     }
+
+
 
     private void ChangeStatus() throws IOException {
         if(status == EnemyAnimationStatus.Spawn){
@@ -68,7 +76,7 @@ public class Artist  implements  IEnemy{
 
     @Override
     public void ChangeSpriteTime(int timeTosleep) throws IOException {
-        if(spriteTime != 0){
+        if(spriteTime > 0){
             spriteTime -= timeTosleep;
         }
         else{
@@ -93,7 +101,10 @@ public class Artist  implements  IEnemy{
             ChangeHp(5);
         }
         if(cellEffects.contains(CellEffect.SLOW)){
-            curSpeed = maxSpeed / 2;
+            curSpeed = slowedSpeed;
+        }
+        else{
+            curSpeed = normalSpeed;
         }
     }
 
@@ -131,6 +142,11 @@ public class Artist  implements  IEnemy{
     }
 
     @Override
+    public int Prize() {
+        return prize;
+    }
+
+    @Override
     public int Damage() {
         return damage;
     }
@@ -138,5 +154,15 @@ public class Artist  implements  IEnemy{
     @Override
     public void ChangeHp(int damage) {
         hp -= damage;
+    }
+
+    private void ChangeSpeed(int minute){
+        normalSpeed *= (1 + 0.01 * minute);
+        slowedSpeed = normalSpeed / 2;
+    }
+
+    @Override
+    public void TimeProgress(int minute) {
+        ChangeSpeed(minute);
     }
 }

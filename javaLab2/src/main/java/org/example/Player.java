@@ -9,6 +9,11 @@ public class Player {
         money = startMoney;
     }
 
+    public void Restart(int startHp, int startMoney){
+        hp = startHp;
+        money = startMoney;
+    }
+
     public void ChangeMoney(int profit){
         money += profit;
     }
@@ -19,5 +24,13 @@ public class Player {
 
     public boolean IsAlive(){
         return hp > 0;
+    }
+
+    public int GetHp(){
+        return hp;
+    }
+
+    public int GetMoney(){
+        return money;
     }
 }

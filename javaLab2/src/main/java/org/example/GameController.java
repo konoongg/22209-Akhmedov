@@ -9,18 +9,35 @@ import org.example.map.Cell;
 import org.example.map.CellStatus;
 import org.example.map.GameMap;
 import org.example.viewer.Viewer;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 public class GameController {
-    private final int timeTosleep;
-    private final double timeToSpawnEnemy;
+    private int timeTosleep;
+    private double timeToSpawnEnemy;
     private double enemySpawnWait;
-    GameStat gameStat;
-    Viewer viewer;
+    private GameStat gameStat;
+    private Viewer viewer;
+    private Timer timer;
+    private int countSec;
+    private ViewerListener listener;
+    private boolean finalCrated;
+
+    public void Restart() throws IOException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, InterruptedException {
+        gameStat.Restart();
+        countSec = 0;
+        timeToSpawnEnemy = 1500;
+        enemySpawnWait = timeToSpawnEnemy;
+        viewer.Restart(gameStat);
+        listener.ChangeStop();
+        finalCrated = false;
+    }
 
     public String CharPanelClick(String name, Coords conf) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         GameMap map = gameStat.ReturnMap();
@@ -29,29 +46,34 @@ public class GameController {
         Cell startCell = map.GetCell(new Coords(x,y));
         CreatingCharStatus  status = gameStat.CreateNewCharacter(startCell, name);
         if(status == CreatingCharStatus.NOT_CHAR_SPAWN){
-            return "can't create on this plase";
+            return "can't create on this place";
         }
-        else{
-            return "created" + name;
+        else if(status == CreatingCharStatus.NO_MONEY){
+            return "don't have money";
         }
+        else if(status == CreatingCharStatus.CHAR_SPAWN){
+            viewer.ChangeMoney(gameStat.ReturnPlayer().GetMoney());
+            return "created " + name;
+        }
+        return "error";
     }
 
     private void SpawnEnemy() throws IOException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         if(enemySpawnWait <= 0){
-            enemySpawnWait =  timeToSpawnEnemy;
             gameStat.CreateNewEnemy();
-            enemySpawnWait = 5000;
+            enemySpawnWait = timeToSpawnEnemy;
         }
         else{
             enemySpawnWait -= timeTosleep;
         }
     }
 
-    private void CheckPlayer(){
+    private PlayerStatus CheckPlayer(){
         Player player = gameStat.ReturnPlayer();
         if(!player.IsAlive()){
-            viewer.CreateFinal();
+            return PlayerStatus.DIE;
         }
+        return PlayerStatus.OK;
     }
 
     private void CheckCahracters() throws IOException {
@@ -63,7 +85,7 @@ public class GameController {
                 character.Wait(timeTosleep);
             }
             else if(character.Status() == CharacterAnimationStatus.Atack){
-                character.UseSkill(enemyList);
+                character.UseSkill(enemyList, gameStat.ReturnMap().GetAllCell());
             }
         }
     }
@@ -73,6 +95,7 @@ public class GameController {
         for(IEnemy enemy : enemyList){
             enemy.ChangeSpriteTime(timeTosleep);
             if(enemy.Status() == EnemyAnimationStatus.Walk){
+                enemy.TimeProgress(countSec / 60);
                 Coords enemyCooeds = new Coords(enemy.CoordsX(), enemy.CoordsY());
                 Cell curCell = gameStat.ReturnMap().GetCell(enemyCooeds);
                 CellStatus curStatus = curCell.GetStatus();
@@ -80,13 +103,16 @@ public class GameController {
                     Player player = gameStat.ReturnPlayer();
                     player.ChangeHp(enemy.Damage());
                     gameStat.DeleteEnemy(enemy);
-                    CheckPlayer();
+                    viewer.ChangeHp(player.GetHp());
                 }
                 else{
                     enemy.Move(curCell);
                 }
             }
             else if(enemy.Status() == EnemyAnimationStatus.Died){
+                Player player = gameStat.ReturnPlayer();
+                player.ChangeMoney(enemy.Prize());
+                viewer.ChangeMoney(player.GetMoney());
                 gameStat.DeleteEnemy(enemy);
             }
         }
@@ -97,17 +123,50 @@ public class GameController {
         CheckEnemy();
         viewer.RepaintMap(gameStat);
     }
+
+    private void DefineSrr(){
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = ge.getDefaultScreenDevice();
+        DisplayMode dm = gd.getDisplayMode();
+        int refreshRate = dm.getRefreshRate();
+        timeTosleep = 1000 / refreshRate;
+    }
+
     public GameController(GameStat gameStat, Viewer viewer) throws IOException, InterruptedException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        timeToSpawnEnemy = 5000;
-        timeTosleep = 50;
-        enemySpawnWait = 5000;
+        countSec = 0;
+        timeToSpawnEnemy = 1500;
+        timer = new Timer();
+        DefineSrr();
+        enemySpawnWait = timeToSpawnEnemy;
         this.viewer = viewer;
         this.gameStat = gameStat;
-        ViewerListener listener = new ViewerListener(this);
+        listener = new ViewerListener(this);
         viewer.Start(gameStat, listener);
+        TimerTask TimeController = new TimerTask() {
+            @Override
+            public void run() {
+                countSec++;
+                viewer.ChangeTime(countSec / 3600, (countSec % 3600) / 60, countSec % 60);
+                if(countSec % 60 == 0){
+                    if(timeToSpawnEnemy > 500){
+                        timeToSpawnEnemy -= 100;
+                    }
+                }
+            }
+        };
+        timer.scheduleAtFixedRate(TimeController, 1000, 1000);
         Sprite mapSprite = gameStat.ReturnMap().GetSprite();
+        finalCrated = false;
         while (true){
-            StartMonitoring();
+            if(!listener.Stop()){
+                StartMonitoring();
+            }
+            if(CheckPlayer() == PlayerStatus.DIE){
+                if(!finalCrated){
+                    viewer.CreateFinal();
+                    finalCrated = true;
+                }
+            }
             Thread.sleep(timeTosleep);
         }
     }

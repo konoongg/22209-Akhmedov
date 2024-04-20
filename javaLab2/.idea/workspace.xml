@@ -5,17 +5,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="acee78b5-86a4-4e6d-bd28-391b9bcfb0c4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/PlayerStatus.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/characters/Mathematician.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/Images/Characters/Mathematician/animationConfig.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/GameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/GameController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/animation/Animation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/animation/Animation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/characters/CharacterAnimationStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/characters/CharacterAnimationStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/GameStat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/GameStat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/ViewerListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/ViewerListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/characters/CreatingCharStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/characters/CreatingCharStatus.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/characters/ICharacter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/characters/ICharacter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/characters/Scientist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/characters/Scientist.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/enemy/Artist.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/enemy/Artist.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/enemy/EnemyAnimationStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/enemy/EnemyAnimationStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/enemy/IEnemy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/enemy/IEnemy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/map/Cell.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/map/Cell.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/map/GameMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/map/GameMap.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/viewer/ImagePanel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/viewer/ImagePanel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/viewer/Viewer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/viewer/Viewer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/Images/Characters/Scientist/Atack/1.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/Images/Characters/Scientist/Atack/1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/Images/Characters/Scientist/Wait/1.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/Images/Characters/Scientist/Wait/1.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/Images/Characters/Scientist/Wait/2.png" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/Images/Characters/Scientist/Wait/2.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/Images/Characters/Scientist/animationConfig.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/Images/Characters/Scientist/animationConfig.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/Images/Enemys/Artist/animationConfig.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/Images/Enemys/Artist/animationConfig.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/charactersConfig.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/charactersConfig.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/charactersStats.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/charactersStats.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,6 +45,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;konoongg&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:konoongg/22209-Akhmedov.git&quot;,
+    &quot;accountId&quot;: &quot;ff835c68-0f86-4a5e-8f25-d69e2353aab4&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 7
@@ -50,11 +74,12 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "javaLab2",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/konoongglts/work/22209-Akhmedov/javaLab2/src/main/resources/Images/Characters/Scientist"
+    "last_opened_file_path": "/home/konoongglts/work/22209-Akhmedov/javaLab2/src/main/resources/Images/Characters/Mathematician"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources/Images/Characters/Mathematician" />
       <recent name="$PROJECT_DIR$/src/main/resources/Images/Characters/Scientist" />
       <recent name="$PROJECT_DIR$/src/main/resources/Images/Characters/Scientist/Atack" />
     </key>
@@ -71,13 +96,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-  </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="jdk-11.0.21-corretto-11.0.21-4caba194b151-fab2e099" />
-      </set>
-    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">

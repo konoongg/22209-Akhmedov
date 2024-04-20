@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public interface ICharacter {
-    void UseSkill(ArrayList<IEnemy> enemyList);
+    void UseSkill(ArrayList<IEnemy> enemyList, Cell[] cells);
     void Create(Cell startCell, CharactersParams params) throws IOException;
     Coords GetStartCoords();
     Coords GetEndCoords();

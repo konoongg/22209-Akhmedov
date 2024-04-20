@@ -6,6 +6,7 @@ import org.example.characters.CharactersParams;
 import org.example.characters.ICharacter;
 import org.example.enemy.IEnemy;
 import org.example.map.Cell;
+import org.example.map.CellEffect;
 import org.example.map.CellStatus;
 
 import javax.swing.*;
@@ -148,10 +149,44 @@ public class ImagePanel extends JPanel {
         }
     }
 
+    private void PrintMapEffects(Graphics g)  {
+        for (Cell cell : cells){
+            ArrayList<CellEffect> effects = cell.GetCellEffects();
+            if(effects.isEmpty()){
+                continue;
+            }
+            double cofMonX = 1 / (double)mapSprite.SizeX() * getWidth();
+            double cofMonY = 1 / (double)mapSprite.SizeY() * getHeight();
+            Coords start = cell.GetStartCoords();
+            double startX = start.X() * cofMonX;
+            double startY = start.Y() * cofMonY;
+            Coords end = cell.GetEndCoords();
+            double endX = end.X() * cofMonX;
+            double endY = end.Y() * cofMonY;
+            double weight = endX - startX;
+            double height = endY - startY;
+            for(CellEffect effect : effects){
+                String path = "/Images/Effects/" + String.valueOf(effect) + ".png";
+                URL effectURL = Viewer.class.getResource(path);
+                if(effectURL == null){
+                    throw new RuntimeException(new IOException());
+                }
+                BufferedImage effectImage;
+                try {
+                    effectImage = ImageIO.read(effectURL);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                g.drawImage(effectImage, (int)startX, (int)startY, (int)weight, (int)height, this);
+            }
+        }
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         PrintMap(g);
+        PrintMapEffects(g);
         try {
             PrintEnemys(g);
         } catch (IOException e) {

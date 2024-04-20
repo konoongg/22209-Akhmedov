@@ -16,9 +16,18 @@ public class Cell {
         this.status = status;
         effects = new ArrayList<CellEffect>();
     }
+
+    public void Restart(){
+        if(status == CellStatus.BORROW){
+            status = CellStatus.FREE;
+        }
+        effects = new ArrayList<CellEffect>();
+    }
+
     public void ChangeStatus(CellStatus newStatus){
         status = newStatus;
     }
+
     public CellStatus GetStatus(){
         return status;
     }
@@ -26,6 +35,7 @@ public class Cell {
     public ArrayList<CellEffect> GetCellEffects(){
         return effects;
     }
+
     public void AddEffect(CellEffect effect){
         effects.add(effect);
     }
@@ -35,6 +45,13 @@ public class Cell {
 
     public Coords GetStartCoords(){
         return start;
+    }
+
+    public boolean HaveEffect(CellEffect effect){
+        if(effects.contains(effect)){
+            return true;
+        }
+        return  false;
     }
 
     public  Coords GetEndCoords(){

@@ -17,6 +17,7 @@ public class GameMap {
     private final int cellSize = 50;
     private Cell[] cells;
     private ArrayList<Coords> enemySpawn;
+
     private void DefineName(BufferedReader reader) throws IOException {
         String line = reader.readLine();
         if(line == null){
@@ -99,8 +100,15 @@ public class GameMap {
             throw e;
         }
     }
+
     public GameMap(String config) throws IOException {
         CreateField(config);
+    }
+
+    public void Restart(){
+        for(Cell cell : cells){
+            cell.Restart();
+        }
     }
 
     public String GetName(){
@@ -124,7 +132,7 @@ public class GameMap {
         int countCellY = sizeY / cellSize;
         int countCellX = sizeX / cellSize;
         int cellIndex = Y *  countCellY + X;
-        if(X > countCellX - 1 || Y > countCellY - 1 ){
+        if(X > countCellX - 1 || Y > countCellY - 1 || X < 0 || Y < 0 ){
             return  new Cell(0,0,0, CellStatus.NOT_IN_MAP);
         }
         return cells[cellIndex];

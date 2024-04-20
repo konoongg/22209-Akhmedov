@@ -21,11 +21,12 @@ public class GameStat {
     private final Player player;
     private final EnemyFactory enemyFactory;
     private final CharacterFactory characterFactory;
-    private final ArrayList<IEnemy> enemyList;
-    private final ArrayList<ICharacter> characterList;
+    private ArrayList<IEnemy> enemyList;
+    private ArrayList<ICharacter> characterList;
     private final Map<String, CharactersParams> unicCharacters;
+
     public GameStat (String config) throws IOException {
-        player = new Player(1000, 200);
+        player = new Player(10, 200);
         gameMap = new GameMap(config);
         enemyFactory = new EnemyFactory();
         characterFactory = new CharacterFactory();
@@ -33,6 +34,13 @@ public class GameStat {
         ReadCharacters();
         enemyList = new ArrayList<>();
         characterList = new ArrayList<>();
+    }
+
+    public void Restart(){
+        enemyList = new ArrayList<>();
+        characterList = new ArrayList<>();
+        player.Restart(100, 200);
+        gameMap.Restart();
     }
 
     private void ReadCharacters() throws IOException {
@@ -98,14 +106,21 @@ public class GameStat {
         if(!ISItSuitableCell(startCell, name, params)){
            return CreatingCharStatus.NOT_CHAR_SPAWN;
         }
+        if(params.GetCoast() > player.GetMoney()){
+
+            return CreatingCharStatus.NO_MONEY;
+        }
         BorrowCells(startCell, params);
         ICharacter character = characterFactory.CreateCharacter(name, startCell, params);
         characterList.add(character);
+        player.ChangeMoney(-params.GetCoast());
         return CreatingCharStatus.CHAR_SPAWN;
     }
+
     public ArrayList<ICharacter> ReturnCharacterList(){
         return characterList;
     }
+
     public ArrayList<IEnemy> ReturnEnemyList(){
         return enemyList;
     }
@@ -113,9 +128,11 @@ public class GameStat {
     public Player ReturnPlayer(){
         return player;
     }
+
     public GameMap ReturnMap(){
         return gameMap;
     }
+
     public Map<String, CharactersParams> ReturnUnicCharacters(){
         return unicCharacters;
     }
