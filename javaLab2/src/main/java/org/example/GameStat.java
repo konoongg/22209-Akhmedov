@@ -26,7 +26,7 @@ public class GameStat {
     private final Map<String, CharactersParams> unicCharacters;
 
     public GameStat (String config) throws IOException {
-        player = new Player(10, 200);
+        player = new Player(1000, 200);
         gameMap = new GameMap(config);
         enemyFactory = new EnemyFactory();
         characterFactory = new CharacterFactory();
@@ -39,7 +39,7 @@ public class GameStat {
     public void Restart(){
         enemyList = new ArrayList<>();
         characterList = new ArrayList<>();
-        player.Restart(100, 200);
+        player.Restart(1000, 200);
         gameMap.Restart();
     }
 
