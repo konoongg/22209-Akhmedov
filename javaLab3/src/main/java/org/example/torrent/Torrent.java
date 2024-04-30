@@ -2,6 +2,7 @@ package org.example.torrent;
 
 import org.example.exceptions.WrongTorrentFileFormat;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
@@ -32,21 +33,20 @@ public class Torrent {
     public Torrent(String torrentPath, String folderPath) throws WrongTorrentFileFormat {
         Map<String, byte[]>  mainDict = new HashMap<>();
         Map<String, byte[]>  infoDict = new HashMap<>();
-        TorrentParser parser = new TorrentParser(mainDict, torrentPath);
+        byte[] text = null;
+        try (FileInputStream fis = new FileInputStream(torrentPath)) {
+            text = fis.readAllBytes();
+            text = Arrays.copyOfRange(text, 1, text.length - 1);
+        } catch (IOException e) {
+            throw new WrongTorrentFileFormat("can't read torrent file: " + e.getMessage());
+        }
+        TorrentParser parser = new TorrentParser();
+        parser.ParseText(mainDict, text);
         if(!mainDict.containsKey("info")){
             throw new WrongTorrentFileFormat("torrent file don't have field info");
         }
         parser.ParseText(infoDict, mainDict.get("info"));
         info = mainDict.get("info");
-
-        String filePath = "example.txt"; // Путь к файлу, в который мы хотим записать массив байт
-        try (FileOutputStream fos = new FileOutputStream(filePath)) {
-            fos.write(info); // Записываем массив байт в файл
-            System.out.println("Массив байт успешно записан в файл.");
-        } catch (IOException e) {
-            System.err.println("Ошибка при записи в файл: " + e.getMessage());
-        }
-
         DefineFields(mainDict, infoDict, folderPath);
     }
 
@@ -71,7 +71,11 @@ public class Torrent {
     }
 
     public byte[] GetInfo(){
-        return info;
+        byte[] extendedInfo = new byte[info.length + 2];
+        extendedInfo[0] = (byte) 'd';
+        System.arraycopy(info, 0, extendedInfo, 1, info.length);
+        extendedInfo[extendedInfo.length - 1] = (byte) 'e';
+        return  extendedInfo;
     }
 
     public int GetDownloadSize(){

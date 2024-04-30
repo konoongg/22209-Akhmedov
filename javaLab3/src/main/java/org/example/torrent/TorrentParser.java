@@ -131,20 +131,7 @@ public class TorrentParser {
             }
             ParseFild(text);
             byte[] field = Arrays.copyOfRange(text, startIndex, endIndex);
-            System.out.println(startIndex + " " + endIndex + " " + fieldName);
             dict.put(fieldName, field);
         }
-    }
-
-    public TorrentParser(Map<String, byte[]>  mainDict, String path) throws WrongTorrentFileFormat {
-        byte[] text = null;
-        curIndex = 1;
-        try (FileInputStream fis = new FileInputStream(path)) {
-            text = fis.readAllBytes();
-            text = Arrays.copyOfRange(text, 1, text.length - 1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ParseText(mainDict, text);
     }
 }
