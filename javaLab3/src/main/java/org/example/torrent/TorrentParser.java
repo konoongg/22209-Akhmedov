@@ -2,8 +2,6 @@ package org.example.torrent;
 
 import org.example.exceptions.WrongTorrentFileFormat;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 

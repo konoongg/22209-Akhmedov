@@ -1,5 +1,6 @@
 package org.example.torrent;
 
+import org.example.FileT;
 import org.example.exceptions.WrongTorrentFileFormat;
 
 import java.util.ArrayList;
@@ -32,6 +33,15 @@ public class Definer {
             offset += 20;
             segmentSha1.add(subData);
         }
+    }
+
+    public int DefineCountParts(Map<String, byte[]>  infoDict) throws WrongTorrentFileFormat {
+        if(!infoDict.containsKey("pieces")){
+            throw new WrongTorrentFileFormat("torrent file don't have field info/pieces");
+        }
+        byte[] data = infoDict.get("pieces");
+        int segmentsSize = data.length;
+        return segmentsSize / 20;
     }
 
     public void DefineFiles(Map<String, byte[]>  infoDict, String folderPath, ArrayList<FileT> files) throws WrongTorrentFileFormat {

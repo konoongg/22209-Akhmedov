@@ -1,9 +1,8 @@
-package org.example.torrent;
+package org.example;
 
 import org.example.exceptions.CantcreateFile;
 
 import java.io.*;
-import java.io.File;
 import java.util.ArrayList;
 
 public class FileSaver {

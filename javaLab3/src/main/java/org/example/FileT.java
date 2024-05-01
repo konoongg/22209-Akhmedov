@@ -1,4 +1,4 @@
-package org.example.torrent;
+package org.example;
 
 public class FileT {
     private String path;
