@@ -28,6 +28,10 @@ public class Peer {
         choked = PeerStatusE.UNCHOKE;
     }
 
+    public void Choke(){
+        choked = PeerStatusE.CHOKE;
+    }
+
     public void SetParts(byte[] parts){
         int index = 0;
         for(byte part : parts){

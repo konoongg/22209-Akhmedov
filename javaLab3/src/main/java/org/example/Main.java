@@ -8,7 +8,7 @@ public class Main {
             TorrentController torrentController = new TorrentController(torrentPath, folderPath);
         }
         catch (Exception e){
-            System.out.println(e.getMessage());
+            System.out.println(e + e.getMessage());
         }
     }
 }

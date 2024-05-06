@@ -1,6 +1,7 @@
 package org.example;
 
 import org.example.exceptions.CantcreateFile;
+import org.example.exceptions.ConnectionError;
 import org.example.exceptions.ServerCommunicateError;
 import org.example.exceptions.WrongTorrentFileFormat;
 import org.example.connection.ConnectionManager;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 
 public class TorrentController {
 
-    public TorrentController(String torrentPath, String folderPath) throws WrongTorrentFileFormat, ServerCommunicateError, CantcreateFile, IOException {
+    public TorrentController(String torrentPath, String folderPath) throws WrongTorrentFileFormat, ServerCommunicateError, CantcreateFile, IOException, ConnectionError {
         TorrentClient torrent = new TorrentClient(torrentPath, folderPath);
         TorrentFile torrentFile = torrent.GetTorrentFile();
         InfoPrinter infoPrinter = new InfoPrinter();

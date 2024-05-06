@@ -46,6 +46,33 @@ public class PeerConnection implements Runnable{
         return mes;
     }
 
+
+    private byte[] CreateReqMes(){
+        byte[] mes = new byte[13];
+        int index = 0;
+        mes[index] =  19;
+        index++;
+        byte[] btp = new byte[]{'B', 'i', 't', 'T', 'o', 'r', 'r', 'e', 'n', 't', ' ', 'p', 'r', 'o', 't', 'o', 'c', 'o', 'l'};
+        for(int i = 0; i < 19; ++i){
+            mes[index] = (btp[i]);
+            index++;
+        }
+        for(int i = 0; i < 8; ++i){
+            mes[index] = 0;
+            index++;
+        }
+        byte[] infoHashB = torrent.GetInfoHashB();
+        for(int i = 0; i < 20; ++i){
+            mes[index] = infoHashB[i];
+            index++;
+        }
+        byte[] peerIdB = torrent.GetPeerIdB();
+        for(int i = 0; i < 20; ++i){
+            mes[index] = peerIdB[i];
+        }
+        return mes;
+    }
+
     private HandShackeStatusE CheckHandShacke(byte[] buffer){
         int index = 0;
         if(buffer[index] != 19){
@@ -69,6 +96,8 @@ public class PeerConnection implements Runnable{
         }
         return  HandShackeStatusE.SUCCESSFUL;
     }
+
+    //java.neo socket chanel
 
     private void DoHandShake() throws ConnectionError {
         try {
@@ -101,34 +130,95 @@ public class PeerConnection implements Runnable{
         }
     }
 
-    private void DifineStatus(byte status, byte[] data) throws ConnectionError {
-        if(status == MessageIdE.BITFIELD.getValue()){
-            SendInterested();
-            peer.SetParts(data);
+
+    private void SendReq(int segment, int offset) throws ConnectionError {
+        int sizeBlock = 16 * 1024;
+        byte[] reqv = new byte[17];
+        reqv[0] = 0;
+        reqv[1] = 0;
+        reqv[2] = 0;
+        reqv[3] = 13;
+        reqv[4] = MessageIdE.REQUEST.getValue();
+        int curIndex = 5;
+        try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream()){
+            DataOutputStream out = new DataOutputStream(byteStream);
+            out.writeInt(segment);
+            out.writeInt(offset);
+            out.writeInt(sizeBlock);
+            byte[] bytes = byteStream.toByteArray();
+            for(int i = 0; i < 12; ++i){
+                reqv[curIndex] = bytes[i];
+                curIndex++;
+            }
+            outputStream.write(reqv);
+        } catch (IOException e) {
+            throw new ConnectionError("can't send interested: " + e.getMessage());
         }
     }
 
-    private void Read() throws ConnectionError {
+    private void DifineId(byte id, byte[] data) throws ConnectionError {
+        if(id == MessageIdE.BITFIELD.getValue()){
+            SendInterested();
+            peer.SetParts(data);
+        }
+        else if(id == MessageIdE.UNCHOKE.getValue()){
+            peer.Unchoke();
+        }
+        else if(id == MessageIdE.CHOKE.getValue()){
+            peer.Choke();
+        }
+        else{
+            //throw new ConnectionError("id message is uncorrected:  " + id);
+        }
+    }
+
+    private byte ListenPeer() throws ConnectionError {
         byte[] lenghtB = new byte[4];
-        byte[] statusB = new byte[1];
+        byte[] idB = new byte[1];
+        int readStatus;
+        try {
+            readStatus = inputStream.readNBytes(lenghtB, 0, 4);
+            if(readStatus < 4){
+                return -1;
+            }
+            readStatus =  inputStream.readNBytes(idB, 0, 1);
+            if(readStatus < 1 ){
+                return -1;
+            }
+            ByteBuffer buffer = ByteBuffer.wrap(lenghtB);
+            buffer.order(ByteOrder.BIG_ENDIAN);
+            int length = buffer.getInt();
+            byte id = idB[0];
+            System.out.println("ID: " + id + " " +  peer.GetHost() + ":" + peer.GetPort() + " " +length);
+            if(length <= 0){
+                return -1;
+            }
+            byte[] data = new byte[length - 1];
+            readStatus = inputStream.readNBytes(data, 0, length - 1);
+            if(readStatus < length - 1){
+                return -1;
+            }
+            DifineId(id, data);
+            return id;
+        }
+        catch (IOException e) {
+            throw new ConnectionError("can't read data " + peer.GetHost() + ":" + peer.GetPort());
+        }
+    }
+
+    private void WaitUnchoke() throws ConnectionError {
+        boolean flag = false;
         while(true){
-            try {
-                inputStream.read(lenghtB);
-                inputStream.read(statusB);
-                ByteBuffer buffer = ByteBuffer.wrap(lenghtB);
-                buffer.order(ByteOrder.BIG_ENDIAN);
-                System.out.println(lenghtB[0] + " " +  lenghtB[1] + " " + lenghtB[2] + " " + lenghtB[3]);
-                int length = buffer.getInt();
-                if(length < 0){
-                    continue;
+            byte id = ListenPeer();
+            if(id == MessageIdE.UNCHOKE.getValue() || flag){
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
-                byte status = statusB[0];
-                System.out.println("STATUS: " + status + " " +  peer.GetHost() + ":" + peer.GetPort() + " " +length);
-                byte[] data = new byte[length - 1];
-                DifineStatus(status, data);
-                inputStream.read(data);
-            } catch (IOException e) {
-                throw new ConnectionError("can't read data " + peer.GetHost() + ":" + peer.GetPort());
+                SendReq(0,0);
+                flag = true;
+                //return;
             }
         }
     }
@@ -141,7 +231,7 @@ public class PeerConnection implements Runnable{
             outputStream = socket.getOutputStream();
             System.out.println("connection with " + peer.GetHost() + ":" + peer.GetPort());
             DoHandShake();
-            Read();
+            WaitUnchoke();
         } catch (IOException e) {
             System.out.println("can't connection with " + peer.GetHost() + ":" + peer.GetPort());
         } catch (ConnectionError e) {
