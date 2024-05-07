@@ -1,6 +1,8 @@
 package org.example.connection;
 
 import org.example.exceptions.ConnectionError;
+import org.example.exceptions.ReadException;
+import org.example.exceptions.WriteException;
 import org.example.torrent.TorrentClient;
 
 import java.io.IOException;
@@ -17,24 +19,17 @@ import java.util.*;
 public class ConnectionManager {
     private TorrentClient torrent;
     private Map<String, ConnectionStatusE> connectionStatus = new HashMap<>();
-    private HandShake hsManager;
-
-    private String GetHostAddress(SocketChannel channel){
-        Socket socket = channel.socket();
-        InetAddress host = socket.getInetAddress();
-        String address = host.getHostAddress() + " " + socket.getPort();
-        return address;
-    }
+    private ConnectionLogic connectionLogic;
 
     public ConnectionManager(ArrayList<Peer> peers, TorrentClient torrent) throws ConnectionError {
         this.torrent = torrent;
-        hsManager = new HandShake(torrent);
         Selector selector = null;
+        connectionLogic = new ConnectionLogic(torrent);
         try{
             selector = Selector.open();
         }
         catch (IOException e){
-            System.out.println("connection error: " + e.getMessage());
+            throw new ConnectionError("connection error: " + e.getMessage());
         }
         for(Peer peer : peers){
             try {
@@ -42,13 +37,13 @@ public class ConnectionManager {
                 socketChannel.socket().connect(new InetSocketAddress(peer.GetHost(), peer.GetPort()), 1000);
                 if(socketChannel.isConnected()){
                     socketChannel.configureBlocking(false);
-                    socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-                    connectionStatus.put(GetHostAddress(socketChannel), ConnectionStatusE.CONNECTED);
+                    socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, peer);
+                    connectionStatus.put(connectionLogic.GetHostAddress(socketChannel), ConnectionStatusE.CONNECTED);
                     System.out.println("Connectrd: " + peer.GetHost() );
                 }
             }
             catch (IOException e){
-                System.out.println("connection error: " + e.getMessage());
+                System.out.println("connection error " + peer.GetHost() + " " + peer.GetPort() + ": " + e);
             }
         }
         while(true){
@@ -66,61 +61,22 @@ public class ConnectionManager {
             Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
             while(keyIterator.hasNext()){
                 SelectionKey key = keyIterator.next();
-                    if(key.isWritable()){
+                if(key.isWritable()){
                     SocketChannel channel = (SocketChannel) key.channel();
-                    if(connectionStatus.get(GetHostAddress(channel)) == ConnectionStatusE.CONNECTED){
-                        try{
-                            channel.configureBlocking(false);
-                            hsManager.DoHandShake(channel, key);
-                            connectionStatus.put(GetHostAddress(channel), ConnectionStatusE.HANDSHAKED);
-                            System.out.println("HANSHAKE SEND: " + GetHostAddress(channel));
-                        }
-                        catch (IOException e){
-                            channel.keyFor(selector).cancel();
-                            System.out.println("can't connection: " + GetHostAddress(channel) +  " " +  e.getMessage());
-                            continue;
-                        }
+                    try {
+                        connectionLogic.DefineWrite(channel, connectionStatus, selector);
+                    } catch (WriteException e) {
+                        System.out.println(e.getMessage());
                     }
-
                 }
                 if (key.isReadable()) {
-                    SocketChannel channel = (SocketChannel) key.channel();
-                    if(connectionStatus.get(GetHostAddress(channel)) == ConnectionStatusE.HANDSHAKED){
-                        ByteBuffer buffer = ByteBuffer.allocate(68);
-                        int bytesRead = 0;
-                        try{
-                            bytesRead = channel.read(buffer);
-                        }
-                        catch (IOException e){
-                            channel.keyFor(selector).cancel();
-                            System.out.println("ERROR cant read handshake: " +  GetHostAddress(channel) +  " " + e.getMessage());
-                            continue;
-                        }
-                        System.out.println(buffer);
-                        if(bytesRead < 68){
-                            channel.keyFor(selector).cancel();
-                            System.out.println("ERROR cant read handshake bytes read: " + bytesRead + " "+ GetHostAddress(channel));
-                            continue;
-                        }
-                        buffer.flip();
-                        byte[] data = new byte[bytesRead];
-                        buffer.get(data);
-                        if( hsManager.CheckHandShacke(data) == HandShackeStatusE.SUCCESSFUL){
-                            connectionStatus.put(GetHostAddress(channel), ConnectionStatusE.HANDSHAKED);
-                            System.out.println("HANDSHAKE  " + GetHostAddress(channel));
-                        }
-                        else{
-                            channel.keyFor(selector).cancel();
-                            System.out.println("can't handShake: " + GetHostAddress(channel));
-                        }
+                    try {
+                        connectionLogic.DefineRead(key , connectionStatus, selector);
+                    } catch (ReadException e) {
+                        System.out.println(e.getMessage());
                     }
                 }
             }
         }
-
-//        for(Peer peer : peers){
-//            Thread thread = new Thread(new PeerConnection(peer, torrent));
-//            thread.start();
-//        }
     }
 }

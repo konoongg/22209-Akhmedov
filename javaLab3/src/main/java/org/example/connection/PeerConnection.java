@@ -138,7 +138,7 @@ public class PeerConnection implements Runnable{
         reqv[1] = 0;
         reqv[2] = 0;
         reqv[3] = 13;
-        reqv[4] = MessageIdE.REQUEST.getValue();
+        //reqv[4] = MessageIdE.REQUEST.getValue();
         int curIndex = 5;
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream()){
             DataOutputStream out = new DataOutputStream(byteStream);

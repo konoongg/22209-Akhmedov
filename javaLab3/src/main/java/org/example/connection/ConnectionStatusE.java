@@ -1,5 +1,5 @@
 package org.example.connection;
 
 public enum ConnectionStatusE {
-    START, HANDSHAKED, CONNECTED
+    TRY_HANDSHAKE, LISTENER, CONNECTED, INTERESTED, REQUESTED
 }

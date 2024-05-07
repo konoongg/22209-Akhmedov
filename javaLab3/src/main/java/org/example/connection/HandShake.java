@@ -1,6 +1,7 @@
 package org.example.connection;
 
 import org.example.exceptions.ConnectionError;
+import org.example.exceptions.WriteException;
 import org.example.torrent.TorrentClient;
 
 import java.io.IOException;
@@ -63,23 +64,14 @@ public class HandShake {
         return  HandShackeStatusE.SUCCESSFUL;
     }
 
-    public void DoHandShake(SocketChannel channel, SelectionKey key) throws ConnectionError {
+    public void DoHandShake(SocketChannel channel) throws WriteException {
         try{
             byte[] hsMes = CreateHandShakeMes();
             ByteBuffer buffer = ByteBuffer.wrap(hsMes);
-            while(!key.isWritable()){
-                try{
-                    System.out.println("Sleep");
-                    Thread.sleep(100);
-                }
-                catch(InterruptedException e){
-                    throw new ConnectionError("can't write: " + e.getMessage());
-                }
-            }
             channel.write(buffer);
         }
         catch (IOException e) {
-            throw new ConnectionError("can't handShake: " +  e.getMessage());
+            throw new WriteException("can't handShake: " +  e.getMessage());
         }
     }
 
