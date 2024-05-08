@@ -1,6 +1,8 @@
 package org.example.connection;
 
-import org.example.exceptions.ConnectionError;
+import org.example.connection.states.ConnectionStatusE;
+import org.example.connection.states.HandShackeStatusE;
+import org.example.connection.states.MessageIdE;
 import org.example.exceptions.ReadException;
 import org.example.exceptions.WriteException;
 import org.example.torrent.TorrentClient;
@@ -11,7 +13,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -25,112 +26,149 @@ public class ConnectionLogic {
         this.torrent = torrent;
     }
 
-    public String GetHostAddress(SocketChannel channel){
-        Socket socket = channel.socket();
-        InetAddress host = socket.getInetAddress();
-        String address = host.getHostAddress() + " " + socket.getPort();
-        return address;
-    }
-
-    private void ReadHandshake(SocketChannel channel, Map<String, ConnectionStatusE> connectionStatus, Selector selector) throws ReadException {
-        ByteBuffer buffer = ByteBuffer.allocate(68);
+    private void ReadHandshake(SelectionKey key, Selector selector) throws ReadException {
+        SocketChannel channel = (SocketChannel) key.channel();
+        Peer peer = (Peer)key.attachment();
+        peer.BufferConnect(68);
         int bytesRead = 0;
         try{
-            bytesRead = channel.read(buffer);
+            bytesRead = channel.read(peer.GetBuffer());
         }
         catch (IOException e){
             channel.keyFor(selector).cancel();
-            throw new ReadException("ERROR cant read handshake: " +  GetHostAddress(channel) +  " " + e.getMessage());
+            throw new ReadException("ERROR cant read handshake: " +  peer.GetHost() + ":" + peer.GetPort() +  " " + e.getMessage());
         }
-        if(bytesRead < 68){
+        if(bytesRead == -1){
+            throw new ReadException(peer.GetHost() + ":" + peer.GetPort() +  " can't read");
+        }
+        peer.ReadByte(bytesRead);
+        if(peer.GetNeededWrite() != 0){
             channel.keyFor(selector).cancel();
-            throw new ReadException("ERROR cant read handshake bytes read: " + bytesRead + " "+ GetHostAddress(channel));
+            throw new ReadException(peer.GetHost() + ":" + peer.GetPort() + " Wait part byte: " + peer.GetNeededWrite());
         }
-        buffer.flip();
-        byte[] data = new byte[bytesRead];
-        buffer.get(data);
+        System.out.println(peer.GetHost() + ":" + peer.GetPort() + " get all byte ");
+        peer.GetBuffer().flip();
+        byte[] data = new byte[68];
+        peer.GetBuffer().get(data);
         if(hsManager.CheckHandShacke(data) == HandShackeStatusE.SUCCESSFUL){
-            connectionStatus.put(GetHostAddress(channel), ConnectionStatusE.LISTENER);
-            System.out.println("HANDSHAKE  " + GetHostAddress(channel));
+            peer.BufferDisconnect();
+            peer.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
+            System.out.println(peer.GetHost() + ":" + peer.GetPort() + " HANDSHAKE SUCCESSFULE");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            ByteBuffer test = ByteBuffer.allocate(100);
         }
         else{
             channel.keyFor(selector).cancel();
-            System.out.println("can't handShake: " + GetHostAddress(channel));
+            System.out.println("can't handShake: " + peer.GetHost() + ":" + peer.GetPort());
         }
     }
 
-    private void ReadData(SocketChannel channel, ByteBuffer buffer, int  dataSize) throws ReadException {
+    private void HandleFinishRead(Peer peer){
+        ConnectionStatusE status = peer.GetStatus();
+        peer.SaveBuffer();
+        peer.BufferDisconnect();
+        if(status == ConnectionStatusE.LISTENER_LENGTH){
+            peer.ChangeStatus(ConnectionStatusE.LISTENER_ID);
+        }
+        else if(status == ConnectionStatusE.LISTENER_ID){
+            peer.ChangeStatus(ConnectionStatusE.LISTENER_DATA);
+        }
+    }
+
+    private void ReadData(SocketChannel channel, Peer peer) throws ReadException {
         int bytesRead;
+        ByteBuffer buffer  = peer.GetBuffer();
         try{
             bytesRead = channel.read(buffer);
-            buffer.rewind();
+            System.out.println(peer.GetHost() + ":" + peer.GetPort() + " read byte: " + bytesRead);
         }
         catch (IOException e){
-            throw new ReadException("ERROR cant data-length: " +  GetHostAddress(channel) +  " " + e.getMessage());
+            throw new ReadException("ERROR cant data-length: " + peer.GetHost() + ":" + peer.GetPort() +  " " + e.getMessage());
         }
-        if(bytesRead < dataSize){
-            throw new ReadException("wrong  data length: " + bytesRead + " but expected  " +  dataSize + " " +  GetHostAddress(channel));
+        if(bytesRead == -1){
+            throw new ReadException(peer.GetHost() + ":" + peer.GetPort() +  " can't read, no data");
         }
+        peer.ReadByte(bytesRead);
+        if(peer.GetNeededWrite() != 0){
+            throw new ReadException(peer.GetHost() + ":" + peer.GetPort() + " Wait part byte: " + peer.GetNeededWrite());
+        }
+        System.out.println(peer.GetHost() + ":" + peer.GetPort() + " get all byte ");
+        HandleFinishRead(peer);
     }
 
-    private void DefineId(int id, SelectionKey key, Map<String, ConnectionStatusE> connectionStatus, ByteBuffer data) throws ReadException {
+    private void DefineId(Peer peer) throws ReadException {
+        int id = peer.GetMessage().GetId();
         if(id == MessageIdE.BITFIELD.getValue()){
-            SocketChannel channel = (SocketChannel) key.channel();
-            connectionStatus.put(GetHostAddress(channel), ConnectionStatusE.INTERESTED);
-            Peer peer = (Peer)key.attachment();
-            peer.SetParts(data.array());
+            peer.ChangeStatus(ConnectionStatusE.INTERESTED);
+            peer.SetParts();
+            System.out.println(peer.GetHost() + ":" + peer.GetPort() + "  BITFIELD");
         }
         else if(id == MessageIdE.UNCHOKE.getValue()){
-            Peer peer = (Peer)key.attachment();
             peer.Unchoke();
+            peer.ChangeStatus(ConnectionStatusE.REQUESTED);
+            System.out.println(peer.GetHost() + ":" + peer.GetPort() + "  UNCHOKE");
         }
         else if(id == MessageIdE.CHOKE.getValue()){
-            Peer peer = (Peer)key.attachment();
             peer.Choke();
+            System.out.println(peer.GetHost() + ":" + peer.GetPort() + "  CHOKE");
         }
         else{
-            throw new ReadException("unexpected id " + id);
+            throw new ReadException(peer.GetHost() + ":" + peer.GetPort() + " unexpected id " + id);
         }
     }
 
-    private void ListenPeer(SocketChannel channel, SelectionKey key, Map<String, ConnectionStatusE> connectionStatus) throws ReadException {
-        ByteBuffer lengthB = ByteBuffer.allocate(4);
-        ByteBuffer idB = ByteBuffer.allocate(1);
-        ReadData(channel, lengthB, 4);
-        ReadData(channel, idB, 1);
-        int length = lengthB.getInt();
-        int  id = idB.get() & 0xFF;
-        System.out.println(GetHostAddress(channel) + " " + id + " " + length);
-        ByteBuffer data = ByteBuffer.allocate(length - 1);
-        ReadData(channel, data, length - 1 );
-        DefineId(id, key, connectionStatus, data);
-    }
-
-
-    public void DefineRead(SelectionKey key, Map<String, ConnectionStatusE> connectionStatus, Selector selector) throws ReadException {
+    private void ListenPeer(SelectionKey key) throws ReadException {
         SocketChannel channel = (SocketChannel) key.channel();
-        if(connectionStatus.get(GetHostAddress(channel)) == ConnectionStatusE.TRY_HANDSHAKE){
-            ReadHandshake(channel, connectionStatus, selector);
+        Peer peer = (Peer)key.attachment();
+        System.out.println(peer.GetHost() + ":" + peer.GetPort() + " LISTEN_PEER");
+        if(peer.GetStatus() == ConnectionStatusE.LISTENER_LENGTH){
+            peer.BufferConnect(4);
+            ReadData(channel, peer);
         }
-        else if(connectionStatus.get(GetHostAddress(channel)) == ConnectionStatusE.LISTENER){
-            ListenPeer(channel, key, connectionStatus);
+        if(peer.GetStatus() == ConnectionStatusE.LISTENER_ID){
+            peer.BufferConnect(1);
+            ReadData(channel, peer);
+        }
+        if(peer.GetStatus() == ConnectionStatusE.LISTENER_DATA){
+            PeerMessage message = peer.GetMessage();
+            peer.BufferConnect(message.GetLength() - 1);
+            System.out.println(peer.GetHost() + ":" + peer.GetPort() + " lenght: " +  message.GetLength() + " ID: " + message.GetId());
+            ReadData(channel, peer);
+        }
+        DefineId(peer);
+    }
+
+    public void DefineRead(SelectionKey key, Selector selector) throws ReadException {
+        Peer peer = (Peer)key.attachment();
+        ConnectionStatusE status = peer.GetStatus();
+        if(status == ConnectionStatusE.TRY_HANDSHAKE){
+            ReadHandshake(key, selector);
+        }
+        else if(status == ConnectionStatusE.LISTENER_ID || status == ConnectionStatusE.LISTENER_LENGTH || status == ConnectionStatusE.LISTENER_DATA){
+            ListenPeer(key);
         }
     }
 
-    private void WriteHanshake(SocketChannel channel, Map<String, ConnectionStatusE> connectionStatus, Selector selector) throws WriteException {
+    private void WriteHanshake(SelectionKey key,  Selector selector) throws WriteException {
+        SocketChannel channel = (SocketChannel) key.channel();
+        Peer peer = (Peer)key.attachment();
         try{
             channel.configureBlocking(false);
             hsManager.DoHandShake(channel);
-            connectionStatus.put(GetHostAddress(channel), ConnectionStatusE.TRY_HANDSHAKE);
-            System.out.println("HANSHAKE SEND: " + GetHostAddress(channel));
+            peer.ChangeStatus(ConnectionStatusE.TRY_HANDSHAKE);
+            System.out.println(peer.GetHost() + ":" + peer.GetPort() + " HANSHAKE SEND");
         }
         catch (IOException e){
             channel.keyFor(selector).cancel();
-            throw new WriteException("can't connection: " + GetHostAddress(channel) +  " " +  e.getMessage());
+            throw new WriteException(peer.GetHost() + ":" + peer.GetPort() + " can't connection: " +  e.getMessage());
         }
     }
 
-    private void WriteInterested(SocketChannel channel, Map<String, ConnectionStatusE> connectionStatus) throws WriteException {
+    private void WriteInterested(SelectionKey key) throws WriteException {
         byte[] interested = new byte[5];
         interested[0] = 0;
         interested[1] = 0;
@@ -138,16 +176,18 @@ public class ConnectionLogic {
         interested[3] = 1;
         interested[4] = 2;
         ByteBuffer buffer = ByteBuffer.wrap(interested);
+        SocketChannel channel = (SocketChannel) key.channel();
+        Peer peer = (Peer) key.attachment();
         try {
             channel.write(buffer);
         } catch (IOException e) {
-            throw new WriteException("can't send interested: " + e.getMessage());
+            throw new WriteException(peer.GetHost() + ":" + peer.GetPort() + " can't send interested: " + e.getMessage());
         }
-        connectionStatus.put(GetHostAddress(channel), ConnectionStatusE.REQUESTED);
-        System.out.println("SEND INTERSTE  " + GetHostAddress(channel));
+        peer.ChangeStatus(ConnectionStatusE.REQUESTED);
+        System.out.println(peer.GetHost() + ":" + peer.GetPort() + " SEND INTERESTE" );
     }
 
-    private void WriteReq(SocketChannel channel, Map<String, ConnectionStatusE> connectionStatus, int segment, int offset) throws WriteException {
+    private void WriteReq(SelectionKey key, int segment, int offset) throws WriteException {
         int sizeBlock = 16 * 1024;
         byte[] reqv = new byte[17];
         reqv[0] = 0;
@@ -156,6 +196,8 @@ public class ConnectionLogic {
         reqv[3] = 13;
         reqv[4] = (byte)MessageIdE.REQUEST.getValue();
         int curIndex = 5;
+        SocketChannel channel = (SocketChannel) key.channel();
+        Peer peer = (Peer)key.attachment();
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream()){
             DataOutputStream out = new DataOutputStream(byteStream);
             out.writeInt(segment);
@@ -168,26 +210,48 @@ public class ConnectionLogic {
             }
             ByteBuffer buffer = ByteBuffer.wrap(reqv);
             try {
-                channel.write(buffer);
-                connectionStatus.put(GetHostAddress(channel), ConnectionStatusE.LISTENER);
+                int write = channel.write(buffer);
+                System.out.println(peer.GetHost() + ":" + peer.GetPort() + " SEND REQV: " + write);
+                peer.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                //ByteBuffer testBuffer = ByteBuffer.allocate(20000);
+                //int bytesRead = channel.read(testBuffer);
+
+                //if(bytesRead == 216){
+//                    System.out.println("WOW");
+//                    testBuffer.rewind();
+//                    for (int i = 0; i < bytesRead; i++) {
+//                        System.out.println("B " + testBuffer.get());
+//                    }
+                //}
+
+                //System.out.println("test " + bytesRead);
             } catch (IOException e) {
-                throw new WriteException("can't send reqv: " + e.getMessage());
+                throw new WriteException(peer.GetHost() + ":" + peer.GetPort() + " can't send reqv: " + e.getMessage());
             }
         } catch (IOException e) {
-            throw new WriteException("can't send reqv: " + e.getMessage());
+            throw new WriteException(peer.GetHost() + ":" + peer.GetPort() + " can't send reqv: " + e.getMessage());
         }
     }
 
-    public void DefineWrite(SocketChannel channel, Map<String, ConnectionStatusE> connectionStatus, Selector selector) throws WriteException {
+    public void DefineWrite(SelectionKey key, Selector selector) throws WriteException {
+        Peer peer = (Peer)key.attachment();
         while (true){
-            if(connectionStatus.get(GetHostAddress(channel)) == ConnectionStatusE.CONNECTED){
-                WriteHanshake(channel, connectionStatus, selector);
+            ConnectionStatusE status = peer.GetStatus();
+            if(status == ConnectionStatusE.CONNECTED){
+                WriteHanshake(key, selector);
             }
-            else if(connectionStatus.get(GetHostAddress(channel)) == ConnectionStatusE.INTERESTED){
-                WriteInterested(channel, connectionStatus);
+            else if(status == ConnectionStatusE.INTERESTED){
+                System.out.println(peer.GetHost() + ":" + peer.GetPort() + " INTERESTED");
+                WriteInterested(key);
             }
-            else if(connectionStatus.get(GetHostAddress(channel)) == ConnectionStatusE.REQUESTED){
-                WriteReq(channel, connectionStatus, 0, 0);
+            else if(status == ConnectionStatusE.REQUESTED){
+                System.out.println(peer.GetHost() + ":" + peer.GetPort() + " REQUESTED");
+                WriteReq(key, 0, 0);
             }
             else {
                 break;

@@ -1,15 +1,13 @@
 package org.example.connection;
 
+import org.example.connection.states.ConnectionStatusE;
 import org.example.exceptions.ConnectionError;
 import org.example.exceptions.ReadException;
 import org.example.exceptions.WriteException;
 import org.example.torrent.TorrentClient;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -38,7 +36,6 @@ public class ConnectionManager {
                 if(socketChannel.isConnected()){
                     socketChannel.configureBlocking(false);
                     socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, peer);
-                    connectionStatus.put(connectionLogic.GetHostAddress(socketChannel), ConnectionStatusE.CONNECTED);
                     System.out.println("Connectrd: " + peer.GetHost() );
                 }
             }
@@ -61,18 +58,19 @@ public class ConnectionManager {
             Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
             while(keyIterator.hasNext()){
                 SelectionKey key = keyIterator.next();
-                if(key.isWritable()){
-                    SocketChannel channel = (SocketChannel) key.channel();
+                keyIterator.remove();
+                if (key.isReadable()) {
                     try {
-                        connectionLogic.DefineWrite(channel, connectionStatus, selector);
-                    } catch (WriteException e) {
+                        connectionLogic.DefineRead(key, selector);
+                    } catch (ReadException e) {
                         System.out.println(e.getMessage());
                     }
                 }
-                if (key.isReadable()) {
+                if(key.isWritable()) {
+                    SocketChannel channel = (SocketChannel) key.channel();
                     try {
-                        connectionLogic.DefineRead(key , connectionStatus, selector);
-                    } catch (ReadException e) {
+                        connectionLogic.DefineWrite(key, selector);
+                    } catch (WriteException e) {
                         System.out.println(e.getMessage());
                     }
                 }

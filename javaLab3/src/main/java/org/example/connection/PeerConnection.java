@@ -1,5 +1,7 @@
 package org.example.connection;
 
+import org.example.connection.states.HandShackeStatusE;
+import org.example.connection.states.MessageIdE;
 import org.example.exceptions.ConnectionError;
 import org.example.torrent.TorrentClient;
 
@@ -159,7 +161,7 @@ public class PeerConnection implements Runnable{
     private void DifineId(byte id, byte[] data) throws ConnectionError {
         if(id == MessageIdE.BITFIELD.getValue()){
             SendInterested();
-            peer.SetParts(data);
+            //peer.SetParts(data);
         }
         else if(id == MessageIdE.UNCHOKE.getValue()){
             peer.Unchoke();

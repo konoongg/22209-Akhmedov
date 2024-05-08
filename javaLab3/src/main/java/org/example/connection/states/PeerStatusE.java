@@ -1,4 +1,4 @@
-package org.example.connection;
+package org.example.connection.states;
 
 public enum PeerStatusE {
     CHOKE, UNCHOKE;

@@ -1,12 +1,11 @@
 package org.example.connection;
 
-import org.example.exceptions.ConnectionError;
+import org.example.connection.states.HandShackeStatusE;
 import org.example.exceptions.WriteException;
 import org.example.torrent.TorrentClient;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 public class HandShake {
