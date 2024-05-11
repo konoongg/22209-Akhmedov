@@ -1,11 +1,9 @@
 package org.example;
 
-import org.example.exceptions.CantcreateFile;
-import org.example.exceptions.ConnectionError;
-import org.example.exceptions.ServerCommunicateError;
-import org.example.exceptions.WrongTorrentFileFormat;
+import org.example.exceptions.*;
 import org.example.connection.ConnectionManager;
-import org.example.connection.Peer;
+import org.example.connection.peer.Peer;
+import org.example.file.save.FileSaver;
 import org.example.torrent.TorrentClient;
 import org.example.torrent.TorrentFile;
 import org.example.tracker.Tracker;
@@ -15,15 +13,14 @@ import java.util.ArrayList;
 
 public class TorrentController {
 
-    public TorrentController(String torrentPath, String folderPath) throws WrongTorrentFileFormat, ServerCommunicateError, CantcreateFile, IOException, ConnectionError {
+    public TorrentController(String torrentPath, String folderPath) throws WrongTorrentFileFormat, ServerCommunicateError, CantcreateFile, IOException, ConnectionError, SaveDataException {
         TorrentClient torrent = new TorrentClient(torrentPath, folderPath);
         TorrentFile torrentFile = torrent.GetTorrentFile();
         InfoPrinter infoPrinter = new InfoPrinter();
         infoPrinter.PrintStartInfo(torrent);
-        FileSaver fileSaver = new FileSaver(torrentFile.GetFiles(), folderPath, torrentFile.GetName());
         Tracker serverComm = new Tracker();
-        ArrayList<Peer> peers = serverComm.GetPeers(torrent);
+        ArrayList<Peer> peers = serverComm.GetPeers(torrent, folderPath);
         infoPrinter.PrintPeers(peers);
-        ConnectionManager connectionManager = new ConnectionManager(peers, torrent);
+        ConnectionManager connectionManager = new ConnectionManager(peers,  torrent, torrentFile.GetFiles().get(0), folderPath);
     }
 }

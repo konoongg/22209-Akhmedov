@@ -1,6 +1,6 @@
 package org.example;
 
-import org.example.connection.Peer;
+import org.example.connection.peer.Peer;
 import org.example.torrent.TorrentClient;
 import org.example.torrent.TorrentFile;
 

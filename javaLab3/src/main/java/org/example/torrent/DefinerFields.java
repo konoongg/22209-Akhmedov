@@ -1,14 +1,15 @@
 package org.example.torrent;
 
-import org.example.FileT;
+import org.example.file.FileT;
 import org.example.exceptions.WrongTorrentFileFormat;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
-public class Definer {
+public class DefinerFields {
     private int downloadSize = 0;
 
     public byte[] DefineAnnounce(Map<String, byte[]> mainDict) throws WrongTorrentFileFormat {
@@ -44,11 +45,11 @@ public class Definer {
         return segmentsSize / 20;
     }
 
-    public void DefineFiles(Map<String, byte[]>  infoDict, String folderPath, ArrayList<FileT> files) throws WrongTorrentFileFormat {
+    public void DefineFiles(Map<String, byte[]>  infoDict, String folderPath, ArrayList<FileT> files, int countParts, int pieceLength) throws WrongTorrentFileFormat {
         if(infoDict.containsKey("length")){
             int length = Integer.valueOf(new String(infoDict.get("length")));
             downloadSize = length;
-            files.add(new FileT(folderPath, length));
+            files.add(new FileT(folderPath, length, countParts, pieceLength));
         }
         else if(infoDict.containsKey("files")){
             //
@@ -56,6 +57,15 @@ public class Definer {
         else{
             throw new WrongTorrentFileFormat("torrent file don't have field info/length or info/files");
         }
+    }
+
+    public int DefinePieceLength(Map<String, byte[]>  infoDict) throws WrongTorrentFileFormat {
+        if(!infoDict.containsKey("piece length")){
+            throw new WrongTorrentFileFormat("torrent file don't have field info/length or info/name");
+        }
+        byte[] data = infoDict.get("piece length");
+        String length = new String(data);
+        return  Integer.valueOf(length);
     }
 
     public String DefineName(Map<String, byte[]>  infoDict) throws WrongTorrentFileFormat {

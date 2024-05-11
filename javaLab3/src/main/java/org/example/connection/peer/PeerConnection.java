@@ -1,4 +1,4 @@
-package org.example.connection;
+package org.example.connection.peer;
 
 import org.example.connection.states.HandShackeStatusE;
 import org.example.connection.states.MessageIdE;

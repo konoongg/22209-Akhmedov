@@ -1,4 +1,4 @@
-package org.example.connection;
+package org.example.connection.peer;
 
 import java.nio.ByteBuffer;
 

@@ -2,7 +2,7 @@ package org.example.tracker;
 
 import org.example.exceptions.ServerCommunicateError;
 import org.example.exceptions.WrongTorrentFileFormat;
-import org.example.connection.Peer;
+import org.example.connection.peer.Peer;
 import org.example.torrent.TorrentParser;
 
 import java.io.ByteArrayOutputStream;

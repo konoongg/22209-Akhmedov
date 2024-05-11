@@ -1,6 +1,6 @@
 package org.example.torrent;
 
-import org.example.FileT;
+import org.example.file.FileT;
 import org.example.exceptions.ServerCommunicateError;
 import org.example.exceptions.WrongTorrentFileFormat;
 
@@ -14,23 +14,25 @@ public class TorrentFile {
     private String comment;
     private String createdBy;
     private Date createdDate;
-    private ArrayList<byte[]> segmentSha1 = new ArrayList<>();
+    private ArrayList<byte[]> segmentsSha1 = new ArrayList<>();
     private ArrayList<FileT> files = new ArrayList<>();
     private byte[] info;
     private int downloadSize;
     private int countParts;
+    private int pieceLength;
 
     private void  DefineFields(Map<String, byte[]>  mainDict, Map<String, byte[]>  infoDict, String folderPath) throws WrongTorrentFileFormat {
-        Definer definer = new Definer();
+        DefinerFields definer = new DefinerFields();
         announce = definer.DefineAnnounce(mainDict);
-        definer.DefineSegments(infoDict, segmentSha1);
-        definer.DefineFiles(infoDict, folderPath, files);
+        definer.DefineSegments(infoDict, segmentsSha1);
+        countParts = definer.DefineCountParts(infoDict);
+        pieceLength = definer.DefinePieceLength(infoDict);
+        definer.DefineFiles(infoDict, folderPath, files, GetCountParts(), pieceLength);
         name = definer.DefineName(infoDict);
         comment = definer.DefineComment(mainDict);
         createdBy = definer.DefineCreatedBy(mainDict);
         createdDate = definer.DefineCreatedDate(mainDict);
         downloadSize = definer.DefineDownloadSize();
-        countParts = definer.DefineCountParts(infoDict);
     }
 
     public TorrentFile(String torrentPath, String folderPath) throws WrongTorrentFileFormat, ServerCommunicateError {
@@ -83,6 +85,10 @@ public class TorrentFile {
 
     public int GetCountParts(){
         return countParts;
+    }
+
+    public ArrayList<byte[]> GetSegmentsSha1(){
+        return segmentsSha1;
     }
 
     public byte[] GetInfo(){

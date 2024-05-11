@@ -1,7 +1,7 @@
 package org.example.tracker;
 
 import org.example.torrent.TorrentClient;
-import org.example.connection.Peer;
+import org.example.connection.peer.Peer;
 import org.example.exceptions.ServerCommunicateError;
 import org.example.exceptions.WrongTorrentFileFormat;
 import org.example.torrent.TorrentFile;
@@ -45,7 +45,25 @@ public class Tracker {
         return url;
     }
 
-    public ArrayList<Peer> GetPeers(TorrentClient torrent) throws ServerCommunicateError, IOException, WrongTorrentFileFormat {
+    private String DefineFullPath(String path, String name){
+        String fullPath = path;
+        if(path.charAt(path.length() - 1) == '/'){
+            fullPath += name;
+        }
+        else{
+            fullPath += "/" + name;
+        }
+        return fullPath;
+    }
+
+    private void  SetPeerFile(ArrayList<Peer> peers, String path, String name ){
+        String fullPath = DefineFullPath(path, name);
+        for(Peer peer : peers){
+            peer.SetTask(fullPath);
+        }
+    }
+
+    public ArrayList<Peer> GetPeers(TorrentClient torrent, String folderPath) throws ServerCommunicateError, IOException, WrongTorrentFileFormat {
         URL url = CreateUrl(torrent);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -56,7 +74,7 @@ public class Tracker {
         }
         AnswerParser trackerAnswerParser = new AnswerParser();
         ArrayList<Peer> peers =  trackerAnswerParser.PeersParsing(connection, torrent.GetTorrentFile().GetCountParts());
-
+        SetPeerFile(peers, folderPath, torrent.GetTorrentFile().GetName());
         return peers;
     }
 }
