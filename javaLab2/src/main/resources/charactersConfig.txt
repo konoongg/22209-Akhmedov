@@ -1,0 +1,2 @@
+Scientist org.example.characters.Scientist
+Mathematician org.example.characters.Mathematician

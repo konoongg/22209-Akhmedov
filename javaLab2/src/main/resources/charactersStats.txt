@@ -1,0 +1,2 @@
+Mathematician 100 0 /Images/Characters/Mathematician/ 0 1 1
+Scientist 100 40 /Images/Characters/Scientist/ 500 2 2
