@@ -4,10 +4,7 @@ import org.example.connection.peer.Peer;
 import org.example.connection.peer.PeerDataContoller;
 import org.example.connection.peer.PeerMessage;
 import org.example.connection.peer.PeerTask;
-import org.example.connection.states.ConnectionStatusE;
-import org.example.connection.states.HandShackeStatusE;
-import org.example.connection.states.MessageIdE;
-import org.example.connection.states.PeerDownloadedE;
+import org.example.connection.states.*;
 import org.example.exceptions.ReadException;
 import org.example.exceptions.WriteException;
 import org.example.torrent.TorrentClient;
@@ -115,12 +112,11 @@ public class ConnectionLogic {
             con.SetParts();
             System.out.println(peer.GetHost() + ":" + peer.GetPort() + "  BITFIELD");
         }
-        else if(id == MessageIdE.UNCHOKE.getValue()){
-
+        else if(id == MessageIdE.UNCHOKE.getValue() && peer.GetPeerStatus() == PeerStatusE.CHOKE){
             System.out.println(peer.GetHost() + ":" + peer.GetPort() + " befpre UNCHOKE " + con.GetStatus());
             peer.Unchoke();
             if(con.GetStatus() != ConnectionStatusE.LOAD_DATA){
-                con.ChangeStatus(ConnectionStatusE.REQUESTED);
+                con.ChangeStatus(ConnectionStatusE.WAIT_TASK);
                 peer.GetTask().Ready(MessageIdE.UNCHOKE);
             }
             System.out.println(peer.GetHost() + ":" + peer.GetPort() + "  UNCHOKE");
@@ -218,7 +214,7 @@ public class ConnectionLogic {
         }
         PeerDataContoller con = peer.GetPeerDataCon();
         if(con.GetStatus() != ConnectionStatusE.LOAD_DATA){
-            con.ChangeStatus(ConnectionStatusE.REQUESTED);
+            con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
         }
         System.out.println(peer.GetHost() + ":" + peer.GetPort() + " SEND INTERESTE" );
     }
@@ -241,7 +237,7 @@ public class ConnectionLogic {
             out.writeInt(task.GetOffset());
             out.writeInt(sizeBlock);
 
-            System.out.println(peer.GetHost() + ":" + peer.GetPort() + " REQUESTED: " + task.GetSegment() + ":" + task.GetOffset() + ":" + sizeBlock );
+            System.out.println(peer.GetHost() + ":" + peer.GetPort() + " REQUESTED: " + ":" + task.GetOffset() + ":" + sizeBlock );
             byte[] bytes = byteStream.toByteArray();
             for(int i = 0; i < 12; ++i){
                 reqv[curIndex] = bytes[i];

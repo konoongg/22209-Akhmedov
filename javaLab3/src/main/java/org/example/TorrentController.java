@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class TorrentController {
 
-    public TorrentController(String torrentPath, String folderPath) throws WrongTorrentFileFormat, ServerCommunicateError, CantcreateFile, IOException, ConnectionError, SaveDataException {
+    public TorrentController(String torrentPath, String folderPath) throws WrongTorrentFileFormat, ServerCommunicateError, CantcreateFile, IOException, ConnectionError, SaveDataException, SelectionSegmentException {
         TorrentClient torrent = new TorrentClient(torrentPath, folderPath);
         TorrentFile torrentFile = torrent.GetTorrentFile();
         InfoPrinter infoPrinter = new InfoPrinter();

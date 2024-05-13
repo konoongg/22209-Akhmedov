@@ -1,5 +1,4 @@
 package org.example.connection;
-
 import org.example.connection.peer.Peer;
 import org.example.connection.peer.PeerDataContoller;
 import org.example.connection.peer.PeerTask;
@@ -18,6 +17,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.*;
 
+
 public class ConnectionManager {
     private TorrentClient torrent;
     private Map<String, ConnectionStatusE> connectionStatus = new HashMap<>();
@@ -25,7 +25,7 @@ public class ConnectionManager {
     private FileT fileT;
     private FileSaveManager fileSaveManager;
 
-    private void CheckReadyWrite(Peer peer) throws SaveDataException {
+    private void CheckReadyWrite(Peer peer) throws SaveDataException, SelectionSegmentException {
         PeerTask task = peer.GetTask();
         PeerDataContoller con = peer.GetPeerDataCon();
         PeerDataContoller controller = peer.GetPeerDataCon();
@@ -33,19 +33,20 @@ public class ConnectionManager {
             SegmentManager segmentManager = fileT.GetSegmentManager();
             int segment = segmentManager.Segment(controller.GetParts());
             task.SetTask(segment, segmentManager.SegmentSize(segment));
+            peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.REQUESTED);
             System.out.println(peer.GetHost() + ":" + peer.GetPort() + " NEED_WORK " + segment);
         }
         else if(task.Downloaded() == PeerDownloadedE.READY_All){
             task.LoadDataInBuf(peer.GetPeerDataCon().GetMessage().GetMes());
+            if(fileSaveManager.Write(task.GetSegmentId(), task.GetSegment())){
+                fileT.GetSegmentManager().CompliteDownload(task.GetSegmentId());
+            }
+            else{
+                fileT.GetSegmentManager().CantDownload(task.GetSegmentId());
+            }
             SegmentManager segmentManager = fileT.GetSegmentManager();
             int segmentId = segmentManager.Segment(controller.GetParts());
             task.SetTask(segmentId, segmentManager.SegmentSize(segmentId));
-            if(fileSaveManager.Write(task.GetSegmentId(), task.GetSegment())){
-                fileT.GetSegmentManager().CompliteDownload(segmentId);
-            }
-            else{
-                fileT.GetSegmentManager().CantDownload(segmentId);
-            }
             con.ChangeStatus(ConnectionStatusE.REQUESTED);
             System.out.println(peer.GetHost() + ":" + peer.GetPort() + " GET TASK: " + segmentId + ":"+ task.GetOffset());
         }
@@ -64,7 +65,7 @@ public class ConnectionManager {
         }
     }
 
-    public ConnectionManager(ArrayList<Peer> peers, TorrentClient torrent, FileT fileT, String folderPath) throws ConnectionError, CantcreateFile, SaveDataException {
+    public ConnectionManager(ArrayList<Peer> peers, TorrentClient torrent, FileT fileT, String folderPath) throws ConnectionError, CantcreateFile, SaveDataException, SelectionSegmentException {
         this.torrent = torrent;
         fileSaveManager = new FileSaveManager(torrent, folderPath);
         this.fileT = fileT;
@@ -72,8 +73,7 @@ public class ConnectionManager {
         Connect(peers);
     }
 
-    private void Connect(ArrayList<Peer> peers) throws ConnectionError, SaveDataException {
-
+    private void Connect(ArrayList<Peer> peers) throws ConnectionError, SaveDataException, SelectionSegmentException {
         Selector selector = null;
         try{
             selector = Selector.open();
@@ -83,9 +83,6 @@ public class ConnectionManager {
         }
         for(Peer peer : peers){
             try {
-                if(peer.GetPort() != 26009){
-                    continue;
-                }
                 SocketChannel socketChannel = SelectorProvider.provider().openSocketChannel();
                 socketChannel.socket().connect(new InetSocketAddress(peer.GetHost(), peer.GetPort()), 1000);
                 if(socketChannel.isConnected()){
@@ -108,6 +105,11 @@ public class ConnectionManager {
             }
             if (readyChannels == 0){
                 continue;
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
             Iterator<SelectionKey> keyIterator = selectedKeys.iterator();

@@ -45,7 +45,6 @@ public class FileSaver {
     public void Write(byte[] data, int startPosition) throws SaveDataException {
         try (RandomAccessFile raf = new RandomAccessFile(fullPath, "rw")) {
             raf.seek(startPosition);
-
             raf.write(data);
         } catch (FileNotFoundException e) {
             throw new SaveDataException("can't find file: " + fullPath);

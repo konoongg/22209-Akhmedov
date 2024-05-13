@@ -87,6 +87,10 @@ public class TorrentFile {
         return countParts;
     }
 
+    public int GetPieceLength(){
+        return pieceLength;
+    }
+
     public ArrayList<byte[]> GetSegmentsSha1(){
         return segmentsSha1;
     }

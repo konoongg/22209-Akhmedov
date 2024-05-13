@@ -44,7 +44,7 @@ public class Peer {
 
     public PeerTask GetTask(){return peerTask;}
 
-    public PeerStatusE peerStatus(){
+    public PeerStatusE GetPeerStatus(){
         return choked;
     }
 }

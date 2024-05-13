@@ -17,10 +17,12 @@ public class SegmentChecker {
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-1");
             byte[] sha1 = digest.digest(segment);
-            if(sha1 == segmentSha1.get(segmentId)){
-                return true;
+            for(int i = 0; i < 20; ++i){
+                if(sha1[i] != segmentSha1.get(segmentId)[i]){
+                    return false;
+                }
             }
-            return false;
+            return true;
         } catch (NoSuchAlgorithmException e) {
             throw new SaveDataException("can't check sha-1 segment");
         }

@@ -53,7 +53,7 @@ public class AnswerParser {
             try {
                 host = InetAddress.getByAddress(ipBytes);
             } catch (UnknownHostException e) {
-                throw new ServerCommunicateError("can'r get ip address peers");
+                throw new ServerCommunicateError("can't get ip address peers");
             }
             index += 4;
             byte[] portBytes = Arrays.copyOfRange(peers, index, index + 2);

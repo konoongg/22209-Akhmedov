@@ -27,6 +27,7 @@ public class PeerTask {
     public void SetTask(int segmentId, int segmentSize){
         this.segmentId = segmentId;
         this.segmentSize = segmentSize;
+        curOffset = 0;
         segment = new byte[segmentSize];
         downloaded = PeerDownloadedE.NOT_READY;
     }
@@ -51,14 +52,15 @@ public class PeerTask {
     }
 
     public void LoadDataInBuf(byte[] partData){
-        for(int i = 0; i < partData.length; ++i){
-            segment[curOffset + i] =  partData[i];
+        for(int i = 8; i < partData.length; ++i){
+            segment[curOffset + i - 8] =  partData[i];
         }
         System.out.println("local writed");
     }
 
     public void LoadNext(){
         curOffset += sizeBlock;
+        downloaded = PeerDownloadedE.NOT_READY;
     }
 
     public PeerDownloadedE Downloaded(){
