@@ -35,15 +35,15 @@ public class ConnectionLogic {
             bytesRead = channel.read(con.GetBuffer());
         }
         catch (IOException e){
-            channel.keyFor(selector).cancel();
+            peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.DISCONNECTED);
             throw new ReadException("ERROR cant read handshake: " +  peer.GetHost() + ":" + peer.GetPort() +  " " + e.getMessage());
         }
         if(bytesRead == -1){
+            peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.DISCONNECTED);
             throw new ReadException(peer.GetHost() + ":" + peer.GetPort() +  " can't read");
         }
         con.ReadByte(bytesRead);
         if(con.GetNeededWrite() != 0){
-            channel.keyFor(selector).cancel();
             throw new ReadException(peer.GetHost() + ":" + peer.GetPort() + " Wait part byte: " + con.GetNeededWrite());
         }
         System.out.println(peer.GetHost() + ":" + peer.GetPort() + " get all byte ");
@@ -62,7 +62,7 @@ public class ConnectionLogic {
             ByteBuffer test = ByteBuffer.allocate(100);
         }
         else{
-            channel.keyFor(selector).cancel();
+            peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.DISCONNECTED);
             System.out.println("can't handShake: " + peer.GetHost() + ":" + peer.GetPort());
         }
     }
@@ -96,6 +96,12 @@ public class ConnectionLogic {
             peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.DISCONNECTED);
             throw new ReadException(peer.GetHost() + ":" + peer.GetPort() +  " can't read, no data");
         }
+        else if(bytesRead == 0){
+            peer.GetPeerDataCon().UnSuccessfulReading();
+        }
+        else{
+            peer.GetPeerDataCon().SuccessfulReading();
+        }
         con.ReadByte(bytesRead);
         if(con.GetNeededWrite() != 0){
             throw new ReadException(peer.GetHost() + ":" + peer.GetPort() + " Wait part byte: " + con.GetNeededWrite());
@@ -113,7 +119,6 @@ public class ConnectionLogic {
             System.out.println(peer.GetHost() + ":" + peer.GetPort() + "  BITFIELD");
         }
         else if(id == MessageIdE.UNCHOKE.getValue() && peer.GetPeerStatus() == PeerStatusE.CHOKE){
-            System.out.println(peer.GetHost() + ":" + peer.GetPort() + " befpre UNCHOKE " + con.GetStatus());
             peer.Unchoke();
             if(con.GetStatus() != ConnectionStatusE.LOAD_DATA){
                 con.ChangeStatus(ConnectionStatusE.WAIT_TASK);
@@ -192,7 +197,7 @@ public class ConnectionLogic {
             System.out.println(peer.GetHost() + ":" + peer.GetPort() + " HANSHAKE SEND");
         }
         catch (IOException e){
-            channel.keyFor(selector).cancel();
+            peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.DISCONNECTED);
             throw new WriteException(peer.GetHost() + ":" + peer.GetPort() + " can't connection: " +  e.getMessage());
         }
     }

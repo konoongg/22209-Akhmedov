@@ -1,4 +1,5 @@
 package org.example.connection;
+import org.example.Main;
 import org.example.connection.peer.Peer;
 import org.example.connection.peer.PeerDataContoller;
 import org.example.connection.peer.PeerTask;
@@ -9,6 +10,9 @@ import org.example.file.save.FileSaveManager;
 import org.example.file.FileT;
 import org.example.file.SegmentManager;
 import org.example.torrent.TorrentClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
@@ -19,11 +23,13 @@ import java.util.*;
 
 
 public class ConnectionManager {
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
     private TorrentClient torrent;
     private Map<String, ConnectionStatusE> connectionStatus = new HashMap<>();
     private ConnectionLogic connectionLogic;
     private FileT fileT;
     private FileSaveManager fileSaveManager;
+    private PeerBlackList peerBlackList;
 
     private void CheckReadyWrite(Peer peer) throws SaveDataException, SelectionSegmentException {
         PeerTask task = peer.GetTask();
@@ -58,10 +64,28 @@ public class ConnectionManager {
         }
     }
 
-    private void CheckConnect(SelectionKey key){
+    private void CheckConnect(SelectionKey key, Selector selector){
         Peer peer = (Peer)key.attachment();
-        if(peer.GetPeerDataCon().GetStatus() == ConnectionStatusE.DISCONNECTED){
+        if(peer.GetPeerDataCon().GetUnSuccessful() >= 10 || peer.GetPeerDataCon().GetStatus() == ConnectionStatusE.DISCONNECTED){
+            String address = peer.GetHost() + ":" + peer.GetPort();
+            log.warn(address + " DISCONNECTED");
+            peerBlackList.Disconnect(address);
             key.cancel();
+            if(!peerBlackList.IsBlock(address)){
+                try{
+                    PeerConnect(peer, selector);
+                    peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.CONNECTED);
+                    peer.GetPeerDataCon().SuccessfulReading();
+                    log.info(address + " RECONNECTED");
+                }
+                catch (IOException e){
+                    peerBlackList.Disconnect(address);
+                    log.warn(address + " CANT RECONNECTED");
+                }
+            }
+            else{
+                log.warn(address + " FYNNALY DISCONNECTED");
+            }
         }
     }
 
@@ -70,7 +94,18 @@ public class ConnectionManager {
         fileSaveManager = new FileSaveManager(torrent, folderPath);
         this.fileT = fileT;
         connectionLogic = new ConnectionLogic(torrent);
+        peerBlackList = new PeerBlackList();
         Connect(peers);
+    }
+
+    private void PeerConnect(Peer peer, Selector selector) throws IOException {
+        SocketChannel socketChannel = SelectorProvider.provider().openSocketChannel();
+        socketChannel.socket().connect(new InetSocketAddress(peer.GetHost(), peer.GetPort()), 1000);
+        if(socketChannel.isConnected()){
+            socketChannel.configureBlocking(false);
+            socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, peer);
+            System.out.println("Connectrd: " + peer.GetHost() + ":" + peer.GetPort());
+        }
     }
 
     private void Connect(ArrayList<Peer> peers) throws ConnectionError, SaveDataException, SelectionSegmentException {
@@ -83,13 +118,7 @@ public class ConnectionManager {
         }
         for(Peer peer : peers){
             try {
-                SocketChannel socketChannel = SelectorProvider.provider().openSocketChannel();
-                socketChannel.socket().connect(new InetSocketAddress(peer.GetHost(), peer.GetPort()), 1000);
-                if(socketChannel.isConnected()){
-                    socketChannel.configureBlocking(false);
-                    socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, peer);
-                    System.out.println("Connectrd: " + peer.GetHost() + ":" + peer.GetPort());
-                }
+                PeerConnect(peer, selector);
             }
             catch (IOException e){
                 System.out.println("connection error " + peer.GetHost() + " " + peer.GetPort() + ": " + e);
@@ -106,11 +135,11 @@ public class ConnectionManager {
             if (readyChannels == 0){
                 continue;
             }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
             Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
             while(keyIterator.hasNext()){
@@ -133,7 +162,7 @@ public class ConnectionManager {
                 }
                 Peer peer = (Peer)key.attachment();
                 CheckReadyWrite(peer);
-                CheckConnect(key);
+                CheckConnect(key, selector);
             }
         }
     }

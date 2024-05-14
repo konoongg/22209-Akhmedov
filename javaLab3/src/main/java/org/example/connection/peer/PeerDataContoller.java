@@ -5,7 +5,6 @@ import org.example.exceptions.ReadException;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.BitSet;
 
 public class PeerDataContoller {
     private PeerMessage message;
@@ -14,12 +13,14 @@ public class PeerDataContoller {
     private ByteBuffer buffer;
     private ConnectionStatusE status;
     private int neededByte;
+    private int UnSuccessful;
 
     public PeerDataContoller(int countParts){
         message = new PeerMessage();
         haveParts = new ArrayList<>(countParts);
         this.countParts = countParts;
         buffer = null;
+        UnSuccessful = 0;
         status = ConnectionStatusE.CONNECTED;
     }
 
@@ -44,6 +45,14 @@ public class PeerDataContoller {
                 }
             }
         }
+    }
+
+    public void UnSuccessfulReading(){
+        UnSuccessful++;
+    }
+
+    public void SuccessfulReading(){
+        UnSuccessful = 0;
     }
 
     public void ApplyHave() throws ReadException {
@@ -95,6 +104,10 @@ public class PeerDataContoller {
 
     public ConnectionStatusE GetStatus(){
         return status;
+    }
+
+    public int GetUnSuccessful(){
+        return UnSuccessful;
     }
 
     public void ChangeStatus(ConnectionStatusE newStatus){
