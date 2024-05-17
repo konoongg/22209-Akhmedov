@@ -1,13 +1,15 @@
 package org.example.file;
 
-import org.example.exceptions.SaveDataException;
 import org.example.exceptions.SelectionSegmentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
 public class SegmentManager {
+    private static final Logger log = LoggerFactory.getLogger(SegmentManager.class);
     private HashSet<Integer> needDownload = new HashSet<>();
     private HashSet<Integer> nowDownload = new HashSet<>();
     private HashSet<Integer> downloaded = new HashSet<>();
@@ -29,6 +31,23 @@ public class SegmentManager {
     }
 
     public int Segment(ArrayList<Integer> haveParts) throws SelectionSegmentException {
+        if(needDownload.isEmpty()){
+            HashSet<Integer> setNow = new HashSet<>(nowDownload);
+            HashSet<Integer> setHave = new HashSet<>(haveParts);
+            setNow.retainAll(setHave);
+            if(setNow.isEmpty()){
+                return -1;
+            }
+            else{
+                Random random = new Random();
+                Integer[]  intersection = setNow.toArray(new Integer[0]);
+                int randomIndex = random.nextInt(intersection.length);
+                int randomElem = intersection[randomIndex];
+                nowDownload.add(randomElem);
+                needDownload.remove(randomElem);
+                return randomElem;
+            }
+        }
         HashSet<Integer> setNeed = new HashSet<>(needDownload);
         HashSet<Integer> setHave = new HashSet<>(haveParts);
         setNeed.retainAll(setHave);
@@ -60,18 +79,24 @@ public class SegmentManager {
 
     public void CompliteDownload(int index) throws SelectionSegmentException {
         if(!downloaded.add(index)){
-            System.out.println("this part yet downloaded: " + index);
-            throw new SelectionSegmentException("this part yet downloaded: " + index);
+            log.debug("this part yet downloaded: " + index);
         }
         if(!nowDownload.remove(index)){
-            System.out.println("this part not download: " + index);
-            throw new SelectionSegmentException("this part not download: " + index);
+            log.debug("this part not download: " + index);
         }
-        System.out.println("NEED DOWNLOAD: " + needDownload.size() + " NOW DOWNLOAD: " + nowDownload.size() + " DoWNLOAD: " + downloaded.size());
+        log.debug("NEED DOWNLOAD: " + needDownload.size() + " NOW DOWNLOAD: " + nowDownload.size() + " DoWNLOAD: " + downloaded.size());
     }
 
     public void CantDownload(int index){
         nowDownload.remove(index);
         needDownload.add(index);
+    }
+
+    public int GetCountSegment(){
+        return countSegment;
+    }
+
+    public HashSet<Integer> GetDownloadedParts(){
+        return downloaded;
     }
 }

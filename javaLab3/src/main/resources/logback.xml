@@ -2,11 +2,39 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5highlight(%level) %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>log.txt</file>
+        <append>false</append>
+        <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
     <root level="trace">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
     </root>
+
+    <conversionRule conversionWord="highlight" converterClass="org.slf4j.helpers.MessageFormatter">
+        <substitution>
+            <token>DEBUG</token>
+            <color>1;36</color> <!-- Cyan for DEBUG level -->
+        </substitution>
+        <substitution>
+            <token>INFO</token>
+            <color>1;32</color> <!-- Green for INFO level -->
+        </substitution>
+        <substitution>
+            <token>WARN</token>
+            <color>1;33</color> <!-- Yellow for WARN level -->
+        </substitution>
+        <substitution>
+            <token>ERROR</token>
+            <color>1;31</color> <!-- Red for ERROR level -->
+        </substitution>
+    </conversionRule>
 </configuration>

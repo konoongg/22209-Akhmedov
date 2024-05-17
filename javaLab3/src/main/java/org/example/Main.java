@@ -7,8 +7,6 @@ public class Main {
 
     public static void main(String[] args)  {
         log.trace("start program");
-        log.error("start program");
-        log.warn("start program");
         String torrentPath = args[0];
         String folderPath = args[1];
         try{

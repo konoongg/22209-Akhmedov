@@ -10,6 +10,7 @@ public class Peer {
     private PeerStatusE choked;
     private PeerDataContoller peerDataContoller;
     private PeerTask peerTask;
+    private PeerServerTask peerServerTask;
 
     public Peer(InetAddress host, int port, int countParts){
         this.host = host;
@@ -20,6 +21,10 @@ public class Peer {
 
     public void SetTask(String path){
         peerTask = new PeerTask(path);
+    }
+
+    public void SetServerTask(byte[] args){
+        peerServerTask = new PeerServerTask(args);
     }
 
     public InetAddress GetHost(){
@@ -43,6 +48,8 @@ public class Peer {
     }
 
     public PeerTask GetTask(){return peerTask;}
+
+    public PeerServerTask GetServerTask(){return  peerServerTask;}
 
     public PeerStatusE GetPeerStatus(){
         return choked;

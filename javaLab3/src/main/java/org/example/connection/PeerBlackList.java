@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class PeerBlackList {
     private Map<String, Integer> blackList= new HashMap<>();
-    private int maxCountDisconnect = 3;
+    private int maxCountDisconnect = 10;
 
     public void Disconnect(String key){
         if(blackList.containsKey(key)){

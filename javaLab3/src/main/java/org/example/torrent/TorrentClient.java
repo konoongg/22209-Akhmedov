@@ -92,4 +92,8 @@ public class TorrentClient {
     public byte[] GetPeerIdB(){
         return peerIdB;
     }
+
+    public int GetPort(){
+        return port;
+    }
 }

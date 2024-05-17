@@ -5,6 +5,7 @@ import org.example.exceptions.ReadException;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class PeerDataContoller {
     private PeerMessage message;
@@ -38,13 +39,26 @@ public class PeerDataContoller {
             for(int i = 7; i >= 0; --i){
                 int mask = 1 << i;
                 boolean bit = (part & mask) != 0;
-                haveParts.add(index);
+                if(bit){
+                    haveParts.add(index);
+                }
                 index++;
                 if(index >= countParts){
                     return;
                 }
             }
         }
+    }
+
+    public void SetParts(HashSet<Integer> donloaded){
+        haveParts.addAll(donloaded);
+    }
+
+    public void UpdateParts(HashSet<Integer> donloaded, PeerServerTask peerServerTask){
+        HashSet<Integer> havePartsSet = new HashSet<>(haveParts);
+        HashSet<Integer> downloadedSet = new HashSet<>(donloaded);
+        downloadedSet.retainAll(havePartsSet);
+        peerServerTask.SetNeedHave(downloadedSet);
     }
 
     public void UnSuccessfulReading(){
@@ -66,7 +80,7 @@ public class PeerDataContoller {
 
     }
 
-    public void SaveBuffer(){
+    public void SaveBuffer() throws ReadException {
         if(status == ConnectionStatusE.LISTENER_LENGTH){
             message.SetLength(buffer);
         }
@@ -112,5 +126,9 @@ public class PeerDataContoller {
 
     public void ChangeStatus(ConnectionStatusE newStatus){
         status = newStatus;
+    }
+
+    public ArrayList<Integer> GetHaveParts(){
+        return haveParts;
     }
 }

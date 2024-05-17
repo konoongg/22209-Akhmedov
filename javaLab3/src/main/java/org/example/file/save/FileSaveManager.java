@@ -2,11 +2,16 @@ package org.example.file.save;
 
 import org.example.exceptions.CantcreateFile;
 import org.example.exceptions.SaveDataException;
+import org.example.file.SegmentManager;
 import org.example.torrent.TorrentClient;
 import org.example.torrent.TorrentFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 
 public class FileSaveManager {
+    private static final Logger log = LoggerFactory.getLogger(FileSaveManager.class);
     private SegmentChecker segmentChecker;
     private FileSaver fileSaver;
     private int segmentSize;
@@ -27,11 +32,11 @@ public class FileSaveManager {
     public boolean Write(int segmentId, byte[] segment) throws SaveDataException {
         if(segmentChecker.CheckSegment(segmentId, segment)){
             downloadedPieces++;
-            System.out.println("______WRITE_______ : " + segmentId + ", downloaded pieces: " + downloadedPieces);
+           log.info("______WRITE_______ : " + segmentId + ", downloaded pieces: " + downloadedPieces);
             fileSaver.Write(segment, DefineOffset(segmentId));
             return true;
         }
-        System.out.println("______ NOT WRITE_______ : " + segmentId);
+       log.debug("______ NOT WRITE_______ : " + segmentId);
         return false;
     }
 }
