@@ -19,6 +19,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.HashSet;
 
 public class ConnectionLogic {
@@ -76,7 +77,8 @@ public class ConnectionLogic {
             ByteBuffer buffer = ByteBuffer.wrap(data);
             try {
                 channel.write(buffer);
-                con.ChangeStatus(ConnectionStatusE.SEND_UNCHOKE);
+                con.ChangeStatus(ConnectionStatusE.SEND_BITSET);
+                con.BufferDisconnect();
             } catch (IOException e) {
                 throw new WriteException("server can't send handshake");
             }
@@ -171,6 +173,7 @@ public class ConnectionLogic {
             peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.LOAD_SERVER_DATA);
         }
         else{
+            con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
             throw new ReadException(peer.GetHost() + ":" + peer.GetPort() + " unexpected id " + id);
         }
     }
@@ -181,6 +184,7 @@ public class ConnectionLogic {
         PeerDataContoller con = peer.GetPeerDataCon();
         log.debug(peer.GetHost() + ":" + peer.GetPort() + " LISTEN_PEER");
         if(con.GetStatus() == ConnectionStatusE.LISTENER_LENGTH){
+            con.BufferConnect(4);
             con.BufferConnect(4);
             ReadData(channel, peer);
         }
@@ -300,8 +304,11 @@ public class ConnectionLogic {
     public void WriteBitset(SelectionKey key, int countSegment) throws WriteException {
         Peer peer = (Peer)key.attachment();
         PeerDataContoller con = peer.GetPeerDataCon();
-        int length = countSegment + 1;
-        byte[] bitSet = new byte[length + 4];
+        BitSet bitSet = new BitSet(countSegment);
+        int bitSetSize = (int)Math.ceil((double)countSegment / 8);
+        log.trace(" server bitsetsize: " + bitSetSize);
+        int length = bitSetSize + 1;
+        byte[] bitSetMes = new byte[length + 4];
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
         try {
@@ -313,23 +320,32 @@ public class ConnectionLogic {
         if(bytes.length != 4){
             throw new WriteException("server wrong length size:" );
         }
-        System.arraycopy(bytes, 0, bitSet, 0, bytes.length);
-        bitSet[5] = (byte)MessageIdE.BITFIELD.getValue();
-        Arrays.fill(bitSet, 4, bitSet.length, (byte) 0);
+        System.arraycopy(bytes, 0, bitSetMes, 0, bytes.length);
+        bitSetMes[4] = (byte)MessageIdE.BITFIELD.getValue();
+        for(int i = 0; i < countSegment; ++i){
+            bitSet.set(i, false);
+        }
         ArrayList<Integer> haveParts = con.GetHaveParts();
         for(Integer index : haveParts){
-            bitSet[index] = 1;
+            bitSet.set(index, true);
         }
-
+        byte[] byteBitSet = bitSet.toByteArray();
+        if(countSegment % 8 != 0){
+            int countOffset = 8 - countSegment % 8;
+            byteBitSet [byteBitSet.length - 1] <<= countOffset;
+        }
+        for(int i = 5; i < 5 + byteBitSet.length; ++i){
+            bitSetMes[i] = byteBitSet[i - 5];
+        }
         SocketChannel channel = (SocketChannel) key.channel();
-        ByteBuffer buffer = ByteBuffer.wrap(bitSet);
+        ByteBuffer buffer = ByteBuffer.wrap(bitSetMes);
         try {
             int write = channel.write(buffer);
             log.trace("server bitset write: " + write);
         } catch (IOException e) {
             throw new WriteException("server can't write bitset" );
         }
-        con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
+        con.ChangeStatus(ConnectionStatusE.SEND_UNCHOKE);
     }
 
     public void WriteUnchoke(SelectionKey key) throws WriteException {
@@ -349,7 +365,7 @@ public class ConnectionLogic {
         } catch (IOException e) {
             throw new WriteException("server can't write bitset" );
         }
-        con.ChangeStatus(ConnectionStatusE.SEND_BITSET);
+        con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
     }
 
     public void WriteSeg(SelectionKey key) throws WriteException {
@@ -361,20 +377,21 @@ public class ConnectionLogic {
         int offset = peerServerTask.GetOffset();;
         int bufferSize = 4 + 1 + 4 + 4 + seg.length;
         int length = 1 + 4 + 4 + seg.length;
-        ByteBuffer buffer = ByteBuffer.allocate(bufferSize).order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer buffer = ByteBuffer.allocate(bufferSize).order(ByteOrder.BIG_ENDIAN);
         buffer.putInt(length);
         buffer.put((byte)MessageIdE.PIECE.getValue());
         buffer.putInt(segmentId);
         buffer.putInt(offset);
         buffer.put(seg);
+        buffer.flip();
         SocketChannel channel = (SocketChannel) key.channel();
         try {
             int write = channel.write(buffer);
-            log.trace("server bitset write: " + write);
+            log.trace("server seg write: " + write);
         } catch (IOException e) {
             throw new WriteException("server can't write piece" );
         }
-        con.ChangeStatus(ConnectionStatusE.SEND_HAVE);
+        con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
     }
 
     public void WriteHave(SelectionKey key) throws WriteException {

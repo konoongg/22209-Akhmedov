@@ -32,21 +32,20 @@ public class ConnectionManager {
     private FileSaveManager fileSaveManager;
     private PeerBlackList peerBlackList;
 
-    private void GetWork(Peer peer) throws SelectionSegmentException {
+    private int GetWork(Peer peer) throws SelectionSegmentException {
         SegmentManager segmentManager = fileT.GetSegmentManager();
         int segmentId = segmentManager.Segment(peer.GetPeerDataCon().GetParts());
         if(segmentId == -1){
             log.debug(peer.GetHost() + ":" + peer.GetPort() + "download all his part");
-            return;
+            return - 1;
         }
         peer.GetTask().SetTask(segmentId, segmentManager.SegmentSize(segmentId));
         log.trace(peer.GetHost() + ":" + peer.GetPort() + " GET TASK: " + segmentId + ":"+ peer.GetTask().GetOffset());
+        return  0;
     }
 
-    private void CheckReadyWrite(Peer peer) throws SaveDataException, SelectionSegmentException, ReadDataFromFileException {
-        PeerTask task = peer.GetTask();
+    private void CheckServerReadyWrite(Peer peer) throws ReadDataFromFileException {
         PeerDataContoller con = peer.GetPeerDataCon();
-        PeerDataContoller controller = peer.GetPeerDataCon();
         if(con.GetStatus() == ConnectionStatusE.LOAD_SERVER_DATA){
             PeerServerTask serverTask = peer.GetServerTask();
             int segmentId = serverTask.GetSegmentId();
@@ -56,43 +55,54 @@ public class ConnectionManager {
             peer.GetPeerDataCon().UpdateParts(fileT.GetSegmentManager().GetDownloadedParts(), peer.GetServerTask());
             con.ChangeStatus(ConnectionStatusE.READY_SEND_SEG);
         }
-        else{
-            if(task.Downloaded() == PeerDownloadedE.NEED_WORK){
-                GetWork(peer);
-                log.trace(peer.GetHost() + ":" + peer.GetPort() + " NEED WORk: ");
-                peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.REQUESTED);
+    }
+
+    private void CheckReadyWrite(Peer peer) throws SaveDataException, SelectionSegmentException, ReadDataFromFileException {
+        PeerTask task = peer.GetTask();
+        PeerDataContoller con = peer.GetPeerDataCon();
+        if(task.Downloaded() == PeerDownloadedE.NEED_WORK){
+            if(GetWork(peer) == -1){
+                return;
             }
-            else if(task.Downloaded() == PeerDownloadedE.READY_All){
-                try {
-                    task.LoadDataInBuf(peer.GetPeerDataCon().GetMessage().GetMes());
-                } catch (ReadException e) {
-                    fileT.GetSegmentManager().CantDownload(task.GetSegmentId());
-                    GetWork(peer);
+            log.trace(peer.GetHost() + ":" + peer.GetPort() + " NEED WORk: ");
+            peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.REQUESTED);
+        }
+        else if(task.Downloaded() == PeerDownloadedE.READY_All){
+            try {
+                task.LoadDataInBuf(peer.GetPeerDataCon().GetMessage().GetMes());
+            } catch (ReadException e) {
+                fileT.GetSegmentManager().CantDownload(task.GetSegmentId());
+                if(GetWork(peer) == -1){
                     return;
                 }
-                log.debug(peer.GetHost() + ":" + peer.GetPort() + " try write segment");
-                if(fileSaveManager.Write(task.GetSegmentId(), task.GetSegment())){
-                    fileT.GetSegmentManager().CompliteDownload(task.GetSegmentId());
-                }
-                else{
-                    fileT.GetSegmentManager().CantDownload(task.GetSegmentId());
-                }
-                GetWork(peer);
-                con.ChangeStatus(ConnectionStatusE.REQUESTED);
+                return;
             }
-            else if(task.Downloaded() == PeerDownloadedE.READY_PART){
-                try{
-                    task.LoadDataInBuf(peer.GetPeerDataCon().GetMessage().GetMes());
-                }
-                catch (ReadException e) {
-                    fileT.GetSegmentManager().CantDownload(task.GetSegmentId());
-                    GetWork(peer);
+            log.debug(peer.GetHost() + ":" + peer.GetPort() + " try write segment");
+            if(fileSaveManager.Write(task.GetSegmentId(), task.GetSegment())){
+                fileT.GetSegmentManager().CompliteDownload(task.GetSegmentId());
+            }
+            else{
+                fileT.GetSegmentManager().CantDownload(task.GetSegmentId());
+            }
+            if(GetWork(peer) == -1){
+                return;
+            }
+            con.ChangeStatus(ConnectionStatusE.REQUESTED);
+        }
+        else if(task.Downloaded() == PeerDownloadedE.READY_PART){
+            try{
+                task.LoadDataInBuf(peer.GetPeerDataCon().GetMessage().GetMes());
+            }
+            catch (ReadException e) {
+                fileT.GetSegmentManager().CantDownload(task.GetSegmentId());
+                if(GetWork(peer) == -1){
                     return;
                 }
-                task.LoadNext();
-                con.ChangeStatus(ConnectionStatusE.REQUESTED);
-                log.trace(peer.GetHost() + ":" + peer.GetPort() + " NEW BLOCK" +  ":" + task.GetOffset());
+                return;
             }
+            task.LoadNext();
+            con.ChangeStatus(ConnectionStatusE.REQUESTED);
+            log.trace(peer.GetHost() + ":" + peer.GetPort() + " NEW BLOCK" +  ":" + task.GetOffset());
         }
     }
 
@@ -172,7 +182,7 @@ public class ConnectionManager {
         catch (IOException e){
             log.warn("server connection error: " + e);
         }
-        while(!fileT.IsDownloaded()){
+        while(true){
             int readyChannels = 0;
             try{
                 readyChannels = selector.select();
@@ -209,8 +219,9 @@ public class ConnectionManager {
                         Peer peer = new Peer(clientAddress.getAddress(), clientAddress.getPort(), fileT.GetSegmentManager().GetCountSegment());
                         peer.GetPeerDataCon().SetParts(fileT.GetSegmentManager().GetDownloadedParts());
                         peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.SERVER_HANDSHAKE);
+                        peer.MadeItServer();
                         client.configureBlocking(false);
-                        client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+                        client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, peer);
                         log.info("new client: " + client.getRemoteAddress());
                     }
                     catch(IOException e) {
@@ -233,13 +244,21 @@ public class ConnectionManager {
                         }
                     }
                     Peer peer = (Peer)key.attachment();
-                    CheckReadyWrite(peer);
+                    if(!fileT.IsDownloaded() ){
+                        CheckReadyWrite(peer);
+                    }
+                    else{
+                        if(!peer.IsItServer()){
+                            log.info(peer.GetHost() + ":" + peer.GetPort() + " disconnect:");
+                            key.cancel();
+                        }
+                    }
+                    if(peer.IsItServer()){
+                        CheckServerReadyWrite(peer);
+                    }
                     CheckConnect(key, selector);
                 }
             }
         }
-        Date endDate = new Date();
-        long executionTime = endDate.getTime() - startDate.getTime();
-        log.info("SUCCESSFUL DOWNLOADED: " + executionTime);
     }
 }

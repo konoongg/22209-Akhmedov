@@ -11,8 +11,10 @@ public class Peer {
     private PeerDataContoller peerDataContoller;
     private PeerTask peerTask;
     private PeerServerTask peerServerTask;
+    private boolean serverPeer;
 
     public Peer(InetAddress host, int port, int countParts){
+        serverPeer = false;
         this.host = host;
         choked = PeerStatusE.CHOKE;
         this.port = port;
@@ -53,5 +55,13 @@ public class Peer {
 
     public PeerStatusE GetPeerStatus(){
         return choked;
+    }
+
+    public void  MadeItServer(){
+        serverPeer = true;
+    }
+
+    public boolean IsItServer(){
+        return serverPeer;
     }
 }

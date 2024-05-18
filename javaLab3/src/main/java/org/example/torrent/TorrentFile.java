@@ -27,8 +27,8 @@ public class TorrentFile {
         definer.DefineSegments(infoDict, segmentsSha1);
         countParts = definer.DefineCountParts(infoDict);
         pieceLength = definer.DefinePieceLength(infoDict);
-        definer.DefineFiles(infoDict, folderPath, files, GetCountParts(), pieceLength);
         name = definer.DefineName(infoDict);
+        definer.DefineFiles(infoDict, folderPath, files, GetCountParts(), pieceLength, name);
         comment = definer.DefineComment(mainDict);
         createdBy = definer.DefineCreatedBy(mainDict);
         createdDate = definer.DefineCreatedDate(mainDict);

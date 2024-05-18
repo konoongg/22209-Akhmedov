@@ -13,9 +13,9 @@ public class FileT {
     private int length;
     private SegmentManager segmentManager;
 
-    public FileT(String path, int length, int countParts, int pieceLength){
+    public FileT(String path, int length, int countParts, int pieceLength, String fileName){
         this.length = length;
-        this.path = path;
+        this.path = path + "/" + fileName;
         segmentManager = new SegmentManager(countParts, length, pieceLength);
     }
 

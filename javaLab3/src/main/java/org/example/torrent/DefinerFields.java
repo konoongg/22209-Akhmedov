@@ -44,11 +44,11 @@ public class DefinerFields {
         return segmentsSize / 20;
     }
 
-    public void DefineFiles(Map<String, byte[]>  infoDict, String folderPath, ArrayList<FileT> files, int countParts, int pieceLength) throws WrongTorrentFileFormat {
+    public void DefineFiles(Map<String, byte[]>  infoDict, String folderPath, ArrayList<FileT> files, int countParts, int pieceLength, String fileName) throws WrongTorrentFileFormat {
         if(infoDict.containsKey("length")){
             int length = Integer.valueOf(new String(infoDict.get("length")));
             downloadSize = length;
-            files.add(new FileT(folderPath, length, countParts, pieceLength));
+            files.add(new FileT(folderPath, length, countParts, pieceLength, fileName));
         }
         else if(infoDict.containsKey("files")){
             //
