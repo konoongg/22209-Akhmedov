@@ -11,7 +11,7 @@ public class PeerServerTask {
     private byte[] data;
     private HashSet<Integer> needHave;
 
-    public PeerServerTask(byte[] args){
+    public void SetServerTask(byte[] args){
         ByteBuffer buffer = ByteBuffer.wrap(args).order(ByteOrder.BIG_ENDIAN);
         segmentId = buffer.getInt();
         offset = buffer.getInt();
@@ -43,5 +43,19 @@ public class PeerServerTask {
 
     public HashSet<Integer> GetNeedHave(){
         return needHave;
+    }
+
+    public boolean IsNeedHave(){
+        if(needHave == null){
+            return false;
+        }
+        if(needHave.size() == 0){
+            return false;
+        }
+        return true;
+    }
+
+    public void ClearHave(){
+        needHave = new HashSet<>();
     }
 }

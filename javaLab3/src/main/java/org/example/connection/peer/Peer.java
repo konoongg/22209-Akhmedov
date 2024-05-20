@@ -19,6 +19,7 @@ public class Peer {
         choked = PeerStatusE.CHOKE;
         this.port = port;
         peerDataContoller = new PeerDataContoller(countParts);
+        peerServerTask = new PeerServerTask();
     }
 
     public void SetTask(String path){
@@ -26,7 +27,7 @@ public class Peer {
     }
 
     public void SetServerTask(byte[] args){
-        peerServerTask = new PeerServerTask(args);
+        peerServerTask.SetServerTask(args);
     }
 
     public InetAddress GetHost(){

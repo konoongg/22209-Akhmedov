@@ -44,15 +44,17 @@ public class ConnectionManager {
         return  0;
     }
 
-    private void CheckServerReadyWrite(Peer peer) throws ReadDataFromFileException {
+   private void CheckServerReadyWrite(Peer peer) throws ReadDataFromFileException {
         PeerDataContoller con = peer.GetPeerDataCon();
+        if(!peer.GetServerTask().IsNeedHave()){
+            peer.GetPeerDataCon().UpdateParts(fileT.GetSegmentManager().GetDownloadedParts(), peer.GetServerTask());
+        }
         if(con.GetStatus() == ConnectionStatusE.LOAD_SERVER_DATA){
             PeerServerTask serverTask = peer.GetServerTask();
             int segmentId = serverTask.GetSegmentId();
             int offset = serverTask.GetOffset();
             int length = serverTask.getLength();
             serverTask.SetData(fileT.GetData(segmentId, offset, length));
-            peer.GetPeerDataCon().UpdateParts(fileT.GetSegmentManager().GetDownloadedParts(), peer.GetServerTask());
             con.ChangeStatus(ConnectionStatusE.READY_SEND_SEG);
         }
     }
@@ -220,6 +222,7 @@ public class ConnectionManager {
                         peer.GetPeerDataCon().SetParts(fileT.GetSegmentManager().GetDownloadedParts());
                         peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.SERVER_HANDSHAKE);
                         peer.MadeItServer();
+                        peers.add(peer);
                         client.configureBlocking(false);
                         client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, peer);
                         log.info("new client: " + client.getRemoteAddress());
@@ -244,11 +247,11 @@ public class ConnectionManager {
                         }
                     }
                     Peer peer = (Peer)key.attachment();
-                    if(!fileT.IsDownloaded() ){
-                        CheckReadyWrite(peer);
-                    }
-                    else{
-                        if(!peer.IsItServer()){
+                    if(!peer.IsItServer()){
+                        if(!fileT.IsDownloaded()){
+                            CheckReadyWrite(peer);
+                        }
+                        else{
                             log.info(peer.GetHost() + ":" + peer.GetPort() + " disconnect:");
                             key.cancel();
                         }

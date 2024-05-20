@@ -32,6 +32,10 @@ public class PeerDataContoller {
         }
     }
 
+    public void  BufferDisconnect(){
+        buffer = null;
+    }
+
     public void SetParts(){
         byte[] parts = message.GetMes();
         int index = 0;
@@ -57,7 +61,8 @@ public class PeerDataContoller {
     public void UpdateParts(HashSet<Integer> donloaded, PeerServerTask peerServerTask){
         HashSet<Integer> havePartsSet = new HashSet<>(haveParts);
         HashSet<Integer> downloadedSet = new HashSet<>(donloaded);
-        downloadedSet.retainAll(havePartsSet);
+        downloadedSet.removeIf(havePartsSet::contains);
+        haveParts.addAll(downloadedSet);
         peerServerTask.SetNeedHave(downloadedSet);
     }
 
@@ -98,10 +103,6 @@ public class PeerDataContoller {
 
     public PeerMessage GetMessage(){
         return message;
-    }
-
-    public void  BufferDisconnect(){
-        buffer = null;
     }
 
     public ByteBuffer GetBuffer(){

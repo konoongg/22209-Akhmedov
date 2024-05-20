@@ -158,9 +158,7 @@ public class ConnectionLogic {
         }
         else if(id == MessageIdE.HAVE.getValue()){
             con.ApplyHave();
-            if(con.GetStatus() != ConnectionStatusE.LOAD_DATA){
-                con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
-            }
+            con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
             log.debug(peer.GetHost() + ":" + peer.GetPort() + "  HAVE");
         }
         else if(id == MessageIdE.PIECE.getValue()){
@@ -210,6 +208,14 @@ public class ConnectionLogic {
         if(status == ConnectionStatusE.TRY_HANDSHAKE){
             log.trace(peer.GetHost() + ":" + peer.GetPort() + " start read handshake");
             ReadHandshake(key, selector);
+        }
+        else if(peer.IsItServer() &&  status == ConnectionStatusE.LISTENER_LENGTH && peer.GetServerTask() != null && peer.GetPeerDataCon().GetBuffer() == null ){
+            if(peer.GetServerTask().IsNeedHave()){
+                peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.SEND_HAVE);
+            }
+            else{
+                ListenPeer(key);
+            }
         }
         else if(status == ConnectionStatusE.LISTENER_ID || status == ConnectionStatusE.LISTENER_LENGTH || status == ConnectionStatusE.LISTENER_DATA){
             ListenPeer(key);
@@ -301,10 +307,9 @@ public class ConnectionLogic {
         }
     }
 
-    public void WriteBitset(SelectionKey key, int countSegment) throws WriteException {
+    private void WriteBitset(SelectionKey key, int countSegment) throws WriteException {
         Peer peer = (Peer)key.attachment();
         PeerDataContoller con = peer.GetPeerDataCon();
-        BitSet bitSet = new BitSet(countSegment);
         int bitSetSize = (int)Math.ceil((double)countSegment / 8);
         log.trace(" server bitsetsize: " + bitSetSize);
         int length = bitSetSize + 1;
@@ -322,21 +327,42 @@ public class ConnectionLogic {
         }
         System.arraycopy(bytes, 0, bitSetMes, 0, bytes.length);
         bitSetMes[4] = (byte)MessageIdE.BITFIELD.getValue();
+
+        BitSet bitSet = new BitSet(countSegment);
         for(int i = 0; i < countSegment; ++i){
             bitSet.set(i, false);
         }
         ArrayList<Integer> haveParts = con.GetHaveParts();
+        log.trace(" server bitset index start: " + bitSetSize);
         for(Integer index : haveParts){
             bitSet.set(index, true);
+            log.trace("BITSET DOWN: " + index);
         }
-        byte[] byteBitSet = bitSet.toByteArray();
+        log.trace(" server bitset index end: " + bitSetSize);
+        byte[] byteBitSet = new byte[bitSetSize];
+        byte b = 0;
+        int bCounter = 0;
+        for(int i = 0; i < countSegment; i++){
+            byte newB = bitSet.get(i) == true ? (byte)1 : (byte)0;
+            b |= newB;
+            bCounter++;
+            if(bCounter % 8 == 0 && bCounter != 0){
+                byteBitSet[bCounter / 8 - 1] = b;
+                b = 0;
+            }
+            else{
+                b <<= 1;
+            }
+        }
         if(countSegment % 8 != 0){
-            int countOffset = 8 - countSegment % 8;
-            byteBitSet [byteBitSet.length - 1] <<= countOffset;
+            b <<= ( 8 - countSegment % 8 - 1);
+            byteBitSet[byteBitSet.length - 1] = b;
         }
+        log.trace(" server bitset start For: " + byteBitSet.length);
         for(int i = 5; i < 5 + byteBitSet.length; ++i){
             bitSetMes[i] = byteBitSet[i - 5];
         }
+        log.trace(" server bitset end For: " + byteBitSet.length);
         SocketChannel channel = (SocketChannel) key.channel();
         ByteBuffer buffer = ByteBuffer.wrap(bitSetMes);
         try {
@@ -348,7 +374,7 @@ public class ConnectionLogic {
         con.ChangeStatus(ConnectionStatusE.SEND_UNCHOKE);
     }
 
-    public void WriteUnchoke(SelectionKey key) throws WriteException {
+    private void WriteUnchoke(SelectionKey key) throws WriteException {
         Peer peer = (Peer)key.attachment();
         PeerDataContoller con = peer.GetPeerDataCon();
         byte[] unchoke = new byte[5];
@@ -368,7 +394,7 @@ public class ConnectionLogic {
         con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
     }
 
-    public void WriteSeg(SelectionKey key) throws WriteException {
+    private void WriteSeg(SelectionKey key) throws WriteException {
         Peer peer = (Peer)key.attachment();
         PeerServerTask peerServerTask = peer.GetServerTask();
         PeerDataContoller con = peer.GetPeerDataCon();
@@ -394,13 +420,14 @@ public class ConnectionLogic {
         con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
     }
 
-    public void WriteHave(SelectionKey key) throws WriteException {
+    private void WriteHave(SelectionKey key) throws WriteException {
         Peer peer = (Peer)key.attachment();
         PeerServerTask peerServerTask = peer.GetServerTask();
         PeerDataContoller con = peer.GetPeerDataCon();
         HashSet<Integer> haveParts = peerServerTask.GetNeedHave();
         SocketChannel channel = (SocketChannel) key.channel();
         for(Integer index : haveParts){
+            log.trace("SEND HAVE FOR: " + index);
             byte[] have = new byte[9];
             have[0] = 0;
             have[1] = 0;
@@ -428,6 +455,7 @@ public class ConnectionLogic {
                 throw new WriteException("server can't write have" );
             }
         }
+            peerServerTask.ClearHave();
         con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
     }
 
