@@ -37,6 +37,7 @@ public class ConnectionManager {
         int segmentId = segmentManager.Segment(peer.GetPeerDataCon().GetParts());
         if(segmentId == -1){
             log.debug(peer.GetHost() + ":" + peer.GetPort() + "download all his part");
+            peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
             return - 1;
         }
         peer.GetTask().SetTask(segmentId, segmentManager.SegmentSize(segmentId));
@@ -161,7 +162,6 @@ public class ConnectionManager {
     }
 
     private void Connect(ArrayList<Peer> peers) throws ConnectionError, SaveDataException, SelectionSegmentException, ReadDataFromFileException {
-        Date startDate = new Date();
         Selector selector = null;
         try{
             selector = Selector.open();
@@ -225,7 +225,7 @@ public class ConnectionManager {
                         peers.add(peer);
                         client.configureBlocking(false);
                         client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, peer);
-                        log.info("new client: " + client.getRemoteAddress());
+                        log.info("server new client: " + client.getRemoteAddress());
                     }
                     catch(IOException e) {
                         log.warn("can't accept address");

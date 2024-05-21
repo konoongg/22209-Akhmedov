@@ -2,6 +2,8 @@ package org.example.connection.peer;
 
 import org.example.connection.states.ConnectionStatusE;
 import org.example.exceptions.ReadException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ public class PeerDataContoller {
     private ConnectionStatusE status;
     private int neededByte;
     private int UnSuccessful;
+    private static final Logger log = LoggerFactory.getLogger(PeerDataContoller.class);
 
     public PeerDataContoller(int countParts){
         message = new PeerMessage();
@@ -63,6 +66,9 @@ public class PeerDataContoller {
         HashSet<Integer> downloadedSet = new HashSet<>(donloaded);
         downloadedSet.removeIf(havePartsSet::contains);
         haveParts.addAll(downloadedSet);
+        if(downloadedSet.size() != 0){
+            log.trace("SEND HAVE UPDATE: " + downloadedSet);
+        }
         peerServerTask.SetNeedHave(downloadedSet);
     }
 

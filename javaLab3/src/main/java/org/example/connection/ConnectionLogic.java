@@ -421,6 +421,7 @@ public class ConnectionLogic {
     }
 
     private void WriteHave(SelectionKey key) throws WriteException {
+        log.trace("SEND HAVE START");
         Peer peer = (Peer)key.attachment();
         PeerServerTask peerServerTask = peer.GetServerTask();
         PeerDataContoller con = peer.GetPeerDataCon();
@@ -452,10 +453,10 @@ public class ConnectionLogic {
                 int write = channel.write(buffer);
                 log.trace("server have write: " + write);
             } catch (IOException e) {
-                throw new WriteException("server can't write have" );
+                throw new WriteException("server can't write have: " + e.getMessage());
             }
         }
-            peerServerTask.ClearHave();
+        peerServerTask.ClearHave();
         con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
     }
 
@@ -489,6 +490,10 @@ public class ConnectionLogic {
         else if(status == ConnectionStatusE.SEND_HAVE){
             log.trace(peer.GetHost() + ":" + peer.GetPort() + " SEND_HAVE");
             WriteHave(key);
+        }
+        else if(peer.IsItServer() && peer.GetServerTask().IsNeedHave()){
+
+                WriteHave(key);
         }
     }
 }

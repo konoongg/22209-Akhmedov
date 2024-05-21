@@ -1,5 +1,8 @@
 package org.example.connection.peer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashSet;
@@ -10,6 +13,7 @@ public class PeerServerTask {
     private int length;
     private byte[] data;
     private HashSet<Integer> needHave;
+    private static final Logger log = LoggerFactory.getLogger(PeerServerTask.class);
 
     public void SetServerTask(byte[] args){
         ByteBuffer buffer = ByteBuffer.wrap(args).order(ByteOrder.BIG_ENDIAN);
@@ -56,6 +60,7 @@ public class PeerServerTask {
     }
 
     public void ClearHave(){
+        log.trace("SEND HAVE CLEAR");
         needHave = new HashSet<>();
     }
 }
