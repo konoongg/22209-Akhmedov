@@ -1,14 +1,11 @@
 package org.example.connection.peer;
 
-import org.example.connection.ConnectionLogic;
-import org.example.connection.states.ConnectionStatusE;
 import org.example.connection.states.MessageIdE;
 import org.example.connection.states.PeerDownloadedE;
 import org.example.exceptions.ReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
 
 public class PeerTask {
     private static final Logger log = LoggerFactory.getLogger(PeerTask.class);
@@ -17,7 +14,7 @@ public class PeerTask {
     private int segmentId;
     private int segmentSize;
     private int curOffset;
-    private int sizeBlock;
+    private final int sizeBlock;
     private byte[] segment;
 
 
@@ -61,7 +58,6 @@ public class PeerTask {
             log.debug(" start LoadDaraInDuf curOffset: " + curOffset + " length data: " + partData.length + " segmentSize: " + segmentSize );
             throw new ReadException("wrong data format: so big length");
         }
-
         for(int i = 8; i < partData.length; ++i){
             segment[curOffset + i - 8] =  partData[i];
         }

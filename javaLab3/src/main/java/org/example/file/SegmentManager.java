@@ -10,12 +10,12 @@ import java.util.Random;
 
 public class SegmentManager {
     private static final Logger log = LoggerFactory.getLogger(SegmentManager.class);
-    private HashSet<Integer> needDownload = new HashSet<>();
-    private HashSet<Integer> nowDownload = new HashSet<>();
-    private HashSet<Integer> downloaded = new HashSet<>();
-    private int countSegment;
-    private int length;
-    private int pieceLength;
+    private final HashSet<Integer> needDownload = new HashSet<>();
+    private final HashSet<Integer> nowDownload = new HashSet<>();
+    private final HashSet<Integer> downloaded = new HashSet<>();
+    private final int countSegment;
+    private final int length;
+    private final int pieceLength;
 
     public SegmentManager(int countParts, int length, int pieceLength){
         countSegment = countParts;

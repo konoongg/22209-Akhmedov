@@ -3,7 +3,6 @@ package org.example;
 import org.example.exceptions.*;
 import org.example.connection.ConnectionManager;
 import org.example.connection.peer.Peer;
-import org.example.file.save.FileSaver;
 import org.example.torrent.TorrentClient;
 import org.example.torrent.TorrentFile;
 import org.example.tracker.Tracker;

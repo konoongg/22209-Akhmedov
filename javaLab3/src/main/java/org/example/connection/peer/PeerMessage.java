@@ -1,6 +1,5 @@
 package org.example.connection.peer;
 
-import org.example.connection.ConnectionLogic;
 import org.example.exceptions.ReadException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,6 @@ public class PeerMessage {
             log.warn("length can't be less then 0");
             throw new ReadException("length can't be less then 0");
         }
-        log.trace("length: " + length);
     }
 
     public void SetId(ByteBuffer buffer){

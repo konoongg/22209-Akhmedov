@@ -46,7 +46,7 @@ public class DefinerFields {
 
     public void DefineFiles(Map<String, byte[]>  infoDict, String folderPath, ArrayList<FileT> files, int countParts, int pieceLength, String fileName) throws WrongTorrentFileFormat {
         if(infoDict.containsKey("length")){
-            int length = Integer.valueOf(new String(infoDict.get("length")));
+            int length = Integer.parseInt(new String(infoDict.get("length")));
             downloadSize = length;
             files.add(new FileT(folderPath, length, countParts, pieceLength, fileName));
         }
@@ -64,7 +64,7 @@ public class DefinerFields {
         }
         byte[] data = infoDict.get("piece length");
         String length = new String(data);
-        return  Integer.valueOf(length);
+        return  Integer.parseInt(length);
     }
 
     public String DefineName(Map<String, byte[]>  infoDict) throws WrongTorrentFileFormat {
@@ -92,7 +92,7 @@ public class DefinerFields {
         if(!mainDict.containsKey("creation date")){
             throw new WrongTorrentFileFormat("torrent file don't have field creation date");
         }
-        long unixeDate = Long.valueOf(new String(mainDict.get("creation date")));
+        long unixeDate = Long.parseLong(new String(mainDict.get("creation date")));
         return new Date(unixeDate * 1000);
     }
 

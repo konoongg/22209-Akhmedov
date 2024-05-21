@@ -5,12 +5,12 @@ import org.example.connection.states.PeerStatusE;
 import java.net.InetAddress;
 
 public class Peer {
-    private InetAddress host;
-    private int port;
+    private final InetAddress host;
+    private final int port;
     private PeerStatusE choked;
-    private PeerDataContoller peerDataContoller;
+    private final PeerDataController peerDataController;
     private PeerTask peerTask;
-    private PeerServerTask peerServerTask;
+    private final PeerServerTask peerServerTask;
     private boolean serverPeer;
 
     public Peer(InetAddress host, int port, int countParts){
@@ -18,7 +18,7 @@ public class Peer {
         this.host = host;
         choked = PeerStatusE.CHOKE;
         this.port = port;
-        peerDataContoller = new PeerDataContoller(countParts);
+        peerDataController = new PeerDataController(countParts);
         peerServerTask = new PeerServerTask();
     }
 
@@ -46,8 +46,8 @@ public class Peer {
         choked = PeerStatusE.CHOKE;
     }
 
-    public PeerDataContoller GetPeerDataCon(){
-        return peerDataContoller;
+    public PeerDataController GetPeerDataCon(){
+        return peerDataController;
     }
 
     public PeerTask GetTask(){return peerTask;}

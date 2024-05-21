@@ -8,7 +8,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class FileSaver {
-    private ArrayList<FileT> files;
+    private final ArrayList<FileT> files;
     private String fullPath;
 
     public FileSaver(ArrayList<FileT> files, String folderPath, String name) throws CantcreateFile {

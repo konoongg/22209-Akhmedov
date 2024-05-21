@@ -11,28 +11,26 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashSet;
 
 public class ConnectionLogic {
     private static final Logger log = LoggerFactory.getLogger(ConnectionLogic.class);
-    private HandShake hsManager;
+    private final HandShake hsManager;
     public ConnectionLogic(TorrentClient torrent){
         hsManager = new HandShake(torrent);
     }
 
-    private void ReadHandshake(SelectionKey key, Selector selector) throws ReadException, WriteException {
+    private void ReadHandshake(SelectionKey key) throws ReadException, WriteException {
         SocketChannel channel = (SocketChannel) key.channel();
         Peer peer = (Peer)key.attachment();
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         con.BufferConnect(68);
         int bytesRead = 0;
         try{
@@ -86,7 +84,7 @@ public class ConnectionLogic {
     }
 
     private void HandleFinishRead(Peer peer){
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         log.trace(peer.GetHost() + ":" + peer.GetPort() + " handle finish read" );
         ConnectionStatusE status = con.GetStatus();
         try{
@@ -108,7 +106,7 @@ public class ConnectionLogic {
 
     private void ReadData(SocketChannel channel, Peer peer) throws ReadException {
         int bytesRead;
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         ByteBuffer buffer  = con.GetBuffer();
         try{
             bytesRead = channel.read(buffer);
@@ -136,7 +134,7 @@ public class ConnectionLogic {
     }
 
     private void DefineId(Peer peer) throws ReadException {
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         int id = con.GetMessage().GetId();
         if(id == MessageIdE.BITFIELD.getValue()){
             con.ChangeStatus(ConnectionStatusE.INTERESTED);
@@ -179,7 +177,7 @@ public class ConnectionLogic {
     private void ListenPeer(SelectionKey key) throws ReadException {
         SocketChannel channel = (SocketChannel) key.channel();
         Peer peer = (Peer)key.attachment();
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         log.debug(peer.GetHost() + ":" + peer.GetPort() + " LISTEN_PEER");
         if(con.GetStatus() == ConnectionStatusE.LISTENER_LENGTH){
             con.BufferConnect(4);
@@ -203,11 +201,11 @@ public class ConnectionLogic {
 
     public void DefineRead(SelectionKey key, Selector selector) throws ReadException, WriteException {
         Peer peer = (Peer)key.attachment();
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         ConnectionStatusE status = con.GetStatus();
         if(status == ConnectionStatusE.TRY_HANDSHAKE){
             log.trace(peer.GetHost() + ":" + peer.GetPort() + " start read handshake");
-            ReadHandshake(key, selector);
+            ReadHandshake(key);
         }
         else if(peer.IsItServer() &&  status == ConnectionStatusE.LISTENER_LENGTH && peer.GetServerTask() != null && peer.GetPeerDataCon().GetBuffer() == null ){
             if(peer.GetServerTask().IsNeedHave()){
@@ -222,11 +220,11 @@ public class ConnectionLogic {
         }
         else if(status == ConnectionStatusE.SERVER_HANDSHAKE){
             log.trace(peer.GetHost() + ":" + peer.GetPort() + " start read handshake");
-            ReadHandshake(key, selector);
+            ReadHandshake(key);
         }
     }
 
-    private void WriteHanshake(SelectionKey key,  Selector selector) throws WriteException {
+    private void WriteHanshake(SelectionKey key) throws WriteException {
         SocketChannel channel = (SocketChannel) key.channel();
         Peer peer = (Peer)key.attachment();
         try{
@@ -237,7 +235,7 @@ public class ConnectionLogic {
             catch (WriteException e){
                 peer.GetPeerDataCon().ChangeStatus(ConnectionStatusE.DISCONNECTED);
             }
-            PeerDataContoller con = peer.GetPeerDataCon();
+            PeerDataController con = peer.GetPeerDataCon();
             con.ChangeStatus(ConnectionStatusE.TRY_HANDSHAKE);
             log.trace(peer.GetHost() + ":" + peer.GetPort() + " HANSHAKE SEND");
         }
@@ -262,7 +260,7 @@ public class ConnectionLogic {
         } catch (IOException e) {
             throw new WriteException(peer.GetHost() + ":" + peer.GetPort() + " can't send interested: " + e.getMessage());
         }
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         if(con.GetStatus() != ConnectionStatusE.LOAD_DATA){
             con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
         }
@@ -297,7 +295,7 @@ public class ConnectionLogic {
             try {
                 int write = channel.write(buffer);
                 log.debug(peer.GetHost() + ":" + peer.GetPort() + " SEND REQV: " + write);
-                PeerDataContoller con = peer.GetPeerDataCon();
+                PeerDataController con = peer.GetPeerDataCon();
                 con.ChangeStatus(ConnectionStatusE.LISTENER_LENGTH);
             } catch (IOException e) {
                 throw new WriteException(peer.GetHost() + ":" + peer.GetPort() + " can't send reqv: " + e.getMessage());
@@ -309,7 +307,7 @@ public class ConnectionLogic {
 
     private void WriteBitset(SelectionKey key, int countSegment) throws WriteException {
         Peer peer = (Peer)key.attachment();
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         int bitSetSize = (int)Math.ceil((double)countSegment / 8);
         log.trace(" server bitsetsize: " + bitSetSize);
         int length = bitSetSize + 1;
@@ -343,7 +341,7 @@ public class ConnectionLogic {
         byte b = 0;
         int bCounter = 0;
         for(int i = 0; i < countSegment; i++){
-            byte newB = bitSet.get(i) == true ? (byte)1 : (byte)0;
+            byte newB = bitSet.get(i) ? (byte)1 : (byte)0;
             b |= newB;
             bCounter++;
             if(bCounter % 8 == 0 && bCounter != 0){
@@ -376,7 +374,7 @@ public class ConnectionLogic {
 
     private void WriteUnchoke(SelectionKey key) throws WriteException {
         Peer peer = (Peer)key.attachment();
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         byte[] unchoke = new byte[5];
         unchoke[0] = 0;
         unchoke[1] = 0;
@@ -397,7 +395,7 @@ public class ConnectionLogic {
     private void WriteSeg(SelectionKey key) throws WriteException {
         Peer peer = (Peer)key.attachment();
         PeerServerTask peerServerTask = peer.GetServerTask();
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         byte[] seg = peerServerTask.GetData();
         int segmentId = peerServerTask.GetSegmentId();
         int offset = peerServerTask.GetOffset();;
@@ -424,7 +422,7 @@ public class ConnectionLogic {
         log.trace("SEND HAVE START");
         Peer peer = (Peer)key.attachment();
         PeerServerTask peerServerTask = peer.GetServerTask();
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         HashSet<Integer> haveParts = peerServerTask.GetNeedHave();
         SocketChannel channel = (SocketChannel) key.channel();
         for(Integer index : haveParts){
@@ -462,10 +460,10 @@ public class ConnectionLogic {
 
     public void DefineWrite(SelectionKey key, Selector selector, int countSegment) throws WriteException {
         Peer peer = (Peer)key.attachment();
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         ConnectionStatusE status = con.GetStatus();
         if(status == ConnectionStatusE.CONNECTED){
-            WriteHanshake(key, selector);
+            WriteHanshake(key);
         }
         else if(status == ConnectionStatusE.INTERESTED){
             log.trace(peer.GetHost() + ":" + peer.GetPort() + " INTERESTED");

@@ -2,7 +2,6 @@ package org.example.connection.peer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashSet;
@@ -53,10 +52,7 @@ public class PeerServerTask {
         if(needHave == null){
             return false;
         }
-        if(needHave.size() == 0){
-            return false;
-        }
-        return true;
+        return !needHave.isEmpty();
     }
 
     public void ClearHave(){

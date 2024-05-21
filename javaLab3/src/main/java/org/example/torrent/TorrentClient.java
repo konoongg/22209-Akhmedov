@@ -16,7 +16,7 @@ public class TorrentClient {
     private int port;
     private String peerId;
     private String infoHash;
-    private TorrentFile torrentFile;
+    private final TorrentFile torrentFile;
     private byte[] infoHashB;
     private byte[] peerIdB;
 

@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 
 public class FileSaveManager {
     private static final Logger log = LoggerFactory.getLogger(FileSaveManager.class);
-    private SegmentChecker segmentChecker;
-    private FileSaver fileSaver;
-    private int segmentSize;
+    private final SegmentChecker segmentChecker;
+    private final FileSaver fileSaver;
+    private final int segmentSize;
     private int downloadedPieces;
 
     public FileSaveManager(TorrentClient torrent, String folderPath) throws CantcreateFile {

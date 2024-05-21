@@ -4,16 +4,13 @@ import org.example.torrent.TorrentClient;
 import org.example.connection.peer.Peer;
 import org.example.exceptions.ServerCommunicateError;
 import org.example.exceptions.WrongTorrentFileFormat;
-import org.example.torrent.TorrentFile;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class Tracker {
-    private TorrentFile torrent;
-
     private URL CreateUrl(TorrentClient torrent) throws ServerCommunicateError {
         Map<String, String> params = torrent.GetParams();
         StringBuilder query = new StringBuilder();
@@ -21,19 +18,15 @@ public class Tracker {
             if (query.length() > 0) {
                 query.append("&");
             }
-            try {
-                if(entry.getKey() != "info_hash"){
-                    query.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-                    query.append("=");
-                    query.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-                }
-                else{
-                    query.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-                    query.append("=");
-                    query.append(entry.getValue());
-                }
-            } catch (UnsupportedEncodingException e) {
-                throw new ServerCommunicateError("can't create url params for trecker");
+            if(!Objects.equals(entry.getKey(), "info_hash")){
+                query.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+                query.append("=");
+                query.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
+            }
+            else{
+                query.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+                query.append("=");
+                query.append(entry.getValue());
             }
         }
         URL url = null;

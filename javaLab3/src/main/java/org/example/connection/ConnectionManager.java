@@ -1,7 +1,6 @@
 package org.example.connection;
-import org.example.Main;
 import org.example.connection.peer.Peer;
-import org.example.connection.peer.PeerDataContoller;
+import org.example.connection.peer.PeerDataController;
 import org.example.connection.peer.PeerServerTask;
 import org.example.connection.peer.PeerTask;
 import org.example.connection.states.ConnectionStatusE;
@@ -25,12 +24,11 @@ import java.util.*;
 
 public class ConnectionManager {
     private static final Logger log = LoggerFactory.getLogger(ConnectionManager.class);
-    private TorrentClient torrent;
-    private Map<String, ConnectionStatusE> connectionStatus = new HashMap<>();
-    private ConnectionLogic connectionLogic;
-    private FileT fileT;
-    private FileSaveManager fileSaveManager;
-    private PeerBlackList peerBlackList;
+    private final TorrentClient torrent;
+    private final ConnectionLogic connectionLogic;
+    private final FileT fileT;
+    private final FileSaveManager fileSaveManager;
+    private final PeerBlackList peerBlackList;
 
     private int GetWork(Peer peer) throws SelectionSegmentException {
         SegmentManager segmentManager = fileT.GetSegmentManager();
@@ -46,7 +44,7 @@ public class ConnectionManager {
     }
 
    private void CheckServerReadyWrite(Peer peer) throws ReadDataFromFileException {
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         if(!peer.GetServerTask().IsNeedHave()){
             peer.GetPeerDataCon().UpdateParts(fileT.GetSegmentManager().GetDownloadedParts(), peer.GetServerTask());
         }
@@ -62,7 +60,7 @@ public class ConnectionManager {
 
     private void CheckReadyWrite(Peer peer) throws SaveDataException, SelectionSegmentException, ReadDataFromFileException {
         PeerTask task = peer.GetTask();
-        PeerDataContoller con = peer.GetPeerDataCon();
+        PeerDataController con = peer.GetPeerDataCon();
         if(task.Downloaded() == PeerDownloadedE.NEED_WORK){
             if(GetWork(peer) == -1){
                 return;

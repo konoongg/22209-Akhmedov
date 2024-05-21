@@ -3,15 +3,13 @@ package org.example.file;
 import org.example.exceptions.ReadDataFromFileException;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
 
 public class FileT {
-    private String path;
-    private int length;
-    private SegmentManager segmentManager;
+    private final String path;
+    private final int length;
+    private final SegmentManager segmentManager;
 
     public FileT(String path, int length, int countParts, int pieceLength, String fileName){
         this.length = length;
@@ -28,10 +26,7 @@ public class FileT {
     }
 
     public boolean IsDownloaded(){
-        if(segmentManager.IsEmpty()){
-            return true;
-        }
-        return false;
+        return segmentManager.IsEmpty();
     }
 
     public byte[] GetData(int segmentId, int offset, int length) throws ReadDataFromFileException {
@@ -45,9 +40,5 @@ public class FileT {
         } catch (IOException e) {
             throw new ReadDataFromFileException("can't read data from:" + path);
         }
-    }
-
-    public String GetPath(){
-        return path;
     }
 }

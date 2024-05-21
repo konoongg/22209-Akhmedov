@@ -14,9 +14,9 @@ public class TorrentFile {
     private String comment;
     private String createdBy;
     private Date createdDate;
-    private ArrayList<byte[]> segmentsSha1 = new ArrayList<>();
-    private ArrayList<FileT> files = new ArrayList<>();
-    private byte[] info;
+    private final ArrayList<byte[]> segmentsSha1 = new ArrayList<>();
+    private final ArrayList<FileT> files = new ArrayList<>();
+    private final byte[] info;
     private int downloadSize;
     private int countParts;
     private int pieceLength;

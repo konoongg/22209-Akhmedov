@@ -9,17 +9,17 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class PeerDataContoller {
-    private PeerMessage message;
+public class PeerDataController {
+    private final PeerMessage message;
     private ArrayList<Integer> haveParts = new ArrayList<>();
-    private int countParts;
+    private final int countParts;
     private ByteBuffer buffer;
     private ConnectionStatusE status;
     private int neededByte;
     private int UnSuccessful;
-    private static final Logger log = LoggerFactory.getLogger(PeerDataContoller.class);
+    private static final Logger log = LoggerFactory.getLogger(PeerDataController.class);
 
-    public PeerDataContoller(int countParts){
+    public PeerDataController(int countParts){
         message = new PeerMessage();
         haveParts = new ArrayList<>(countParts);
         this.countParts = countParts;
@@ -57,16 +57,16 @@ public class PeerDataContoller {
         }
     }
 
-    public void SetParts(HashSet<Integer> donloaded){
-        haveParts.addAll(donloaded);
+    public void SetParts(HashSet<Integer> downloaded){
+        haveParts.addAll(downloaded);
     }
 
-    public void UpdateParts(HashSet<Integer> donloaded, PeerServerTask peerServerTask){
+    public void UpdateParts(HashSet<Integer> downloaded, PeerServerTask peerServerTask){
         HashSet<Integer> havePartsSet = new HashSet<>(haveParts);
-        HashSet<Integer> downloadedSet = new HashSet<>(donloaded);
+        HashSet<Integer> downloadedSet = new HashSet<>(downloaded);
         downloadedSet.removeIf(havePartsSet::contains);
         haveParts.addAll(downloadedSet);
-        if(downloadedSet.size() != 0){
+        if(!downloadedSet.isEmpty()){
             log.trace("SEND HAVE UPDATE: " + downloadedSet);
         }
         peerServerTask.SetNeedHave(downloadedSet);
